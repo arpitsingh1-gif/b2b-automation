@@ -185,16 +185,16 @@ function StageDialogue({lead,apps,setApps,setLeads,onClose}){
   const[form,setForm]=useState(()=>({
     targetStage:lead.status||"Lead Created",
     c24Quote:lead.c24Quote>0?String(lead.c24Quote):app?String(app.quote):"",
-    inspectionNotes:lead.inspectionNotes||app?.inspectionNotes||"",
-    tokenAmount:lead.tokenAmount>0?String(lead.tokenAmount):app?.tokenAmount>0?String(app.tokenAmount):"1",
-    tokenNotes:lead.tokenNotes||app?.tokenNotes||"",
+    inspectionNotes:lead.inspectionNotes||(app&&app.inspectionNotes)||"",
+    tokenAmount:lead.tokenAmount>0?String(lead.tokenAmount):(app&&app.tokenAmount>0)?String(app.tokenAmount):"1",
+    tokenNotes:lead.tokenNotes||(app&&app.tokenNotes)||"",
     challan:lead.challan>0?String(lead.challan):app?String(app.challan||0):"0",
     otherCharges:lead.otherCharges_lead>0?String(lead.otherCharges_lead):app?String(app.otherCharges||0):"0",
     partyPeshi:lead.partyPeshi>0?String(lead.partyPeshi):"0",
     deliveryReleased:lead.deliveryReleased>0?String(lead.deliveryReleased):"",
     deliveryNotes:lead.deliveryNotes||"",
-    siGsType:lead.siGsType||app?.gsType||"GS",
-    siNotes:lead.siNotes||app?.siNotes||"",
+    siGsType:lead.siGsType||(app&&app.gsType)||"GS",
+    siNotes:lead.siNotes||(app&&app.siNotes)||"",
   }));
   // sf: stable setter per field — won't recreate on render
   const sf=useCallback((k)=>(e)=>setForm(p=>({...p,[k]:typeof e==="string"?e:e.target.value})),[]);
@@ -399,12 +399,20 @@ function StageDialogue({lead,apps,setApps,setLeads,onClose}){
   </div>;
 }
 
+
+// ═══════════════════════════════════════════════
+// STAGE DIALOGUE — top-level so React doesn't remount on each keystroke
+// ═══════════════════════════════════════════════
+const ALL_STAGES=["Lead Created","Inspection Done","Token Done","PR Done","Delivery Released","SI Done"];
+const STAGE_ORDER={"Lead Created":0,"Inspection Done":1,"Token Done":2,"PR Done":3,"Delivery Released":4,"SI Done":5};
+
+
 function LeadsModule({user,shared}){
   const{dealers,counters,leads,setLeads,apps,setApps}=shared;
   const[view,setView]=useState("list");
   const[step,setStep]=useState(0);
-  const[sel,setSel]=useState(null);
   const[stageLeadId,setStageLeadId]=useState(null);
+  const[sel,setSel]=useState(null);
   const[newLeadForm,setNewLeadForm]=useState({});
   const nf=(k,v)=>setNewLeadForm(p=>({...p,[k]:v}));
 
@@ -412,10 +420,14 @@ function LeadsModule({user,shared}){
   if(user.role==="RM"&&user.raIds) raIds=[user.id,...user.raIds];
   const isOps=["TM","Central Ops","Business Head"].includes(user.role);
   const myLeads=isOps?leads:leads.filter(l=>raIds.includes(l.raId));
-  const myDealers=isOps?dealers.filter(d=>d.status==="Active"):dealers.filter(d=>raIds.includes(d.raId)&&d.status==="Active");
+
+  const allActiveDealers=dealers.filter(d=>d.status==="Active");
+  const myDealers=isOps?allActiveDealers:allActiveDealers.filter(d=>raIds.includes(d.raId));
   const dealerCtrs=counters.filter(c=>c.dealerId===newLeadForm.dealerId&&c.status==="Active");
   const selCtr=counters.find(c=>c.id===newLeadForm.counterId);
   const selDealer=dealers.find(d=>d.id===newLeadForm.dealerId);
+
+  const stageLeadObj=stageLeadId?leads.find(l=>l.id===stageLeadId):null;
 
   const calcPrice=(fd)=>{
     let base=0;const yr=parseInt(fd.year||"2020");const km=parseInt(fd.km||"0");const mk=fd.make||"";
@@ -423,7 +435,7 @@ function LeadsModule({user,shared}){
     else if(["Kia","Skoda","Volkswagen","Jeep","MG Motors"].includes(mk))base=800000;
     else if(["Hyundai","Honda","Toyota","Tata Motors","Mahindra"].includes(mk))base=600000;
     else base=450000;
-    base=base*Math.pow(0.82,2026-yr);base=base*(1-(km/200000)*0.25);
+    base=base*Math.pow(0.82,2026-yr)*Math.max(0,(1-(km/200000)*0.25));
     if(fd.accident==="Major")base*=0.80;else if(fd.accident==="Minor")base*=0.92;
     if(fd.flood==="Yes")base*=0.75;if(fd.tyres==="Poor")base*=0.96;
     if(fd.ownership==="2nd")base*=0.95;else if(fd.ownership==="3rd+")base*=0.88;
@@ -433,90 +445,100 @@ function LeadsModule({user,shared}){
   function submitLead(){
     const price=calcPrice(newLeadForm);
     const newId=`L${uid()}`;
-    const lead={id:newId,raId:user.role==="RA"?user.id:user.id,...newLeadForm,price,status:"Lead Created",appId:"",createdAt:now(),c24Quote:0,serviceCharge:0,finalPayable:0,challan:0,otherCharges_lead:0,partyPeshi:0,deliveryPayment:0,deliveryReleased:0,deliveryPending:0,stageUpdatedAt:""};
+    const lead={id:newId,raId:user.role==="RA"?user.id:user.id,...newLeadForm,price,status:"Lead Created",appId:"",createdAt:now(),c24Quote:0,serviceCharge:0,finalPayable:0,challan:0,otherCharges_lead:0,partyPeshi:0,deliveryPayment:0,deliveryReleased:0,pendingRelease:0,stageUpdatedAt:""};
     setLeads(p=>[...p,lead]);
     setNewLeadForm({});setView("list");setStep(0);
     setStageLeadId(newId);
   }
 
-  // ── LEAD DETAIL VIEW ──
+  // Lead detail view
   if(sel&&!stageLeadId){
     const lead=leads.find(l=>l.id===sel);
-    if(!lead)return null;
-    const ld=dealers.find(d=>d.id===lead.dealerId);const lc=counters.find(c=>c.id===lead.counterId);
-    const ra=ALL_USERS.find(u=>u.id===lead.raId);const app=apps.find(a=>a.id===lead.appId);
+    if(!lead){setSel(null);return null;}
+    const ld=dealers.find(d=>d.id===lead.dealerId);
+    const lc=counters.find(c=>c.id===lead.counterId);
+    const ra=ALL_USERS.find(u=>u.id===lead.raId);
+    const app=apps.find(a=>a.id===lead.appId);
     return <div>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}><Btn v="ghost" onClick={()=>setSel(null)} sm>← Back</Btn><span style={{fontSize:14,fontWeight:800}}>{lead.make} {lead.model} {lead.year}</span></div>
         <Btn sm v="primary" icon="🎯" onClick={()=>setStageLeadId(lead.id)}>Update Stage</Btn>
       </div>
-      <div style={{background:`linear-gradient(135deg,${T.accentD},${T.accent})`,borderRadius:12,padding:14,marginBottom:10,color:"#fff"}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
-          <div><div style={{fontSize:9,opacity:0.7,fontWeight:800,marginBottom:3}}>CURRENT STAGE</div><Badge s={lead.status} sm/></div>
-          {lead.c24Quote>0&&<div style={{textAlign:"right"}}><div style={{fontSize:9,opacity:0.7,marginBottom:2}}>C24 QUOTE</div><div style={{fontSize:20,fontWeight:900}}>{fmt(lead.c24Quote)}</div></div>}
+      <Card style={{marginBottom:10,background:`linear-gradient(135deg,${T.accentD},${T.accent})`}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+          <div><div style={{fontSize:10,fontWeight:800,color:"rgba(255,255,255,0.6)",marginBottom:3}}>STAGE</div><Badge s={lead.status} sm/></div>
+          {lead.c24Quote>0&&<div style={{textAlign:"right"}}><div style={{fontSize:10,color:"rgba(255,255,255,0.6)",marginBottom:2}}>C24 QUOTE</div><div style={{fontSize:20,fontWeight:900,color:"#fff"}}>{fmt(lead.c24Quote)}</div></div>}
         </div>
-        {lead.finalPayable>0&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginTop:6,paddingTop:8,borderTop:"1px solid rgba(255,255,255,0.15)"}}>
-          {[["Svc Charge",fmt(lead.serviceCharge)],["Final Payable",fmt(lead.finalPayable)],["Delivery Pmt",fmt(lead.deliveryPayment)]].map(([l,v])=><div key={l}><div style={{fontSize:9,opacity:0.6,marginBottom:1}}>{l}</div><div style={{fontSize:11,fontWeight:800}}>{v}</div></div>)}
+        {lead.finalPayable>0&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,borderTop:"1px solid rgba(255,255,255,0.2)",paddingTop:8}}>
+          {[["Svc Chg",fmt(lead.serviceCharge)],["Payable to CX",fmt(lead.finalPayable)],["Delivery Pmt",fmt(lead.deliveryPayment)]].map(([l,v])=><div key={l}><div style={{fontSize:9,color:"rgba(255,255,255,0.55)",marginBottom:2}}>{l}</div><div style={{fontSize:11,fontWeight:800,color:"#fff"}}>{v}</div></div>)}
         </div>}
-        {lead.deliveryReleased>0&&<div style={{marginTop:8,display:"flex",gap:8}}>
-          <div style={{flex:1,background:"rgba(255,255,255,0.15)",borderRadius:7,padding:"5px 8px"}}><div style={{fontSize:9,opacity:0.7}}>Released</div><div style={{fontSize:12,fontWeight:800}}>{fmt(lead.deliveryReleased)}</div></div>
-          {lead.deliveryPending>0&&<div style={{flex:1,background:"rgba(255,180,0,0.2)",borderRadius:7,padding:"5px 8px"}}><div style={{fontSize:9,opacity:0.7}}>⏳ Pending</div><div style={{fontSize:12,fontWeight:800}}>{fmt(lead.deliveryPending)}</div></div>}
-          {lead.deliveryPending===0&&<div style={{flex:1,background:"rgba(16,185,129,0.2)",borderRadius:7,padding:"5px 8px"}}><div style={{fontSize:9,opacity:0.7}}>✓ Fully Released</div></div>}
+        {lead.deliveryReleased>0&&<div style={{marginTop:6,background:"rgba(255,255,255,0.12)",borderRadius:7,padding:"5px 8px",display:"flex",justifyContent:"space-between"}}>
+          <span style={{fontSize:10,color:"rgba(255,255,255,0.7)"}}>💸 Released</span><span style={{fontSize:11,fontWeight:800,color:"#fff"}}>{fmt(lead.deliveryReleased)}</span>
         </div>}
-      </div>
-      <Card style={{marginBottom:8}}><ST>Vehicle</ST>{[["Reg. No.",lead.regNo],["Make / Model",`${lead.make} ${lead.model}`],["Year / Variant",`${lead.year} ${lead.variant||""}`],["Fuel",lead.fuel],["Transmission",lead.transmission],["KM Driven",Number(lead.km||0).toLocaleString("en-IN")+" km"],["Ownership",lead.ownership],["Accident",lead.accident+(lead.accidentDesc?` (${lead.accidentDesc})`:"")],["Tyres",lead.tyres]].map(([l,v])=><Row key={l} label={l} value={v||"—"}/>)}</Card>
-      <Card style={{marginBottom:8}}><ST>Dealership</ST>{[["Dealer",ld&&ld.name],["Counter",lc&&lc.name],["UCM",lc&&lc.ucmName],["RA",ra&&ra.name]].map(([l,v])=><Row key={l} label={l} value={v||"—"}/>)}</Card>
-      {app&&<Card style={{marginBottom:8}}><ST>App_ID</ST>{[["App_ID",app.id],["GS Type",app.gsType],["Wallet",fmt(app.otherCharges-app.splitReleased)],["Stock-In",app.stockIn?"✓":"✗"]].map(([l,v])=><Row key={l} label={l} value={v}/>)}</Card>}
+        {lead.pendingRelease>0&&<div style={{marginTop:4,background:"rgba(245,158,11,0.25)",borderRadius:7,padding:"5px 8px",display:"flex",justifyContent:"space-between"}}>
+          <span style={{fontSize:10,color:"#FDE68A"}}>⏳ Pending Release</span><span style={{fontSize:11,fontWeight:800,color:"#FDE68A"}}>{fmt(lead.pendingRelease)}</span>
+        </div>}
+      </Card>
+      <Card style={{marginBottom:10}}><ST>Vehicle Details</ST>{[["Reg. No.",lead.regNo],["Vehicle",`${lead.make} ${lead.model} ${lead.year}`],["Variant",lead.variant||"—"],["Fuel",lead.fuel],["Transmission",lead.transmission],["KM",Number(lead.km||0).toLocaleString("en-IN")+" km"],["Color",lead.color||"—"],["Ownership",lead.ownership],["Accident",lead.accident+(lead.accidentDesc?` (${lead.accidentDesc})`:"")],["Flood",lead.flood],["Tyres",lead.tyres],["Engine",lead.engine],["Electrical",lead.electrical]].map(([l,v])=><Row key={l} label={l} value={v||"—"}/>)}</Card>
+      <Card style={{marginBottom:10}}><ST>Dealership</ST>{[["Dealer",ld&&ld.name],["Code",ld&&ld.code],["Counter",lc&&lc.name],["City",lc&&lc.city],["UCM",lc&&lc.ucmName],["Mobile",lc&&lc.ucmMobile],["RA",ra&&ra.name]].map(([l,v])=><Row key={l} label={l} value={v||"—"}/>)}</Card>
+      {app&&<Card style={{marginBottom:10}}><ST>Linked App_ID</ST>{[["App_ID",app.id],["GS Type",app.gsType],["Wallet",fmt(app.otherCharges-app.splitReleased)],["Stock-In",app.stockIn?"✓ Done":"✗ Pending"]].map(([l,v])=><Row key={l} label={l} value={v}/>)}</Card>}
     </div>;
   }
 
-  // ── NEW LEAD FORM ──
   if(view==="form") return <div>
-    {stageLeadId&&<StageDialogue lead={leads.find(l=>l.id===stageLeadId)||{id:"",make:"",model:"",year:"",regNo:"",status:"Lead Created",c24Quote:0,serviceCharge:0,finalPayable:0,challan:0,otherCharges_lead:0,partyPeshi:0,deliveryPayment:0,deliveryReleased:0,deliveryPending:0,inspectionNotes:"",tokenAmount:0,tokenNotes:"",siGsType:"GS",siNotes:""}} apps={apps} setApps={setApps} setLeads={setLeads} onClose={()=>setStageLeadId(null)}/>}
     <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}><Btn v="ghost" onClick={()=>{setView("list");setStep(0);setNewLeadForm({});}} sm>← Back</Btn><span style={{fontSize:14,fontWeight:800}}>New Lead</span></div>
     <StepBar steps={["Location","Vehicle","Condition","Price"]} cur={step}/>
-    {step===0&&<Card><ST>Step 1 — Dealership & Counter</ST>
+    {step===0&&<Card><ST>Dealership & Counter</ST>
       <Sel label="Dealership" value={newLeadForm.dealerId} onChange={v=>nf("dealerId",v)} options={myDealers.map(d=>({value:d.id,label:`${d.name} (${d.code})`}))} placeholder="Select dealer..." required/>
-      {newLeadForm.dealerId&&<>{dealerCtrs.length===0?<Alrt type="warning">No active counters for this dealer.</Alrt>:<Sel label="Counter" value={newLeadForm.counterId} onChange={v=>nf("counterId",v)} options={dealerCtrs.map(c=>({value:c.id,label:`${c.name} — ${c.city}`}))} placeholder="Select counter..." required/>}{selCtr&&<div style={{background:T.accentL,borderRadius:8,padding:10,marginBottom:10}}><div style={{fontSize:10,fontWeight:800,color:T.accent,marginBottom:4}}>AUTO-FILLED</div><Row label="UCM" value={selCtr.ucmName}/><Row label="Mobile" value={selCtr.ucmMobile}/></div>}</>}
+      {newLeadForm.dealerId&&<>{dealerCtrs.length===0?<Alrt type="warning">No active counters for this dealer.</Alrt>:<Sel label="Counter" value={newLeadForm.counterId} onChange={v=>nf("counterId",v)} options={dealerCtrs.map(c=>({value:c.id,label:`${c.name} — ${c.city}`}))} placeholder="Select counter..." required/>}{selCtr&&<div style={{background:T.accentL,borderRadius:8,padding:10,marginBottom:10}}><Row label="Counter" value={selCtr.name}/><Row label="City" value={selCtr.city}/><Row label="UCM" value={selCtr.ucmName}/><Row label="UCM Mobile" value={selCtr.ucmMobile}/></div>}</>}
       <Fld label="Registration Number" value={newLeadForm.regNo} onChange={v=>nf("regNo",v.toUpperCase())} required placeholder="e.g. DL3CAB1234" maxLength={15}/>
-      <div style={{display:"flex",justifyContent:"flex-end"}}><Btn disabled={!newLeadForm.dealerId||!newLeadForm.counterId||!newLeadForm.regNo} onClick={()=>setStep(1)}>Next →</Btn></div>
+      <div style={{display:"flex",justifyContent:"flex-end",marginTop:4}}><Btn disabled={!newLeadForm.dealerId||!newLeadForm.counterId||!newLeadForm.regNo} onClick={()=>setStep(1)}>Next →</Btn></div>
     </Card>}
-    {step===1&&<Card><ST>Step 2 — Vehicle</ST>
-      <G2><Sel label="Make" value={newLeadForm.make} onChange={v=>nf("make",v)} options={CAR_MAKES} placeholder="Select make..." required/><Fld label="Model" value={newLeadForm.model} onChange={v=>nf("model",v)} required placeholder="e.g. Creta"/></G2>
+    {step===1&&<Card><ST>Vehicle Details</ST>
+      <G2><Sel label="Make" value={newLeadForm.make} onChange={v=>nf("make",v)} options={CAR_MAKES} placeholder="Select..." required/><Fld label="Model" value={newLeadForm.model} onChange={v=>nf("model",v)} required placeholder="e.g. Creta"/></G2>
       <G2><Sel label="Year" value={newLeadForm.year} onChange={v=>nf("year",v)} options={Array.from({length:15},(_,i)=>String(2026-i))} placeholder="Year..." required/><Fld label="Variant" value={newLeadForm.variant} onChange={v=>nf("variant",v)} placeholder="e.g. SX 1.5D"/></G2>
-      <G2><Sel label="Fuel" value={newLeadForm.fuel} onChange={v=>nf("fuel",v)} options={["Petrol","Diesel","CNG","Electric","Hybrid"]} placeholder="Fuel..." required/><Sel label="Transmission" value={newLeadForm.transmission} onChange={v=>nf("transmission",v)} options={["Manual","Automatic","AMT","CVT","DCT"]} placeholder="Trans..." required/></G2>
+      <G2><Sel label="Fuel" value={newLeadForm.fuel} onChange={v=>nf("fuel",v)} options={["Petrol","Diesel","CNG","Electric","Hybrid"]} placeholder="Select..." required/><Sel label="Transmission" value={newLeadForm.transmission} onChange={v=>nf("transmission",v)} options={["Manual","Automatic","AMT","CVT","DCT"]} placeholder="Select..." required/></G2>
       <G2><Fld label="Color" value={newLeadForm.color} onChange={v=>nf("color",v)} placeholder="Pearl White"/><Fld label="KM Driven" value={newLeadForm.km} onChange={v=>nf("km",v)} type="number" required placeholder="35000"/></G2>
       <Sel label="Ownership" value={newLeadForm.ownership} onChange={v=>nf("ownership",v)} options={["1st","2nd","3rd+"]} placeholder="Select..." required/>
-      <div style={{display:"flex",justifyContent:"space-between"}}><Btn v="secondary" onClick={()=>setStep(0)}>← Back</Btn><Btn disabled={!newLeadForm.make||!newLeadForm.model||!newLeadForm.year||!newLeadForm.fuel||!newLeadForm.transmission||!newLeadForm.km||!newLeadForm.ownership} onClick={()=>setStep(2)}>Next →</Btn></div>
+      <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}><Btn v="secondary" onClick={()=>setStep(0)}>← Back</Btn><Btn disabled={!newLeadForm.make||!newLeadForm.model||!newLeadForm.year||!newLeadForm.fuel||!newLeadForm.transmission||!newLeadForm.km||!newLeadForm.ownership} onClick={()=>setStep(2)}>Next →</Btn></div>
     </Card>}
-    {step===2&&<Card><ST>Step 3 — Condition</ST>
-      <Sel label="Accident History" value={newLeadForm.accident} onChange={v=>nf("accident",v)} options={["No","Minor","Major"]} placeholder="Select..." required/>
+    {step===2&&<Card><ST>Condition</ST>
+      <Sel label="Accident" value={newLeadForm.accident} onChange={v=>nf("accident",v)} options={["No","Minor","Major"]} placeholder="Select..." required/>
       {newLeadForm.accident&&newLeadForm.accident!=="No"&&<Fld label="Accident Details" value={newLeadForm.accidentDesc} onChange={v=>nf("accidentDesc",v)} placeholder="e.g. Front bumper"/>}
       <Sel label="Flood" value={newLeadForm.flood} onChange={v=>nf("flood",v)} options={["No","Yes"]} placeholder="Select..." required/>
       <Sel label="Tyres" value={newLeadForm.tyres} onChange={v=>nf("tyres",v)} options={["Excellent","Good","Fair","Poor"]} placeholder="Select..." required/>
       <Sel label="Engine" value={newLeadForm.engine} onChange={v=>nf("engine",v)} options={["No issues","Minor issue","Major issue"]} placeholder="Select..." required/>
       <Sel label="Electrical" value={newLeadForm.electrical} onChange={v=>nf("electrical",v)} options={["No issues","Minor issue","Major issue"]} placeholder="Select..." required/>
-      <div style={{display:"flex",justifyContent:"space-between"}}><Btn v="secondary" onClick={()=>setStep(1)}>← Back</Btn><Btn disabled={!newLeadForm.accident||!newLeadForm.flood||!newLeadForm.tyres||!newLeadForm.engine||!newLeadForm.electrical} onClick={()=>setStep(3)}>Get Price →</Btn></div>
+      <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}><Btn v="secondary" onClick={()=>setStep(1)}>← Back</Btn><Btn disabled={!newLeadForm.accident||!newLeadForm.flood||!newLeadForm.tyres||!newLeadForm.engine||!newLeadForm.electrical} onClick={()=>setStep(3)}>Price →</Btn></div>
     </Card>}
-    {step===3&&<Card><ST>Step 4 — Price</ST>
-      <div style={{background:`linear-gradient(135deg,${T.accentD},${T.accent})`,borderRadius:12,padding:16,textAlign:"center",marginBottom:12}}><div style={{fontSize:10,color:"rgba(255,255,255,0.7)",fontWeight:800,letterSpacing:1,marginBottom:4}}>INDICATIVE C24 PRICE</div><div style={{fontSize:30,fontWeight:900,color:"#fff"}}>{fmt(calcPrice(newLeadForm))}</div></div>
+    {step===3&&<Card><ST>Indicative Price</ST>
+      <div style={{background:`linear-gradient(135deg,${T.accentD},${T.accent})`,borderRadius:12,padding:18,textAlign:"center",marginBottom:12}}>
+        <div style={{fontSize:11,color:"rgba(255,255,255,0.7)",fontWeight:800,letterSpacing:1,marginBottom:4}}>INDICATIVE C24 PRICE</div>
+        <div style={{fontSize:32,fontWeight:900,color:"#fff"}}>{fmt(calcPrice(newLeadForm))}</div>
+        <div style={{fontSize:11,color:"rgba(255,255,255,0.6)",marginTop:4}}>Subject to inspection</div>
+      </div>
       <Alrt type="info">After submitting, a stage update dialogue will open immediately.</Alrt>
       {[["Reg. No.",newLeadForm.regNo],["Vehicle",`${newLeadForm.make} ${newLeadForm.model} ${newLeadForm.year}`],["Dealer",selDealer&&selDealer.name],["Counter",selCtr&&selCtr.name]].map(([l,v])=><Row key={l} label={l} value={v||"—"}/>)}
       <div style={{display:"flex",justifyContent:"space-between",marginTop:10}}><Btn v="secondary" onClick={()=>setStep(2)}>← Edit</Btn><Btn v="success" icon="✓" onClick={submitLead}>Submit & Set Stage →</Btn></div>
     </Card>}
   </div>;
 
-  // ── LEAD LIST ──
-  const stageDialogueLead=stageLeadId?leads.find(l=>l.id===stageLeadId):null;
   return <div>
-    {stageDialogueLead&&<StageDialogue lead={stageDialogueLead} apps={apps} setApps={setApps} setLeads={setLeads} onClose={()=>{setStageLeadId(null);}}/>}
+    {stageLeadObj&&<StageDialogue lead={stageLeadObj} apps={apps} setApps={setApps} setLeads={setLeads} onClose={()=>setStageLeadId(null)}/>}
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
       <Lbl>Leads ({myLeads.length})</Lbl>
-      {(user.role==="RA"||user.role==="RM"||user.role==="TM")&&<Btn sm icon="+" onClick={()=>setView("form")}>New Lead</Btn>}
+      {["RA","RM","TM"].includes(user.role)&&<Btn sm icon="+" onClick={()=>setView("form")}>New Lead</Btn>}
     </div>
     {myLeads.length===0&&<div style={{textAlign:"center",padding:36,color:T.mute}}><div style={{fontSize:28,marginBottom:8}}>📋</div><div>No leads yet</div></div>}
-    {user.role==="RM"&&user.raIds&&user.raIds.map(raId=>{const ra=ALL_USERS.find(u=>u.id===raId);const raL=myLeads.filter(l=>l.raId===raId);return <div key={raId} style={{marginBottom:14}}><div style={{fontSize:11,fontWeight:800,color:T.accent,marginBottom:6,padding:"4px 0",borderBottom:`1px solid ${T.accentL}`}}>{ra&&ra.name} — {raL.length} leads</div>{raL.map(l=>renderLeadCard(l))}</div>;})}
-    {(user.role==="RA"||isOps)&&myLeads.map(l=>renderLeadCard(l))}
+    {user.role==="RM"&&user.raIds&&user.raIds.map(raId=>{
+      const ra=ALL_USERS.find(u=>u.id===raId);
+      const raL=myLeads.filter(l=>l.raId===raId);
+      return <div key={raId} style={{marginBottom:14}}>
+        <div style={{fontSize:11,fontWeight:800,color:T.accent,marginBottom:6,padding:"4px 0",borderBottom:`1px solid ${T.accentL}`}}>{ra&&ra.name} — {raL.length} leads</div>
+        {raL.map(l=>renderLeadCard(l))}
+      </div>;
+    })}
+    {(user.role!=="RM")&&myLeads.map(l=>renderLeadCard(l))}
   </div>;
 
   function renderLeadCard(l){
@@ -527,25 +549,20 @@ function LeadsModule({user,shared}){
         <span style={{fontSize:12,fontWeight:800}}>{l.make} {l.model} {l.year}</span>
         <Badge s={l.status} sm/>
       </div>
-      {l.c24Quote>0
-        ?<div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:5,marginBottom:6}}>
-          {[["Quote",fmt(l.c24Quote)],["Payable",fmt(l.finalPayable)],["Delivery",fmt(l.deliveryPayment)]].map(([lbl,v])=><div key={lbl} style={{background:"#F8FAFC",borderRadius:6,padding:"4px 6px"}}><div style={{fontSize:9,color:T.mute,fontWeight:700}}>{lbl}</div><div style={{fontSize:10,fontWeight:800}}>{v}</div></div>)}
-        </div>
-        :<div style={{fontSize:11,color:T.accent,fontWeight:700,marginBottom:4}}>Indicative: {fmt(l.price)}</div>}
-      <div style={{fontSize:11,color:T.mute,marginBottom:4}}>{l.regNo} · {d&&d.name} · {c&&c.name}</div>
-      {l.appId&&<div style={{fontSize:10,color:T.success,fontWeight:700,marginBottom:4}}>App_ID: {l.appId}</div>}
-      {l.deliveryReleased>0&&<div style={{display:"flex",gap:6,marginBottom:4}}>
-        <span style={{fontSize:10,fontWeight:800,color:T.success}}>💸 Released: {fmt(l.deliveryReleased)}</span>
-        {l.deliveryPending>0&&<span style={{fontSize:10,fontWeight:800,color:T.warn}}>⏳ Pending: {fmt(l.deliveryPending)}</span>}
-      </div>}
-      <div style={{display:"flex",gap:6}}>
-        <Btn sm v="secondary" onClick={()=>setSel(l.id)}>View</Btn>
+      {l.c24Quote>0?<div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:4,marginBottom:6}}>
+        {[["Quote",fmt(l.c24Quote)],["Payable",fmt(l.finalPayable)],["Delivery",fmt(l.deliveryPayment)]].map(([lbl,v])=><div key={lbl} style={{background:"#EBF4FF",borderRadius:6,padding:"4px 6px"}}><div style={{fontSize:9,color:T.accent,fontWeight:700}}>{lbl}</div><div style={{fontSize:10,fontWeight:800}}>{v}</div></div>)}
+      </div>:<div style={{fontSize:11,color:T.accent,fontWeight:700,marginBottom:4}}>Est: {fmt(l.price)}</div>}
+      <div style={{fontSize:11,color:T.mute,marginBottom:4}}>{l.regNo} · {d&&d.name} · {c&&c.ucmName}</div>
+      {l.deliveryReleased>0&&<div style={{fontSize:10,fontWeight:800,color:T.success,marginBottom:2}}>💸 Released: {fmt(l.deliveryReleased)}</div>}
+      {l.pendingRelease>0&&<div style={{fontSize:10,fontWeight:700,color:T.warn,marginBottom:2}}>⏳ Pending: {fmt(l.pendingRelease)}</div>}
+      {l.appId&&<div style={{fontSize:10,color:T.success,fontWeight:700,marginBottom:6}}>App_ID: {l.appId}</div>}
+      <div style={{display:"flex",gap:6,marginTop:4}}>
+        <Btn sm v="secondary" onClick={()=>{setSel(l.id);setStageLeadId(null);}}>View</Btn>
         <Btn sm v="primary" icon="🎯" onClick={()=>setStageLeadId(l.id)}>Update Stage</Btn>
       </div>
     </Card>;
   }
 }
-
 
 
 function AppIDsModule({user,shared}){
@@ -950,6 +967,7 @@ function ConfigModule({user,shared}){
 // ═══════════════════════════════════════════════
 // STAGE MARKING MODULE (RA/RM + Ops/TM view)
 // ═══════════════════════════════════════════════
+
 function CounterUCMOverride({user,shared}){
   const{apps,setApps,counters,dealers}=shared;
   const[selAppId,setSelAppId]=useState("");
@@ -966,68 +984,63 @@ function CounterUCMOverride({user,shared}){
   const currentDealer=selApp?dealers.find(d=>d.id===selApp.dealerId):null;
   const currentCounter=selApp?counters.find(c=>c.id===selApp.counterId):null;
   const newDealer=dealers.find(d=>d.id===newDealerId);
-  // Filter counters to only those of the selected new dealer
   const dealerCounters=counters.filter(c=>c.dealerId===newDealerId&&c.status==="Active");
   const newCounter=counters.find(c=>c.id===newCounterId);
 
   function applyOverride(){
     if(!selAppId||!newDealerId||!newCounterId||!reason){alert("Fill all fields");return;}
-    const entry={id:`OVR${Math.random().toString(36).slice(2,7).toUpperCase()}`,appId:selAppId,vehicle:selApp.vehicle,
-      prevDealer:currentDealer?.name,prevCounter:currentCounter?.name,prevUCM:currentCounter?.ucmName,
-      newDealer:newDealer?.name,newCounter:newCounter?.name,newUCM:newCounter?.ucmName,
-      reason,by:user.role,at:new Date().toLocaleString("en-IN",{hour12:false}).slice(0,16)};
+    const entry={id:`OVR${uid()}`,appId:selAppId,vehicle:selApp.vehicle,
+      prevDealer:currentDealer&&currentDealer.name,prevCounter:currentCounter&&currentCounter.name,prevUCM:currentCounter&&currentCounter.ucmName,
+      newDealer:newDealer&&newDealer.name,newCounter:newCounter&&newCounter.name,newUCM:newCounter&&newCounter.ucmName,
+      reason,by:user.role,at:now()};
     setApps(prev=>prev.map(a=>a.id===selAppId?{...a,dealerId:newDealerId,counterId:newCounterId}:a));
     setLog(p=>[entry,...p]);
     setDone(true);
     setTimeout(()=>{setDone(false);setSelAppId("");setNewDealerId("");setNewCounterId("");setReason("");},1400);
   }
 
-  if(done)return <div style={{textAlign:"center",padding:60}}><div style={{fontSize:48,marginBottom:12}}>✅</div><div style={{fontSize:15,fontWeight:800}}>Dealer, Counter & UCM Updated!</div><div style={{fontSize:12,color:T.mute,marginTop:4}}>All downstream references now reflect the new mapping</div></div>;
+  if(done)return <div style={{textAlign:"center",padding:60}}><div style={{fontSize:48,marginBottom:12}}>✅</div><div style={{fontSize:15,fontWeight:800}}>Dealer, Counter & UCM Updated!</div></div>;
 
   return <div>
-    <Alrt type="warning">Override the Dealer, Counter and UCM on any App_ID. Used for scenario testing since Admin Panel is not integrated.</Alrt>
+    <Alrt type="warning">Override the Dealer + Counter + UCM on any App_ID for scenario testing (Admin Panel not integrated).</Alrt>
     <Card style={{marginBottom:14}}>
-      <ST>Select App_ID to Override</ST>
+      <ST>Select App_ID</ST>
       <Sel value={selAppId} onChange={v=>{setSelAppId(v);setNewDealerId("");setNewCounterId("");}}
         options={apps.map(a=>{const d=dealers.find(dd=>dd.id===a.dealerId);return{value:a.id,label:`${a.id} — ${a.vehicle} (${d?d.name:""})`};})}
         placeholder="Choose App_ID..."/>
-
       {selApp&&<>
         <div style={{background:T.accentL,borderRadius:9,padding:12,marginBottom:12}}>
           <div style={{fontSize:10,fontWeight:800,color:T.accent,marginBottom:6}}>CURRENT MAPPING</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
-            {[["Dealer",currentDealer?.name],["Dealer Code",currentDealer?.code],["Counter",currentCounter?.name],["UCM Name",currentCounter?.ucmName],["UCM Mobile",currentCounter?.ucmMobile],["Counter City",currentCounter?.city]].map(([l,v])=><div key={l} style={{background:"rgba(255,255,255,0.7)",borderRadius:6,padding:"5px 8px"}}><div style={{fontSize:9,color:T.accent,fontWeight:700}}>{l.toUpperCase()}</div><div style={{fontSize:11,fontWeight:800}}>{v||"—"}</div></div>)}
+            {[["Dealer",currentDealer&&currentDealer.name],["Code",currentDealer&&currentDealer.code],["Counter",currentCounter&&currentCounter.name],["UCM",currentCounter&&currentCounter.ucmName],["UCM Mobile",currentCounter&&currentCounter.ucmMobile],["City",currentCounter&&currentCounter.city]].map(([l,v])=><div key={l} style={{background:"rgba(255,255,255,0.7)",borderRadius:6,padding:"5px 8px"}}><div style={{fontSize:9,color:T.accent,fontWeight:700}}>{l.toUpperCase()}</div><div style={{fontSize:11,fontWeight:800}}>{v||"—"}</div></div>)}
           </div>
         </div>
-
-        <ST>New Dealer → Counter → UCM</ST>
-        <Sel label="Step 1 — Select New Dealer" value={newDealerId} onChange={v=>{setNewDealerId(v);setNewCounterId("");}}
+        <ST>Step 1 — Select New Dealer</ST>
+        <Sel value={newDealerId} onChange={v=>{setNewDealerId(v);setNewCounterId("");}}
           options={dealers.filter(d=>d.status==="Active"&&d.id!==selApp.dealerId).map(d=>({value:d.id,label:`${d.name} (${d.code}) — ${d.city}`}))}
           placeholder="Select new dealer..."/>
-
         {newDealerId&&<>
+          <ST>Step 2 — Select Counter (filtered to selected dealer)</ST>
           {dealerCounters.length===0?<Alrt type="warning">No active counters for this dealer yet.</Alrt>:
-          <Sel label="Step 2 — Select Counter (filtered to new dealer)" value={newCounterId} onChange={setNewCounterId}
+          <Sel value={newCounterId} onChange={setNewCounterId}
             options={dealerCounters.map(c=>({value:c.id,label:`${c.name} — ${c.ucmName} (${c.city})`}))}
             placeholder="Select counter..."/>}
-
           {newCounter&&<div style={{background:T.successL,border:"1px solid #BBF7D0",borderRadius:9,padding:12,marginBottom:10}}>
             <div style={{fontSize:10,fontWeight:800,color:T.success,marginBottom:6}}>NEW MAPPING PREVIEW</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
-              {[["Dealer",newDealer?.name],["Counter",newCounter.name],["UCM Name",newCounter.ucmName],["UCM Mobile",newCounter.ucmMobile],["City",newCounter.city]].map(([l,v])=><div key={l} style={{background:"rgba(255,255,255,0.7)",borderRadius:6,padding:"5px 8px"}}><div style={{fontSize:9,color:T.success,fontWeight:700}}>{l.toUpperCase()}</div><div style={{fontSize:11,fontWeight:800}}>{v||"—"}</div></div>)}
+              {[["Dealer",newDealer&&newDealer.name],["Counter",newCounter.name],["UCM",newCounter.ucmName],["Mobile",newCounter.ucmMobile],["City",newCounter.city]].map(([l,v])=><div key={l} style={{background:"rgba(255,255,255,0.7)",borderRadius:6,padding:"5px 8px"}}><div style={{fontSize:9,color:T.success,fontWeight:700}}>{l.toUpperCase()}</div><div style={{fontSize:11,fontWeight:800}}>{v||"—"}</div></div>)}
             </div>
           </div>}
         </>}
-
-        <Fld label="Reason / Note *" value={reason} onChange={setReason} placeholder="e.g. Admin mapped to different dealer / scenario testing" required/>
+        <Fld label="Reason *" value={reason} onChange={setReason} placeholder="e.g. Admin mapped differently / scenario test" required/>
         <Btn full v="primary" icon="⚡" disabled={!newDealerId||!newCounterId||!reason} onClick={applyOverride}>Apply Override</Btn>
       </>}
     </Card>
     {log.length>0&&<Card><Lbl>Override Log ({log.length})</Lbl>{log.map(e=><div key={e.id} style={{padding:"8px 0",borderBottom:`1px solid ${T.border}`}}>
       <div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}><span style={{fontSize:12,fontWeight:800}}>{e.appId} — {e.vehicle}</span><span style={{fontSize:10,color:T.mute}}>{e.at}</span></div>
-      <div style={{fontSize:11,color:T.mid}}>From: <strong>{e.prevDealer}</strong> / {e.prevCounter} / {e.prevUCM}</div>
-      <div style={{fontSize:11,color:T.success,fontWeight:700}}>→ To: {e.newDealer} / {e.newCounter} / {e.newUCM}</div>
-      <div style={{fontSize:10,color:T.mute}}>Reason: {e.reason} · By: {e.by}</div>
+      <div style={{fontSize:11,color:T.mid}}>From: {e.prevDealer} / {e.prevCounter} / {e.prevUCM}</div>
+      <div style={{fontSize:11,color:T.success,fontWeight:700}}>→ {e.newDealer} / {e.newCounter} / {e.newUCM}</div>
+      <div style={{fontSize:10,color:T.mute}}>By: {e.by} — {e.reason}</div>
     </div>)}</Card>}
   </div>;
 }
@@ -1035,142 +1048,84 @@ function CounterUCMOverride({user,shared}){
 
 
 // ═══════════════════════════════════════════════
-// ROLE GUIDE MODAL
+// ROLE GUIDE DATA
 // ═══════════════════════════════════════════════
 const ROLE_GUIDES={
-  "RA":{color:"#0F4C81",bg:"#EBF4FF",icon:"🏃",title:"Relationship Associate",desc:"You are the field agent. You create leads, track vehicle journeys from inspection to SI, and monitor your wallet & payout status.",steps:[
-    {icon:"📋",title:"Create a Lead","body":"Go to Leads → New Lead. Fill dealer, counter, vehicle details in 4 steps. After submit, a stage dialogue opens immediately — set the current stage."},
-    {icon:"🎯",title:"Update Lead Stage","body":"On any lead card tap 'Update Stage'. Pick target stage (Inspection/Token/PR/Delivery/SI). Fill required inputs — amounts auto-calculate. You can skip to any stage and all inputs are collected."},
-    {icon:"💰",title:"Inspection","body":"Enter C24 Quote → Service Charge (2%) auto-calculates → Final Payable to CX shown instantly."},
-    {icon:"🤝",title:"Token","body":"Enter token amount (default ₹1) and notes. Used to mark token received from dealer/CX."},
-    {icon:"📋",title:"PR & Price Breakup","body":"Enter Challan, Other Charges, Party Peshi. Final Delivery Payment = Final Payable − all deductions."},
-    {icon:"💸",title:"Delivery Released","body":"Enter released amount (cannot exceed delivery payment). If partial, pending amount shows separately."},
-    {icon:"✅",title:"SI Done","body":"Marks Stock-In complete. This UNLOCKS your wallet — TM can now raise payouts for this App_ID. GS Type set here flows to payout logic."},
-    {icon:"🚗",title:"App_IDs","body":"View all your App_IDs with stage pills (Insp ✓ / Token ✓ / SI ✓), wallet balance, and full pricing details."},
-    {icon:"🏢",title:"Dealers & Counters","body":"Submit new dealer onboarding requests, counter/UCM mapping requests, and SAP payee creation requests."},
-    {icon:"💸",title:"Payouts","body":"Track payout requests raised by TM on your behalf. You cannot raise payouts — only TM can."},
+  "RA":{color:"#0F4C81",bg:"#EBF4FF",title:"RA — Relationship Associate",subtitle:"You manage dealer leads, onboarding, counters and SAP requests",steps:[
+    {icon:"📋",title:"Create a Lead",desc:"Go to Leads → tap + New Lead. Fill dealer, counter, vehicle details and condition. After submit, a Stage Update popup opens — you can set the stage immediately."},
+    {icon:"🎯",title:"Update Lead Stage",desc:"On any lead card tap 'Update Stage'. Pick a target stage (Inspection → Token → PR → Delivery Released → SI). Each stage collects relevant inputs. C24 Quote auto-calculates service charge (2%) and final payable to CX."},
+    {icon:"🚗",title:"View App_IDs",desc:"App_IDs tab shows all your deals with stage pills (Insp/Token/SI), wallet balance, and linked quote/pricing data synced from the lead."},
+    {icon:"🏢",title:"Onboard a Dealer",desc:"Dealers tab → New Dealer. Fill info, bank, OEM details and documents. Submit triggers auto-email to Admin Panel team. Track status here."},
+    {icon:"🔗",title:"Counter & UCM Request",desc:"Counter tab → New Mapping. Select dealer, fill counter name, city, UCM details. Submitted to Central Ops for approval."},
+    {icon:"🏦",title:"SAP / Payee Request",desc:"SAP tab → New Payee. Link to one or more dealers. Fill bank details, upload PAN + Cancelled Cheque. Submitted to Central Ops."},
+    {icon:"💸",title:"Payout Status",desc:"Payouts tab shows all payment requests raised by TM for your deals — track status from Submitted → Auto-Approved / Released."},
   ]},
-  "RM":{color:"#5B21B6",bg:"#F5F3FF",icon:"👤",title:"Regional Manager",desc:"You supervise your RAs. You see all their leads, App_IDs, wallet balances, and can raise onboarding/counter/SAP requests just like RAs.",steps:[
-    {icon:"🏠",title:"Dashboard","body":"See team wallet (all RAs combined), breakdown per RA, and recent activity. Spot who has pending SI or high wallet balance."},
-    {icon:"📋",title:"Team Leads","body":"Leads tab shows all your RAs' leads grouped by RA. You can open any lead and update its stage."},
-    {icon:"🚗",title:"Team App_IDs","body":"See all App_IDs across your team with wallet balance per RA."},
-    {icon:"🏢",title:"Dealer Requests","body":"Submit dealer onboarding, counter, SAP requests on behalf of your team."},
-    {icon:"💸",title:"Payout Tracker","body":"Monitor all payout requests raised by TM for your team's App_IDs."},
+  "RM":{color:"#5B21B6",bg:"#F5F3FF",title:"RM — Regional Manager",subtitle:"You see your full team's leads, app IDs, and wallet balances",steps:[
+    {icon:"🏠",title:"Dashboard",desc:"Home shows team wallet total, breakdown by each RA, recent leads, and pending payout count."},
+    {icon:"📋",title:"Team Leads",desc:"Leads tab shows all leads grouped by each RA. Tap 'Update Stage' on any lead to move it forward — full stage dialogue opens."},
+    {icon:"🚗",title:"Team App_IDs",desc:"App_IDs grouped by RA with individual wallet balances and stage pills."},
+    {icon:"🏢",title:"Dealer, Counter, SAP",desc:"You can raise onboarding, counter and SAP requests on behalf of your RAs."},
   ]},
-  "TM":{color:"#065F46",bg:"#ECFDF5",icon:"🎯",title:"Territory Manager / City Head",desc:"You are the payout authority. You raise all payment requests for your team, can override counter/UCM mappings, and manage all dealer operations.",steps:[
-    {icon:"💸",title:"Raise Payout (most important)","body":"Go to Raise Payout. Select App_ID → dealer/counter/UCM/RA auto-fill. Select payout type (Split or Incentive). Choose payee. Enter amount + reason. System auto-checks rules → shows route (Auto-Approved / Ops Review / BH Review / BLOCKED)."},
-    {icon:"🚫",title:"Payout blocked?","body":"If stockIn=false the payout is blocked. Ask RA to update lead stage to SI Done first. Once done, wallet unlocks and payout flows through."},
-    {icon:"📋",title:"Update Lead Stages","body":"Go to Leads. You can see all leads across all RAs. Tap 'Update Stage' on any lead to mark Inspection/Token/PR/Delivery/SI."},
-    {icon:"🔄",title:"Counter & UCM Override","body":"Go to Ctr Override. Select App_ID → pick new dealer → counter dropdown shows only that dealer's counters → UCM auto-fills. Apply override. All downstream (Raise Payout, Approvals) reflects instantly."},
-    {icon:"🏢",title:"Dealer / Counter / SAP","body":"TM can raise dealer onboarding, counter, and SAP requests directly — no need to route through RA."},
-    {icon:"💡",title:"Scenario Testing Tip","body":"Switch roles using the top-right dropdown. Create a lead as RA, update stages to SI Done, then switch to TM and raise a payout. Watch it flow through Approvals."},
+  "TM":{color:"#065F46",bg:"#ECFDF5",title:"TM / City Head",subtitle:"You raise payouts, manage stages, override counters, and request new setups",steps:[
+    {icon:"🎯",title:"Update Lead Stage (via Leads tab)",desc:"TM can update any lead's stage across all RAs. Go to Leads, pick any lead, tap Update Stage. SI Done unlocks the wallet immediately."},
+    {icon:"💸",title:"Raise Payout",desc:"Raise Payout tab → select App_ID (only stockIn=true apps are payable) → type (Split / Incentive) → payee → amount → reason. Auto-approval engine checks rules and either auto-releases or routes for approval."},
+    {icon:"🔄",title:"Counter Override",desc:"Ctr Override tab → select App_ID → pick new dealer → counter auto-filters to that dealer. Override logs every change with timestamp."},
+    {icon:"🏢",title:"Request Dealer / Counter / SAP",desc:"You can initiate onboarding, counter mapping, and SAP creation requests directly — they go into Central Ops queue."},
   ]},
-  "Central Ops":{color:"#92400E",bg:"#FFFBEB",icon:"⚙️",title:"Central Ops",desc:"You process all requests from the field — dealer onboarding, counter creation, SAP creation — and approve payouts at first level.",steps:[
-    {icon:"🏢",title:"Onboarding Queue","body":"Dealer onboarding requests from RA/TM appear here. Flow: Admin Panel Pending → simulate code received → OEM Tagging → Ops Review → Activate. Once activated, dealer appears for all roles."},
-    {icon:"🔗",title:"Counter Queue","body":"Counter/UCM mapping requests. Review and Approve → counter becomes available for lead creation and payout overrides."},
-    {icon:"🏦",title:"SAP Queue","body":"Payee creation requests. Approve → SAP code assigned → payee available for TM to select in Raise Payout."},
-    {icon:"✓",title:"Payout Approvals","body":"Payouts with status 'Submitted' land here. Review app details, RA wallet, payee info → Approve (moves to BH/Finance) or Reject."},
-    {icon:"🔄",title:"Counter Override","body":"Override dealer/counter/UCM on any App_ID for scenario testing."},
-    {icon:"⚡",title:"Data Transfer","body":"Bulk transfer all data from one RA to another (e.g. RA resigned). Or single entity re-map for specific dealer/app."},
+  "Central Ops":{color:"#92400E",bg:"#FFFBEB",title:"Central Ops",subtitle:"You approve dealer onboarding, counters, SAP, and validate payouts",steps:[
+    {icon:"▦",title:"Dashboard",desc:"Snapshot of all pending queues — onboarding, counters, SAP requests, and payout pipeline with RA wallet summary."},
+    {icon:"🏢",title:"Onboarding Queue",desc:"Dealer onboarding requests appear here. Simulate dealer code receipt → complete OEM tagging → Activate dealer. Rejected requests notify the RA."},
+    {icon:"🔗",title:"Counter Approvals",desc:"Review counter and UCM mapping requests. Approve creates the counter immediately; it becomes available for lead creation."},
+    {icon:"🏦",title:"SAP Approvals",desc:"Validate payee bank details and PAN. Approve assigns a SAP code and marks Flux status as Validated."},
+    {icon:"✓",title:"Payout Approvals",desc:"Submitted payouts appear here. Review App_ID, vehicle, RA wallet, payee. Approve routes to Finance (≥₹15K) or BH."},
+    {icon:"⚡",title:"Data Transfer",desc:"Transfer tab lets you bulk-reassign all dealers/apps/payees from one RA to another, or re-map individual entities. Every action is audit-logged."},
+    {icon:"🔄",title:"Counter Override",desc:"Override the dealer + counter + UCM on any App_ID for testing different scenarios."},
   ]},
-  "Business Head":{color:"#C2410C",bg:"#FFF7ED",icon:"👑",title:"Business Head",desc:"You have the highest authority. You approve high-value payouts, edit amounts, configure system rules, and see full team performance.",steps:[
-    {icon:"▦",title:"BH Dashboard","body":"See team wallet across all RAs, released MTD, pipeline amount, and recent payout activity at a glance."},
-    {icon:"✓",title:"Approvals","body":"Payouts routed to BH (incentive payouts, or after Ops Approval) appear here. You can override the amount before approving — any edit is permanently audit-logged."},
-    {icon:"⚙",title:"Config Keys","body":"Adjust key thresholds: Split Gate (auto-approve below ₹15K), Non-GS Rate (2%), Non-GS Cap (₹10K), Finance Gate (₹15K). Changes apply immediately to all new requests."},
-    {icon:"⚡",title:"Data Transfer","body":"Full authority to bulk-transfer or re-map any entity. All logged."},
-    {icon:"🔄",title:"Counter Override","body":"Override dealer/counter/UCM on any App_ID."},
+  "Business Head":{color:"#C2410C",bg:"#FFF7ED",title:"Business Head",subtitle:"You have final approval authority, config control, and full team visibility",steps:[
+    {icon:"▦",title:"BH Dashboard",desc:"Full team wallet breakdown by RA, released MTD, pipeline amount, pending BH approvals count, and recent payout activity."},
+    {icon:"✓",title:"Payout Approvals",desc:"BH Review and Ops Approved payouts appear here. You can override the amount before approving. All edits are audit-flagged. Amounts ≥₹15K route to Finance after BH."},
+    {icon:"⚙",title:"Config Keys",desc:"Config tab lets you change all auto-approval thresholds: split gate, incentive rate/cap, finance gate. Changes apply immediately to all new requests."},
+    {icon:"⚡",title:"Data Transfer",desc:"Full access to bulk and single-entity re-mapping. Only BH and Central Ops can execute transfers."},
+    {icon:"🔄",title:"Counter Override",desc:"Override dealer/counter/UCM on any App_ID with audit trail."},
   ]},
-  "Finance":{color:"#991B1B",bg:"#FEF2F2",icon:"💼",title:"Finance",desc:"You give final approval for high-value payouts (≥₹15,000). Payout releases above the Finance Gate come to you after BH approves.",steps:[
-    {icon:"✓",title:"Approvals Queue","body":"Only payouts with status 'BH Approved' AND amount ≥ Finance Gate (₹15K) appear here. Click any request to review full details — App_ID, dealer, payee, RA wallet."},
-    {icon:"💸",title:"Final Approve & Release","body":"Approving marks payout as Released, generates UTR, and deducts from RA wallet immediately."},
-    {icon:"📊",title:"Full History","body":"Scroll down in Approvals to see all historical payout requests with statuses."},
-    {icon:"💡",title:"Tip","body":"To test a Finance-routed payout: switch to TM, raise a Split payout ≥ ₹15K on a stockIn=true App_ID. It flows: Submitted → Ops Approved → BH Approved → Finance queue."},
+  "Finance":{color:"#991B1B",bg:"#FEF2F2",title:"Finance",subtitle:"You give final release approval on high-value payouts",steps:[
+    {icon:"▦",title:"Dashboard",desc:"Shows pending Finance approvals and payout summary."},
+    {icon:"✓",title:"Final Approval",desc:"Payouts that are BH Approved AND ≥₹15K (Finance Gate) appear here. Review full details — App_ID, vehicle, dealer, payee, UTR will be generated on approval."},
+    {icon:"📊",title:"All Requests View",desc:"Bottom of approvals page shows all historical requests with status for reference."},
   ]},
 };
 
-function RoleGuide({user,onClose}){
-  const[tab,setTab]=useState(0);
-  const guide=ROLE_GUIDES[user.role]||ROLE_GUIDES["RA"];
-  const step=guide.steps[tab];
-  return <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",zIndex:9500,display:"flex",alignItems:"flex-start",justifyContent:"center",padding:"20px 12px",overflowY:"auto"}}>
-    <div style={{width:"100%",maxWidth:480,background:"#fff",borderRadius:16,overflow:"hidden",boxShadow:"0 24px 64px rgba(0,0,0,0.4)"}}>
-      {/* Header */}
-      <div style={{background:`linear-gradient(135deg,${guide.color}dd,${guide.color})`,padding:"16px 18px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <div><div style={{fontSize:11,color:"rgba(255,255,255,0.65)",fontWeight:800,marginBottom:2,letterSpacing:1}}>ROLE GUIDE</div><div style={{color:"#fff",fontSize:16,fontWeight:900}}>{guide.icon} {guide.title}</div></div>
-        <button onClick={onClose} style={{background:"rgba(255,255,255,0.15)",border:"none",color:"#fff",width:32,height:32,borderRadius:8,cursor:"pointer",fontSize:18,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}>×</button>
+function RoleGuide({user,onDismiss}){
+  const guide=ROLE_GUIDES[user.role];
+  if(!guide)return null;
+  const[step,setStep]=useState(0);
+  return <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:980,display:"flex",alignItems:"center",justifyContent:"center",padding:"16px"}}>
+    <div style={{width:"100%",maxWidth:440,background:"#fff",borderRadius:18,overflow:"hidden",boxShadow:"0 24px 80px rgba(0,0,0,0.35)"}}>
+      <div style={{background:`linear-gradient(135deg,${T.accentD},${T.accent})`,padding:"20px 20px 16px"}}>
+        <div style={{fontSize:11,color:"rgba(255,255,255,0.6)",fontWeight:800,letterSpacing:1,marginBottom:4}}>SIMULATION GUIDE</div>
+        <div style={{fontSize:16,fontWeight:900,color:"#fff"}}>{guide.title}</div>
+        <div style={{fontSize:12,color:"rgba(255,255,255,0.65)",marginTop:3}}>{guide.subtitle}</div>
       </div>
-      {/* Desc */}
-      <div style={{padding:"12px 18px",background:guide.bg,borderBottom:`1px solid ${guide.color}22`,fontSize:12,color:guide.color,fontWeight:600,lineHeight:1.5}}>{guide.desc}</div>
-      {/* Steps nav */}
-      <div style={{display:"flex",overflowX:"auto",padding:"10px 12px 0",gap:6,borderBottom:`1px solid ${T.border}`,WebkitOverflowScrolling:"touch"}}>
-        {guide.steps.map((s,i)=><button key={i} onClick={()=>setTab(i)} style={{flexShrink:0,padding:"5px 10px",borderRadius:20,border:`1.5px solid ${tab===i?guide.color:T.border}`,background:tab===i?guide.bg:"#fff",color:tab===i?guide.color:T.mute,cursor:"pointer",fontSize:10,fontWeight:700,fontFamily:"inherit",whiteSpace:"nowrap",marginBottom:8}}>{s.icon} {s.title}</button>)}
-      </div>
-      {/* Step content */}
-      <div style={{padding:"20px 18px"}}>
-        <div style={{fontSize:22,marginBottom:8}}>{step.icon}</div>
-        <div style={{fontSize:15,fontWeight:900,color:T.text,marginBottom:8}}>{step.title}</div>
-        <div style={{fontSize:13,color:T.mid,lineHeight:1.65}}>{step.body}</div>
-      </div>
-      {/* Nav */}
-      <div style={{padding:"0 18px 18px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <div style={{fontSize:11,color:T.mute}}>{tab+1} / {guide.steps.length}</div>
-        <div style={{display:"flex",gap:8}}>
-          {tab>0&&<Btn v="secondary" sm onClick={()=>setTab(t=>t-1)}>← Prev</Btn>}
-          {tab<guide.steps.length-1?<Btn v="primary" sm onClick={()=>setTab(t=>t+1)}>Next →</Btn>:<Btn v="success" sm icon="✓" onClick={onClose}>Got it!</Btn>}
+      <div style={{padding:"16px 20px 0"}}>
+        <div style={{display:"flex",gap:4,marginBottom:14,flexWrap:"wrap"}}>
+          {guide.steps.map((_,i)=><div key={i} onClick={()=>setStep(i)} style={{width:26,height:5,borderRadius:3,background:i===step?T.accent:T.border,cursor:"pointer",transition:"background 0.15s"}}/>)}
         </div>
+        <div style={{minHeight:110}}>
+          <div style={{fontSize:24,marginBottom:8}}>{guide.steps[step].icon}</div>
+          <div style={{fontSize:14,fontWeight:800,color:T.text,marginBottom:6}}>{guide.steps[step].title}</div>
+          <div style={{fontSize:12,color:T.mid,lineHeight:1.6}}>{guide.steps[step].desc}</div>
+        </div>
+      </div>
+      <div style={{padding:"16px 20px 20px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{display:"flex",gap:6}}>
+          {step>0&&<Btn v="secondary" sm onClick={()=>setStep(s=>s-1)}>← Prev</Btn>}
+          {step<guide.steps.length-1&&<Btn sm onClick={()=>setStep(s=>s+1)}>Next →</Btn>}
+        </div>
+        <Btn v={step===guide.steps.length-1?"success":"ghost"} sm onClick={onDismiss}>{step===guide.steps.length-1?"✓ Got it!":"Skip Guide"}</Btn>
       </div>
     </div>
   </div>;
 }
-
-
-// ═══════════════════════════════════════════════
-// ROLE GUIDE MODAL
-// ═══════════════════════════════════════════════
-const ROLE_GUIDES={
-  "RA":{icon:"📱",color:"#0F4C81",bg:"#EBF4FF",title:"RA — Relationship Associate",subtitle:"Field agent who creates leads and manages dealer relationships",steps:[
-    {step:"1",icon:"🏢",title:"Create a New Lead","desc":"Go to Leads → tap + New Lead. Fill dealer, counter, vehicle details across 4 steps. After submit, a stage dialogue opens automatically."},
-    {step:"2",icon:"🎯",title:"Update Lead Stage","desc":"From any lead card tap 'Update Stage'. Select a target stage — Inspection, Token, PR, Delivery Released, or SI Done. All required inputs appear below."},
-    {step:"3",icon:"🔍",title:"Inspection Done","desc":"Enter C24 Quote → Service Charge (2%) auto-calculates → Final Payable to CX is shown."},
-    {step:"4",icon:"🤝",title:"Token Done","desc":"Enter token amount (minimum ₹1) and any reference notes."},
-    {step:"5",icon:"📋",title:"PR Done","desc":"Enter Challan, Other Charges, Party Peshi → Final Delivery Payment auto-calculates."},
-    {step:"6",icon:"💸",title:"Delivery Released","desc":"Enter amount released (cannot exceed delivery payment). Pending amount shown if partially released."},
-    {step:"7",icon:"✅",title:"SI Done","desc":"Select GS/Non-GS type, add notes → saves to App_ID. TM can now raise payouts for this vehicle."},
-    {step:"8",icon:"🏦",title:"Submit SAP / Counter requests","desc":"Use Counter and SAP tabs to raise mapping requests to Central Ops."},
-  ]},
-  "RM":{icon:"👥",color:"#5B21B6",bg:"#F5F3FF",title:"RM — Regional Manager",subtitle:"Supervises RA team, monitors pipeline and wallets",steps:[
-    {step:"1",icon:"🏠",title:"Dashboard","desc":"See team wallet breakdown per RA, leads count, stock-in pending, and active deals at a glance."},
-    {step:"2",icon:"📋",title:"Leads — Team View","desc":"Leads tab shows all leads grouped by RA. Each card has stage badges. Tap 'Update Stage' to mark any lead on behalf of your RA."},
-    {step:"3",icon:"🚗",title:"App_IDs","desc":"See stage pills (Insp / Token / SI) and wallet balance per vehicle. Expand for full pricing breakdown."},
-    {step:"4",icon:"💸",title:"Payout Status","desc":"Track all payment requests raised by TM for your team. See UTR numbers for released payments."},
-  ]},
-  "TM":{icon:"🏙",color:"#065F46",bg:"#ECFDF5",title:"TM / City Head",subtitle:"Final payout authority — raises all payment requests",steps:[
-    {step:"1",icon:"📋",title:"Leads — Full View","desc":"See all leads across your city. Leads tab works the same as RA — you can update stages for any lead."},
-    {step:"2",icon:"💸",title:"Raise Payout","desc":"Select App_ID (only SI Done apps show wallet) → type auto-fills dealer/counter/UCM/RA → choose Split or Incentive → select payee → enter amount → check auto-approval rules."},
-    {step:"3",icon:"🔄",title:"Counter & UCM Override","desc":"Pick App_ID → select new Dealer → then counter filters to that dealer → apply override. Useful when Admin Panel mapping differs."},
-    {step:"4",icon:"🏢",title:"Request Onboarding / Counter / SAP","desc":"TM can raise all three request types just like RA — goes to Central Ops queue."},
-  ]},
-  "Central Ops":{icon:"⚙️",color:"#92400E",bg:"#FFFBEB",title:"Central Ops",subtitle:"Approves onboarding, counters, SAP, and payouts",steps:[
-    {step:"1",icon:"▦",title:"Dashboard","desc":"See all pending queues at a glance — onboarding, counter requests, SAP requests, payout approvals."},
-    {step:"2",icon:"🏢",title:"Onboarding Queue","desc":"Review dealer requests. Simulate dealer code receipt → complete OEM tagging → activate dealer. Activated dealers appear for all RA roles instantly."},
-    {step:"3",icon:"🔗",title:"Counter Queue","desc":"Review and approve counter+UCM mapping requests. Approved counters appear in RA lead form dropdown immediately."},
-    {step:"4",icon:"🏦",title:"SAP Queue","desc":"Review payee creation requests. Approve to assign SAP code — payee then appears in TM payout form."},
-    {step:"5",icon:"✓",title:"Payout Approvals","desc":"Approve 'Submitted' payout requests → routes to BH or Finance based on amount."},
-    {step:"6",icon:"⚡",title:"Data Transfer","desc":"Bulk transfer all RA data to another RA (e.g. if RA resigns), or remap individual entities."},
-    {step:"7",icon:"🔄",title:"Counter Override","desc":"Change dealer+counter+UCM on any App_ID — select new dealer first, then filtered counters appear."},
-  ]},
-  "Business Head":{icon:"👔",color:"#C2410C",bg:"#FFF7ED",title:"Business Head",subtitle:"Final approvals, config keys, and team oversight",steps:[
-    {step:"1",icon:"▦",title:"BH Dashboard","desc":"Full team wallet, released MTD, pipeline amount, all RA wallet breakdowns, and recent payout activity."},
-    {step:"2",icon:"✓",title:"Approvals","desc":"BH Review queue shows payout requests routed to you. You can override the amount (permanently flagged), approve, or reject."},
-    {step:"3",icon:"⚙",title:"Config Keys","desc":"Change auto-approval gates, Non-GS rate/cap, Finance gate. Changes apply to all new requests immediately."},
-    {step:"4",icon:"⚡",title:"Data Transfer","desc":"Both bulk and single-entity remapping available. Full audit log maintained."},
-  ]},
-  "Finance":{icon:"💰",color:"#991B1B",bg:"#FEF2F2",title:"Finance",subtitle:"Final release of high-value payouts",steps:[
-    {step:"1",icon:"✓",title:"Finance Queue","desc":"Only see payout requests with status 'BH Approved' AND amount ≥ Finance Gate (₹15,000 by default)."},
-    {step:"2",icon:"💸",title:"Approve & Release","desc":"Review full payout details — dealer, App_ID, vehicle, payee, amount. Click Approve to release and generate UTR."},
-    {step:"3",icon:"📊",title:"All Requests View","desc":"Bottom of approvals page shows all historical requests with status for reference."},
-  ]},
-};
 
 
 // ═══════════════════════════════════════════════
@@ -1192,6 +1147,8 @@ function App(){
   const[userId,setUserId]=useState("RA001");
   const[page,setPage]=useState("dashboard");
   const[toast,setToast]=useState(null);
+  const[showGuide,setShowGuide]=useState(true);
+  const[guideOpen,setGuideOpen]=useState(true);
   const[guideOpen,setGuideOpen]=useState(true); // show guide on load
 
   // SHARED STATE — single source of truth for ALL roles
@@ -1249,6 +1206,7 @@ function App(){
   return <div style={{background:T.bg,minHeight:"100vh",display:"flex",flexDirection:"column"}}>
     {toast&&<Toast key={toast.k} msg={toast.msg} type={toast.type} onDone={()=>setToast(null)}/>}
     {guideOpen&&<RoleGuide user={user} onClose={()=>setGuideOpen(false)}/>}
+    {guideOpen&&<RoleGuide user={user} onClose={()=>setGuideOpen(false)}/>}
 
     {/* TOP HEADER */}
     <div style={{background:T.accentD,padding:"0 14px",height:52,display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0,position:"sticky",top:0,zIndex:100}}>
@@ -1265,6 +1223,7 @@ function App(){
           <div style={{display:"flex",alignItems:"center",gap:4,marginTop:1}}><div style={{fontSize:9,padding:"1px 6px",borderRadius:8,background:`${roleColor}33`,color:roleColor,fontWeight:800}}>{user.role}</div><button onClick={()=>setShowGuide(true)} style={{background:"rgba(255,255,255,0.15)",border:"none",color:"#fff",borderRadius:6,padding:"1px 6px",fontSize:9,fontWeight:800,cursor:"pointer",fontFamily:"inherit"}}>? Guide</button></div>
         </div>
         <button onClick={()=>setGuideOpen(true)} style={{background:"rgba(255,255,255,0.15)",border:"1px solid rgba(255,255,255,0.25)",borderRadius:7,padding:"5px 9px",color:"#fff",cursor:"pointer",fontSize:12,fontWeight:800,flexShrink:0}}>?</button>
+        <button onClick={()=>setGuideOpen(true)} title="Show role guide" style={{background:"rgba(255,255,255,0.15)",border:"1px solid rgba(255,255,255,0.3)",borderRadius:7,padding:"5px 10px",color:"#fff",cursor:"pointer",fontSize:13,fontWeight:900,flexShrink:0,fontFamily:"inherit"}}>?</button>
         <select value={userId} onChange={e=>setUserId(e.target.value)} style={{background:"rgba(255,255,255,0.12)",color:"#fff",border:"1px solid rgba(255,255,255,0.25)",borderRadius:7,padding:"5px 8px",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"inherit",outline:"none",maxWidth:130}}>
           <optgroup label="── Field Team ──" style={{color:"#000"}}>
             {ALL_USERS.filter(u=>isFieldRole(u.role)).map(u=><option key={u.id} value={u.id} style={{color:"#000"}}>{u.name} ({u.role})</option>)}
@@ -1276,8 +1235,9 @@ function App(){
       </div>
     </div>
 
+    {showGuide&&<RoleGuide user={user} onDismiss={()=>setShowGuide(false)}/>}
     {/* SIMULATION BANNER */}
-    <div style={{background:"#FF4B2B",padding:"3px 0",textAlign:"center",flexShrink:0}}><span style={{fontSize:9,fontWeight:800,color:"#fff",letterSpacing:1}}>SIMULATION — NO REAL PAYOUTS · SHARED STATE — ALL ROLES SEE SAME DATA</span></div>
+    <div style={{background:"#FF4B2B",padding:"3px 0",textAlign:"center",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}><span style={{fontSize:9,fontWeight:800,color:"#fff",letterSpacing:1}}>SIMULATION — NO REAL PAYOUTS · SHARED STATE</span><button onClick={()=>setShowGuide(true)} style={{background:"rgba(255,255,255,0.25)",border:"none",borderRadius:6,padding:"1px 7px",fontSize:9,fontWeight:800,color:"#fff",cursor:"pointer"}}>? Guide</button></div>
 
     {/* DESKTOP SIDEBAR + MAIN */}
     <div className="desktop-only" style={{flex:1,display:"flex",minHeight:0}}>
