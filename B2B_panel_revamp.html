@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>Cars24 B2B — Procurement Vertical</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:#F0F2F5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+select option{color:#0D1B2A;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#FF6B35 0%,#E85D2A 100%);border-radius:10px;}
+::-webkit-scrollbar-thumb:hover{background:#FF8555;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes slideRight{from{opacity:0;transform:translateX(-12px);}to{opacity:1;transform:translateX(0);}}
+@keyframes scaleUp{from{opacity:0;transform:scale(0.95);}to{opacity:1;transform:scale(1);}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(255,107,53,0.3);}50%{box-shadow:0 0 0 10px rgba(255,107,53,0);}}
+@keyframes shimmer{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
+@keyframes borderGlow{0%,100%{border-color:rgba(255,107,53,0.2);}50%{border-color:rgba(255,107,53,0.5);}}
+.c24-card{background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.05);box-shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 16px rgba(0,0,0,0.03);transition:all 0.3s cubic-bezier(0.4,0,0.2,1);animation:fadeIn 0.35s ease;}
+.c24-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.06),0 12px 40px rgba(0,0,0,0.06);transform:translateY(-2px);}
+.c24-btn{transition:all 0.25s cubic-bezier(0.4,0,0.2,1);letter-spacing:0.3px;}
+.c24-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,107,53,0.25);}
+.c24-btn:active{transform:translateY(0) scale(0.98);box-shadow:0 2px 8px rgba(255,107,53,0.15);}
+.c24-input{transition:border-color 0.25s ease,box-shadow 0.25s ease;}
+.c24-input:focus{border-color:#FF6B35!important;box-shadow:0 0 0 4px rgba(255,107,53,0.1)!important;}
+.c24-nav-item{transition:all 0.25s cubic-bezier(0.4,0,0.2,1);position:relative;overflow:hidden;}
+.c24-nav-item::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,107,53,0.06),transparent);opacity:0;transition:opacity 0.25s;}
+.c24-nav-item:hover::after{opacity:1;}
+.c24-nav-item:hover{background:rgba(255,107,53,0.06)!important;}
+.c24-nav-active{background:linear-gradient(135deg,rgba(255,107,53,0.1),rgba(255,107,53,0.05))!important;}
+.c24-nav-active::before{content:'';position:absolute;left:0;top:15%;bottom:15%;width:3px;background:linear-gradient(180deg,#FF6B35,#E85D2A);border-radius:0 4px 4px 0;z-index:1;}
+@media(max-width:768px){.desktop-only{display:none!important;}.mobile-only{display:flex!important;}}
+@media(min-width:769px){.mobile-only{display:none!important;}.desktop-only{display:flex!important;}}
+.mobile-only{display:none;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const{useState,useEffect,useCallback,useRef}=React;
+
+// ═══════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════
+const REGIONS=["NDL","UPE","WGJ","NPB","NRJ","CHN","STS","AMD","SKL","STN","MUM","PUN","WMH","WMP","HYD","BLR","KOL","JAI","NHR","NCB"];
+const CITIES=["Delhi","Gurgaon","Faridabad","Noida","Ghaziabad","Greater Noida","Lucknow","Kanpur","Agra","Jaipur","Mumbai","Pune","Thane","Nashik","Ahmedabad","Surat","Vadodara","Chennai","Hyderabad","Bengaluru","Kolkata","Chandigarh","Amritsar","Ludhiana","Indore","Bhopal","Nagpur","Kochi","Coimbatore","Rajkot","Meerut","Dehradun"];
+const OEM_BRANDS=["Mercedes-Benz","BMW","Audi","Volkswagen","Volvo","Toyota","Honda","Hyundai","Kia","Maruti Suzuki","Tata Motors","Mahindra","Renault","Nissan","Skoda","Jeep","MG Motors","Multi-Brand","Other"];
+const DEALER_TYPES=["NCD","UCD","DSA","Franchise","Independent"];
+const BANK_LIST=["HDFC Bank","ICICI Bank","SBI","Kotak Mahindra","Axis Bank","Bank of Maharashtra","Punjab National Bank","Canara Bank","Bank of Baroda","IndusInd Bank","Yes Bank","IDFC First Bank","Federal Bank","RBL Bank","Union Bank of India"];
+const CAR_MAKES=["Maruti Suzuki","Hyundai","Tata Motors","Honda","Toyota","Kia","Mahindra","Skoda","Volkswagen","Ford","Renault","Nissan","MG Motors","Jeep","BMW","Mercedes-Benz","Audi","Volvo","Other"];
+const CONFIGS_DEFAULT={SPLIT_SAME_APP_GATE:15000,SPLIT_CROSS_APP_GATE:15000,NONGS_RATE:2,NONGS_CAP:10000,NONGS_AUTO_GATE:10000,FINANCE_GATE:15000};
+const COMPANY_CODES=["CSPL","CAPL","CFSPL"];
+
+// ═══════════════════════════════════════════════
+// ALL USERS
+// ═══════════════════════════════════════════════
+const ALL_USERS=[
+  {id:"RA001",name:"Ravinder Singh",role:"RA",rmId:"RM001",tmId:"TM001",region:"NDL"},
+  {id:"RA002",name:"Ashwani Kumar", role:"RA",rmId:"RM001",tmId:"TM001",region:"UPE"},
+  {id:"RA003",name:"Satish Patil",  role:"RA",rmId:"RM002",tmId:"TM001",region:"WGJ"},
+  {id:"RM001",name:"Deepak Verma",  role:"RM",rmId:null,tmId:"TM001",region:"NDL",raIds:["RA001","RA002"]},
+  {id:"RM002",name:"Sneha Kulkarni",role:"RM",rmId:null,tmId:"TM001",region:"WGJ",raIds:["RA003"]},
+  {id:"TM001",name:"Vikram Anand",  role:"TM",region:"ALL"},
+  {id:"OPS01",name:"Priya Sharma",  role:"Central Ops",region:"ALL"},
+  {id:"BH001",name:"Rajesh Gupta",  role:"Business Head",region:"ALL"},
+  {id:"FIN01",name:"Seema Mehta",   role:"Finance",region:"ALL"},
+];
+
+// ═══════════════════════════════════════════════
+// SEED DATA
+// ═══════════════════════════════════════════════
+const INIT_DEALERS=[
+  {id:"D001",name:"Landmark Cars Ltd",   code:"108229",type:"NCD",oem:"Mercedes-Benz",region:"NDL",city:"Delhi",   raId:"RA001",status:"Active",onboardedAt:"2026-01-10"},
+  {id:"D002",name:"Raj Power Solutions", code:"138256",type:"NCD",oem:"Multi-Brand",  region:"UPE",city:"Lucknow", raId:"RA002",status:"Active",onboardedAt:"2026-01-18"},
+  {id:"D003",name:"Autobahn Automotive", code:"102341",type:"UCD",oem:"Volkswagen",   region:"WGJ",city:"Ahmedabad",raId:"RA003",status:"Active",onboardedAt:"2026-02-02"},
+];
+const INIT_COUNTERS=[
+  {id:"C001",dealerId:"D001",name:"Landmark - Delhi Main",     city:"Delhi",    ucmName:"Rahul Sharma", ucmMobile:"9811001001",raId:"RA001",status:"Active"},
+  {id:"C002",dealerId:"D001",name:"Landmark - Gurgaon Branch", city:"Gurgaon",  ucmName:"Priya Nair",   ucmMobile:"9811002002",raId:"RA001",status:"Active"},
+  {id:"C003",dealerId:"D002",name:"Raj Power - Lucknow HQ",    city:"Lucknow",  ucmName:"Anil Tiwari",  ucmMobile:"9811003003",raId:"RA002",status:"Active"},
+  {id:"C004",dealerId:"D003",name:"Autobahn - Ahmedabad",      city:"Ahmedabad",ucmName:"Meena Patel",  ucmMobile:"9811004004",raId:"RA003",status:"Active"},
+];
+const INIT_APPS=[
+  {id:"APP001",dealerId:"D001",counterId:"C001",raId:"RA001",vehicle:"2022 Hyundai Creta SX 1.5D",  regNo:"DL3CAB1234",quote:925000,serviceCharge:11800,challan:2500, estRefurb:8000, gsType:"GS",    stockIn:true, otherCharges:20000,splitReleased:0,   incentiveReleased:0,status:"Active",inspectionDone:true,inspectionAt:"2026-02-12 10:00",inspectionNotes:"Clean car, minor wear",tokenDone:true,tokenAt:"2026-02-13 14:00",tokenAmount:5000,tokenNotes:"Token received",siDone:true,siAt:"2026-02-14 09:00",siNotes:"SI complete",siOtherCharges:20000,siGsType:"GS"},
+  {id:"APP002",dealerId:"D001",counterId:"C002",raId:"RA001",vehicle:"2020 Maruti Swift ZXI+",       regNo:"DL7CQ5678", quote:485000,serviceCharge:6800, challan:0,    estRefurb:12000,gsType:"Non-GS",stockIn:true, otherCharges:8500, splitReleased:8500,incentiveReleased:0,status:"Active",inspectionDone:true,inspectionAt:"2026-02-16 11:00",inspectionNotes:"Good condition",tokenDone:true,tokenAt:"2026-02-17 10:00",tokenAmount:3000,tokenNotes:"",siDone:true,siAt:"2026-02-18 09:00",siNotes:"",siOtherCharges:8500,siGsType:"Non-GS"},
+  {id:"APP003",dealerId:"D002",counterId:"C003",raId:"RA002",vehicle:"2021 Tata Nexon XZ+ Dark",    regNo:"UP32AX9012",quote:720000,serviceCharge:9200, challan:1500, estRefurb:6000, gsType:"GS",    stockIn:true, otherCharges:18000,splitReleased:0,   incentiveReleased:0,status:"Active",inspectionDone:true,inspectionAt:"2026-02-20 09:00",inspectionNotes:"Minor front bumper",tokenDone:true,tokenAt:"2026-02-21 11:00",tokenAmount:7000,tokenNotes:"Token paid",siDone:true,siAt:"2026-02-22 08:30",siNotes:"SI done",siOtherCharges:18000,siGsType:"GS"},
+  {id:"APP004",dealerId:"D003",counterId:"C004",raId:"RA003",vehicle:"2019 Honda City ZX CVT",      regNo:"GJ1BN3456", quote:580000,serviceCharge:7500, challan:3200, estRefurb:15000,gsType:"Non-GS",stockIn:false,otherCharges:11000,splitReleased:0,   incentiveReleased:0,status:"Active",inspectionDone:true,inspectionAt:"2026-02-28 14:00",inspectionNotes:"Fair tyres, minor rust",tokenDone:false,tokenAt:"",tokenAmount:0,tokenNotes:"",siDone:false,siAt:"",siNotes:"",siOtherCharges:0,siGsType:"Non-GS"},
+  {id:"APP005",dealerId:"D002",counterId:"C003",raId:"RA002",vehicle:"2022 Kia Seltos HTX+ 1.5P",   regNo:"UP80CK7890",quote:840000,serviceCharge:10500,challan:1200, estRefurb:9000, gsType:"GS",    stockIn:true, otherCharges:15000,splitReleased:5000,incentiveReleased:0,status:"Active",inspectionDone:true,inspectionAt:"2026-03-03 10:00",inspectionNotes:"Excellent condition",tokenDone:true,tokenAt:"2026-03-04 12:00",tokenAmount:10000,tokenNotes:"Full token",siDone:true,siAt:"2026-03-05 09:00",siNotes:"SI done",siOtherCharges:15000,siGsType:"GS"},
+];
+const INIT_LEADS=[
+  {id:"L001",raId:"RA001",dealerId:"D001",counterId:"C001",regNo:"DL3CAB1234",make:"Hyundai",model:"Creta",year:"2022",variant:"SX 1.5 Diesel",color:"Titan Grey",km:"28000",fuel:"Diesel",transmission:"Manual",ownership:"1st",accident:"No",accidentDesc:"",flood:"No",tyres:"Good",engine:"No issues",electrical:"No issues",price:925000,status:"SI Done",appId:"APP001",createdAt:"2026-02-14 11:30",
+   inspectionDone:true,inspectionAt:"2026-02-12 10:00",c24Quote:925000,serviceCharge:18500,finalPayableCx:906500,inspectionNotes:"Clean car, minor wear",
+   tokenDone:true,tokenAt:"2026-02-13 14:00",tokenCount:1,challan:2500,otherCharges:20000,partyPeshi:0,deliveryPayment:883500,deliveryReleased:false,
+   siDone:true,siAt:"2026-02-14 09:00",siNotes:"SI complete",siGsType:"GS"},
+  {id:"L002",raId:"RA001",dealerId:"D001",counterId:"C002",regNo:"DL7CQ5678",make:"Maruti Suzuki",model:"Swift",year:"2020",variant:"ZXI+",color:"Pearl White",km:"41000",fuel:"Petrol",transmission:"Manual",ownership:"1st",accident:"No",accidentDesc:"",flood:"No",tyres:"Good",engine:"No issues",electrical:"No issues",price:485000,status:"Token Done",appId:"APP002",createdAt:"2026-02-18 14:15",
+   inspectionDone:true,inspectionAt:"2026-02-16 11:00",c24Quote:485000,serviceCharge:9700,finalPayableCx:475300,inspectionNotes:"Good condition",
+   tokenDone:true,tokenAt:"2026-02-17 10:00",tokenCount:1,challan:0,otherCharges:8500,partyPeshi:0,deliveryPayment:466800,deliveryReleased:false,
+   siDone:false,siAt:"",siNotes:"",siGsType:"Non-GS"},
+  {id:"L003",raId:"RA002",dealerId:"D002",counterId:"C003",regNo:"UP32AX9012",make:"Tata Motors",model:"Nexon",year:"2021",variant:"XZ+ Dark",color:"Calgary White",km:"33000",fuel:"Petrol",transmission:"Manual",ownership:"1st",accident:"Minor",accidentDesc:"Front bumper",flood:"No",tyres:"Good",engine:"No issues",electrical:"Minor issue",price:720000,status:"Inspection Done",appId:"APP003",createdAt:"2026-02-22 09:45",
+   inspectionDone:true,inspectionAt:"2026-02-20 09:00",c24Quote:720000,serviceCharge:14400,finalPayableCx:705600,inspectionNotes:"Minor front bumper",
+   tokenDone:false,tokenAt:"",tokenCount:1,challan:0,otherCharges:0,partyPeshi:0,deliveryPayment:0,deliveryReleased:false,
+   siDone:false,siAt:"",siNotes:"",siGsType:"GS"},
+  {id:"L004",raId:"RA003",dealerId:"D003",counterId:"C004",regNo:"GJ1BN3456",make:"Honda",model:"City",year:"2019",variant:"ZX CVT",color:"Radiant Red",km:"67000",fuel:"Petrol",transmission:"Automatic",ownership:"2nd",accident:"No",accidentDesc:"",flood:"No",tyres:"Fair",engine:"No issues",electrical:"No issues",price:580000,status:"Lead Created",appId:"",createdAt:"2026-03-01 16:00",
+   inspectionDone:false,inspectionAt:"",c24Quote:0,serviceCharge:0,finalPayableCx:0,inspectionNotes:"",
+   tokenDone:false,tokenAt:"",tokenCount:1,challan:0,otherCharges:0,partyPeshi:0,deliveryPayment:0,deliveryReleased:false,
+   siDone:false,siAt:"",siNotes:"",siGsType:""},
+  {id:"L005",raId:"RA002",dealerId:"D002",counterId:"C003",regNo:"UP80CK7890",make:"Kia",model:"Seltos",year:"2022",variant:"HTX+ 1.5P",color:"Intense Red",km:"19500",fuel:"Petrol",transmission:"Automatic",ownership:"1st",accident:"No",accidentDesc:"",flood:"No",tyres:"Excellent",engine:"No issues",electrical:"No issues",price:840000,status:"SI Done",appId:"APP005",createdAt:"2026-03-05 10:30",
+   inspectionDone:true,inspectionAt:"2026-03-03 10:00",c24Quote:840000,serviceCharge:16800,finalPayableCx:823200,inspectionNotes:"Excellent condition",
+   tokenDone:true,tokenAt:"2026-03-04 12:00",tokenCount:1,challan:1200,otherCharges:15000,partyPeshi:0,deliveryPayment:806000,deliveryReleased:true,
+   siDone:true,siAt:"2026-03-05 09:00",siNotes:"SI done",siGsType:"GS"},
+];
+const INIT_PAYEES=[
+  {id:"SAP001",dealerIds:["D001","D002"],raId:"RA001",payeeName:"Landmark Cars Ltd",pan:"AABCL1862B",bank:"Kotak Mahindra",account:"9211233436",ifsc:"KKBK0000810",mobile:"9876500001",sapCode:"SAP-KL-001",fluxStatus:"Validated",status:"Active",createdAt:"2026-01-14"},
+  {id:"SAP002",dealerIds:["D002"],raId:"RA002",payeeName:"Amol Yuvraj Patil",pan:"CCIPP5942C",bank:"Bank of Maharashtra",account:"60236471678",ifsc:"MAHB0001022",mobile:"9876500002",sapCode:"SAP-JZ-002",fluxStatus:"Validation_Failed",status:"Active",createdAt:"2026-01-22"},
+];
+const INIT_OB=[
+  {id:"OB001",raId:"RA001",submittedBy:"RA",dealerName:"Speedway Motors",type:"DSA",oem:"Toyota",companyCode:"CSPL",region:"NDL",city:"Gurgaon",lat:"28.4595",long:"77.0266",pan:"BGHPS4412C",gst:"29BGHPS4412C1ZT",mobile:"9876543210",email:"info@speedway.in",address:"Sector 18, Gurgaon",bank:"HDFC Bank",account:"50200012345678",ifsc:"HDFC0001234",docs:{gst:"GST-cert.pdf",pan:"PAN.pdf",bank:"stmt.pdf",cancelledCheque:"cheque.pdf",other:""},oemDocs:{franchiseAgreement:"agreement.pdf",oemLetter:"letter.pdf",other:""},status:"Admin Panel Pending",dealerCode:"",submittedAt:"2026-03-07 09:00"},
+];
+const INIT_PR=[
+  {id:"PR001",appId:"APP003",raId:"RA002",payeeId:"SAP001",type:"Split",amount:18000,status:"Submitted",createdAt:"2026-03-08 10:22",utr:null,reason:"GS split for stock-in deal",crossDealerFlag:false,bhEdited:false,originalAmount:18000,rejectionReason:null},
+  {id:"PR002",appId:"APP001",raId:"RA001",payeeId:"SAP001",type:"Split",amount:9000,status:"Auto-Approved",createdAt:"2026-03-09 14:10",utr:"UTR826341092",reason:"Below auto gate",crossDealerFlag:false,bhEdited:false,originalAmount:9000,rejectionReason:null},
+];
+const INIT_COUNTER_REQS=[
+  {id:"CR001",raId:"RA001",dealerId:"D001",counterName:"Landmark - Dwarka",city:"Delhi",ucmName:"Mohit Chauhan",ucmMobile:"9811005005",ucmEmail:"",status:"Ops Review",submittedAt:"2026-03-06 11:00",rejectionReason:null},
+];
+const INIT_SAP_REQS=[
+  {id:"SR001",raId:"RA003",dealerIds:["D003"],payeeName:"Autobahn Group India",pan:"AATCA1234Z",bank:"Axis Bank",account:"918020012345",ifsc:"UTIB0001234",mobile:"9900112233",docs:{pan:"pan.pdf",cancelledCheque:"cheque.pdf",other:""},status:"Ops Review",submittedAt:"2026-03-08 14:30",sapCode:""},
+];
+
+// ═══════════════════════════════════════════════
+// DESIGN TOKENS
+// ═══════════════════════════════════════════════
+const T={bg:"#F0F2F5",card:"#FFFFFF",border:"#E4E7EC",text:"#0D1B2A",mid:"#3D4F5F",mute:"#8896A6",accent:"#FF6B35",accentL:"#FFF5EE",accentD:"#E85D2A",success:"#1B9E4B",successL:"#E8F8EE",warn:"#E8A317",warnL:"#FFF8EB",danger:"#DC3545",dangerL:"#FDF0F0",purple:"#7C3AED",purpleL:"#F3EEFF",orange:"#FF6B35",orangeL:"#FFF5EE",sidebar:"#0D1B2A",sidebarB:"#162D44"};
+const SM={"Active":{bg:"#EAFAF1",c:"#1E8449",dot:"#27AE60"},"Pending":{bg:"#FEF9E7",c:"#B7950B",dot:"#F1C40F"},"Admin Panel Pending":{bg:"#FEF9E7",c:"#B7950B",dot:"#F1C40F"},"OEM Tagging Pending":{bg:"#FFF4EE",c:"#E85D2A",dot:"#FF6B35"},"Ops Review":{bg:"#EBF5FB",c:"#2E86C1",dot:"#3498DB"},"Rejected":{bg:"#FDEDEC",c:"#C0392B",dot:"#E74C3C"},"Auto-Approved":{bg:"#EAFAF1",c:"#1E8449",dot:"#27AE60"},"Ops Approved":{bg:"#EAFAF1",c:"#1E8449",dot:"#27AE60"},"BH Review":{bg:"#FEF9E7",c:"#B7950B",dot:"#F1C40F"},"BH Approved":{bg:"#EAFAF1",c:"#1E8449",dot:"#27AE60"},"Released":{bg:"#EAFAF1",c:"#1E8449",dot:"#27AE60"},"Submitted":{bg:"#EBF5FB",c:"#2E86C1",dot:"#3498DB"},"Inspection Done":{bg:"#F4ECF7",c:"#7D3C98",dot:"#8E44AD"},"App_ID Created":{bg:"#EAFAF1",c:"#1E8449",dot:"#27AE60"},"SI Done":{bg:"#1A1A2E",c:"#FF8C5A",dot:"#FF6B35"},"Token Done":{bg:"#FEF9E7",c:"#B7950B",dot:"#F1C40F"},"Delivery Released":{bg:"#EAFAF1",c:"#1E8449",dot:"#27AE60"},"Lead Created":{bg:"#EBF5FB",c:"#2E86C1",dot:"#3498DB"},"Validated":{bg:"#EAFAF1",c:"#1E8449",dot:"#27AE60"},"Validation_Failed":{bg:"#FDEDEC",c:"#C0392B",dot:"#E74C3C"}};
+
+const fmt=n=>"₹"+Number(n).toLocaleString("en-IN");
+const uid=()=>Math.random().toString(36).slice(2,7).toUpperCase();
+const now=()=>new Date().toLocaleString("en-IN",{hour12:false}).slice(0,16);
+const raWalBal=(raId,apps)=>apps.filter(a=>a.raId===raId&&a.stockIn).reduce((s,a)=>s+a.otherCharges-a.splitReleased,0);
+function autoApprove(req,app,cfg){if(!app.stockIn)return{ok:false,route:"BLOCKED",reason:"Stock-In not complete"};if(req.type==="Split"){const avail=app.otherCharges-app.splitReleased;if(req.amount>avail)return{ok:false,route:"BLOCKED",reason:`Insufficient bucket. Available: ${fmt(avail)}`};if(req.amount<cfg.SPLIT_SAME_APP_GATE)return{ok:true,route:"AUTO-APPROVED",reason:`Below ${fmt(cfg.SPLIT_SAME_APP_GATE)} gate`};return{ok:false,route:"Ops Review → Finance",reason:`≥ ${fmt(cfg.SPLIT_SAME_APP_GATE)} — manual required`};}if(req.type==="Incentive"){if(app.splitReleased>0)return{ok:false,route:"Business Head",reason:"Prior split on this App_ID"};if(app.gsType==="Non-GS"){const base=app.quote-(app.serviceCharge+app.challan+app.estRefurb);const calc=Math.min((cfg.NONGS_RATE/100)*base,cfg.NONGS_CAP);if(req.amount>calc*1.01)return{ok:false,route:"Business Head",reason:`Exceeds calculated ${fmt(calc)}`};if(req.amount<=cfg.NONGS_AUTO_GATE)return{ok:true,route:"AUTO-APPROVED",reason:"Within cap & gate"};return{ok:false,route:"Business Head",reason:`Above auto-gate ${fmt(cfg.NONGS_AUTO_GATE)}`};}return{ok:false,route:"Business Head",reason:"GS incentive needs BH approval"};}return{ok:false,route:"Pending",reason:""};}
+
+// ═══════════════════════════════════════════════
+// BASE COMPONENTS
+// ═══════════════════════════════════════════════
+function Badge({s,sm}){const m=SM[s]||{bg:"#F3F4F6",c:"#6B7280",dot:"#9CA3AF"};return <span style={{display:"inline-flex",alignItems:"center",gap:5,background:m.bg,color:m.c,padding:sm?"3px 8px":"4px 10px",borderRadius:20,fontSize:sm?9:11,fontWeight:800,whiteSpace:"nowrap",letterSpacing:0.2,border:`1px solid ${m.c}15`}}><span style={{width:sm?5:6,height:sm?5:6,borderRadius:"50%",background:m.dot,flexShrink:0}}/>{s}</span>;}
+function Card({children,style={},onClick}){return <div className="c24-card" onClick={onClick} style={{background:T.card,borderRadius:16,border:`1px solid rgba(0,0,0,0.06)`,padding:16,...style,cursor:onClick?"pointer":undefined}}>{children}</div>;}
+function Lbl({children,color}){return <div style={{fontSize:9,fontWeight:800,color:color||T.mute,letterSpacing:1.1,textTransform:"uppercase",marginBottom:8}}>{children}</div>;}
+function ST({children}){return <div style={{fontSize:12,fontWeight:800,color:T.accent,borderBottom:`2px solid ${T.accentL}`,paddingBottom:4,marginBottom:10,marginTop:8}}>{children}</div>;}
+function Row({label,value,mono}){return <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 0",borderBottom:`1px solid ${T.border}`}}><span style={{fontSize:12,color:T.mid,flexShrink:0,marginRight:8}}>{label}</span><span style={{fontSize:12,fontWeight:700,color:T.text,textAlign:"right",fontFamily:mono?"monospace":"inherit",wordBreak:"break-all"}}>{value}</span></div>;}
+function Alrt({type="info",children}){const m={info:{bg:T.accentL,b:"#BFDBFE",c:T.accentD,i:"ℹ"},success:{bg:T.successL,b:"#BBF7D0",c:T.success,i:"✓"},warning:{bg:T.warnL,b:"#FDE68A",c:T.warn,i:"⚠"},error:{bg:T.dangerL,b:"#FECACA",c:T.danger,i:"✕"}}[type];return <div style={{background:m.bg,border:`1px solid ${m.b}`,borderRadius:8,padding:"8px 11px",display:"flex",gap:8,marginBottom:10}}><span style={{color:m.c,fontWeight:900,fontSize:12,flexShrink:0}}>{m.i}</span><span style={{fontSize:11,color:m.c,lineHeight:1.5}}>{children}</span></div>;}
+function Btn({children,onClick,v="primary",disabled,sm,icon,full}){const V={primary:{bg:"linear-gradient(135deg,#FF6B35 0%,#FF8555 50%,#E85D2A 100%)",c:"#fff",b:"transparent"},secondary:{bg:"#fff",c:T.mid,b:T.border},success:{bg:"linear-gradient(135deg,#1B9E4B 0%,#27AE60 50%,#1B9E4B 100%)",c:"#fff",b:"transparent"},danger:{bg:"linear-gradient(135deg,#DC3545 0%,#E74C3C 50%,#C82333 100%)",c:"#fff",b:"transparent"},ghost:{bg:"transparent",c:T.mute,b:"transparent"},warning:{bg:"linear-gradient(135deg,#E8A317 0%,#F39C12 50%,#D68910 100%)",c:"#fff",b:"transparent"}};const s=V[v]||V.primary;return <button className="c24-btn" onClick={onClick} disabled={disabled} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",gap:6,background:disabled?"#E4E7EC":s.bg,color:disabled?"#8896A6":s.c,border:`1.5px solid ${disabled?T.border:s.b}`,borderRadius:12,padding:sm?"7px 14px":"11px 20px",fontSize:sm?11:12,fontWeight:700,cursor:disabled?"not-allowed":"pointer",fontFamily:"inherit",width:full?"100%":undefined,letterSpacing:0.3}}>{icon&&<span>{icon}</span>}{children}</button>;}
+function Fld({label,value,onChange,type="text",disabled,hint,error,required,placeholder,maxLength}){return <div style={{marginBottom:12}}>{label&&<label style={{display:"block",fontSize:11,fontWeight:700,color:T.mid,marginBottom:5,letterSpacing:0.2}}>{label}{required&&<span style={{color:T.danger}}> *</span>}</label>}<input className="c24-input" value={value||""} onChange={e=>onChange&&onChange(e.target.value)} type={type} disabled={disabled} placeholder={placeholder} maxLength={maxLength} style={{width:"100%",padding:"11px 14px",border:`1.5px solid ${error?"#DC3545":T.border}`,borderRadius:12,fontSize:13,background:disabled?"#F8FAFB":"#FFFFFF",color:disabled?T.mute:T.text,outline:"none",fontFamily:"inherit",transition:"border-color 0.25s, box-shadow 0.25s"}}/>{hint&&<p style={{fontSize:10,color:T.mute,marginTop:4}}>{hint}</p>}{error&&<p style={{fontSize:10,color:T.danger,marginTop:4}}>{error}</p>}</div>;}
+function Sel({label,value,onChange,options,disabled,placeholder,required}){return <div style={{marginBottom:12}}>{label&&<label style={{display:"block",fontSize:11,fontWeight:700,color:T.mid,marginBottom:5,letterSpacing:0.2}}>{label}{required&&<span style={{color:T.danger}}> *</span>}</label>}<select className="c24-input" value={value||""} onChange={e=>onChange&&onChange(e.target.value)} disabled={disabled} style={{width:"100%",padding:"11px 14px",border:`1.5px solid ${T.border}`,borderRadius:12,fontSize:13,background:disabled?"#F8FAFB":"#FFFFFF",color:value?T.text:T.mute,outline:"none",fontFamily:"inherit",cursor:disabled?"not-allowed":"pointer",transition:"border-color 0.25s, box-shadow 0.25s"}}><option value="">{placeholder||""}</option>{options.map(o=><option key={o.value||o} value={o.value||o}>{o.label||o}</option>)}</select></div>;}
+function G2({children,gap=8}){return <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap}}>{children}</div>;}
+function StepBar({steps,cur}){return <div style={{display:"flex",alignItems:"center",marginBottom:14,overflowX:"auto",paddingBottom:2}}>{steps.map((s,i)=><div key={i} style={{display:"flex",alignItems:"center",flexShrink:0}}><div style={{display:"flex",alignItems:"center",gap:4}}><div style={{width:20,height:20,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:900,background:i<cur?T.success:i===cur?T.accent:"#E2E8F0",color:i<=cur?"#fff":T.mute}}>{i<cur?"✓":i+1}</div><span style={{fontSize:9,fontWeight:700,color:i===cur?T.accent:i<cur?T.success:T.mute,whiteSpace:"nowrap"}}>{s}</span></div>{i<steps.length-1&&<div style={{width:10,height:1,background:i<cur?T.success:T.border,margin:"0 4px"}}/>}</div>)}</div>;}
+function FileInput({label,value,onChange,required,hint}){return <div style={{marginBottom:10}}>{label&&<label style={{display:"block",fontSize:11,fontWeight:700,color:T.mid,marginBottom:3}}>{label}{required&&<span style={{color:T.danger}}> *</span>}</label>}{hint&&<p style={{fontSize:10,color:T.mute,marginBottom:3}}>{hint}</p>}<div style={{display:"flex",alignItems:"center",gap:8}}><div style={{flex:1,border:`1.5px dashed ${value?"#10B981":T.border}`,borderRadius:8,padding:"8px 10px",background:value?T.successL:"#FAFAFA",cursor:"pointer"}} onClick={()=>{const n=prompt(`Enter filename for "${label}" (simulated upload):`);if(n)onChange(n);}}>{value?<span style={{fontSize:11,color:T.success,fontWeight:700}}>📄 {value}</span>:<span style={{fontSize:11,color:T.mute}}>Tap to upload (simulated)</span>}</div>{value&&<button onClick={()=>onChange("")} style={{background:"none",border:"none",color:T.danger,cursor:"pointer",fontSize:16,fontWeight:700}}>×</button>}</div></div>;}
+function MultiDealerSel({dealers,selected,onChange}){return <div style={{marginBottom:10}}><label style={{display:"block",fontSize:11,fontWeight:700,color:T.mid,marginBottom:4}}>Linked Dealers <span style={{color:T.danger}}>*</span></label><div style={{border:`1.5px solid ${T.border}`,borderRadius:8,padding:8,background:"#fff",minHeight:44}}><div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:selected.length>0?5:0}}>{selected.map(id=>{const d=dealers.find(dd=>dd.id===id);return <span key={id} style={{display:"inline-flex",alignItems:"center",gap:4,background:T.accentL,color:T.accent,borderRadius:12,padding:"2px 8px",fontSize:11,fontWeight:700}}>{d?d.name:"?"}<button onClick={()=>onChange(selected.filter(x=>x!==id))} style={{background:"none",border:"none",color:T.accent,cursor:"pointer",fontSize:12,fontWeight:900}}>×</button></span>;})}</div><select value="" onChange={e=>{if(e.target.value&&!selected.includes(e.target.value))onChange([...selected,e.target.value]);}} style={{width:"100%",border:"none",outline:"none",fontSize:11,color:T.mute,background:"transparent",cursor:"pointer",fontFamily:"inherit"}}><option value="">+ Add dealer...</option>{dealers.filter(d=>d.status==="Active"&&!selected.includes(d.id)).map(d=><option key={d.id} value={d.id}>{d.name} ({d.code})</option>)}</select></div><p style={{fontSize:10,color:T.mute,marginTop:2}}>Payee will be available for payout across all selected dealers</p></div>;}
+function Toast({msg,type,onDone}){useEffect(()=>{const t=setTimeout(onDone,3000);return()=>clearTimeout(t);},[]);const bg=type==="error"?"linear-gradient(135deg,#DC3545,#C82333)":type==="warning"?"linear-gradient(135deg,#E8A317,#D68910)":"linear-gradient(135deg,#1B9E4B,#27AE60)";return <div style={{position:"fixed",top:18,left:"50%",transform:"translateX(-50%)",background:bg,color:"#fff",padding:"14px 28px",borderRadius:14,fontSize:13,fontWeight:700,zIndex:9999,boxShadow:"0 8px 32px rgba(0,0,0,0.2),0 4px 12px rgba(0,0,0,0.1)",maxWidth:420,textAlign:"center",whiteSpace:"nowrap",animation:"slideUp 0.35s cubic-bezier(0.4,0,0.2,1)",letterSpacing:0.3,border:"1px solid rgba(255,255,255,0.15)"}}>{msg}</div>;}
+
+// ═══════════════════════════════════════════════
+// ROLE-BASED NAVIGATION CONFIG
+// ═══════════════════════════════════════════════
+const fieldNav=[
+  {id:"dashboard",label:"Home",icon:"🏠"},
+  {id:"leads",label:"Leads",icon:"📋"},
+  {id:"appids",label:"App_IDs",icon:"🚗"},
+  {id:"onboarding",label:"Dealers",icon:"🏢"},
+  {id:"counter",label:"Counter",icon:"🔗"},
+  {id:"sap",label:"SAP",icon:"🏦"},
+  {id:"payouts",label:"Payouts",icon:"💸"},
+];
+const opsNav=[
+  {id:"dashboard",label:"Dashboard",icon:"▦"},
+  {id:"payout",label:"Raise Payout",icon:"💸",roles:["TM"]},
+  {id:"leads",label:"Leads",icon:"📋",roles:["TM","Central Ops","Business Head"]},
+  {id:"appids",label:"App_IDs",icon:"🚗",roles:["TM","Central Ops","Business Head"]},
+  {id:"override",label:"Ctr Override",icon:"🔄",roles:["TM","Central Ops","Business Head"]},
+  {id:"onboarding",label:"Onboarding",icon:"🏢",badge:"ob"},
+  {id:"counter",label:"Counter",icon:"🔗",badge:"ctr"},
+  {id:"sap",label:"SAP",icon:"🏦",badge:"sap"},
+  {id:"approvals",label:"Approvals",icon:"✓",badge:"apr",roles:["Central Ops","Business Head","Finance"]},
+  {id:"transfer",label:"Transfer",icon:"⚡",roles:["Central Ops","Business Head"]},
+  {id:"config",label:"Config",icon:"⚙",roles:["Business Head"]},
+];
+
+// ═══════════════════════════════════════════════
+// RA/RM MODULES
+// ═══════════════════════════════════════════════
+function RADashboard({user,shared}){
+  const{apps,dealers,leads,onboarding,payoutRequests}=shared;
+  let raIds=[user.id];if(user.role==="RM"&&user.raIds)raIds=[user.id,...user.raIds];
+  const myLeads=leads.filter(l=>raIds.includes(l.raId));const myApps=apps.filter(a=>raIds.includes(a.raId));const myDealers=dealers.filter(d=>raIds.includes(d.raId));const myPR=payoutRequests.filter(p=>raIds.includes(p.raId));
+  const walBal=raIds.reduce((s,r)=>s+raWalBal(r,apps),0);
+  const kpis=[{icon:"📋",label:"Leads",value:myLeads.length,sub:`${myLeads.filter(l=>l.status==="App_ID Created").length} converted`,color:T.accent,bg:T.accentL},{icon:"🚗",label:"Stock-In Pending",value:myApps.filter(a=>!a.stockIn).length,sub:"of "+myApps.length+" apps",color:T.orange,bg:T.orangeL},{icon:"✅",label:"Active Deals",value:myApps.filter(a=>a.status==="Active").length,color:T.success,bg:T.successL},{icon:"⏳",label:"Pending Payouts",value:myPR.filter(p=>!["Auto-Approved","Released","Rejected"].includes(p.status)).length,color:T.warn,bg:T.warnL},{icon:"🏢",label:"Active Dealers",value:myDealers.filter(d=>d.status==="Active").length,color:T.purple,bg:T.purpleL},{icon:"💰",label:"Wallet",value:fmt(walBal),sub:"available",color:T.accentD,bg:T.accentL}];
+  return <div>
+    <div style={{background:`linear-gradient(135deg,#FF6B35,#E85D2A)`,borderRadius:16,padding:18,color:"#fff",marginBottom:14,boxShadow:"0 4px 20px rgba(255,107,53,0.25)"}}>
+      <div style={{fontSize:9,fontWeight:800,letterSpacing:1.2,opacity:0.7,marginBottom:4}}>{user.role==="RM"?"TEAM WALLET":"MY WALLET"} — OTHER CHARGES</div>
+      <div style={{fontSize:26,fontWeight:900}}>{fmt(walBal)}</div>
+      <div style={{fontSize:11,opacity:0.7,marginTop:2}}>Available to split</div>
+      {user.role==="RM"&&user.raIds&&<div style={{marginTop:10,paddingTop:8,borderTop:"1px solid rgba(255,255,255,0.2)",display:"flex",gap:6,flexWrap:"wrap"}}>{[user.id,...user.raIds].map(rid=>{const ra=ALL_USERS.find(u=>u.id===rid);return <div key={rid} style={{background:"rgba(255,255,255,0.12)",borderRadius:8,padding:"4px 8px",fontSize:10}}><div style={{fontWeight:700}}>{ra&&ra.name.split(" ")[0]}</div><div style={{opacity:0.8}}>{fmt(raWalBal(rid,apps))}</div></div>;})} </div>}
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>{kpis.map(k=><div key={k.label} style={{background:k.bg,borderRadius:10,padding:10,border:`1px solid ${k.color}22`}}><div style={{fontSize:16,marginBottom:3}}>{k.icon}</div><div style={{fontSize:18,fontWeight:900,color:T.text}}>{k.value}</div><div style={{fontSize:9,fontWeight:800,color:k.color,letterSpacing:0.7,textTransform:"uppercase",marginTop:1}}>{k.label}</div>{k.sub&&<div style={{fontSize:10,color:T.mute,marginTop:1}}>{k.sub}</div>}</div>)}</div>
+    {user.role==="RM"&&user.raIds&&<Card style={{marginBottom:10}}><Lbl>Team Breakdown</Lbl>{user.raIds.map(raId=>{const ra=ALL_USERS.find(u=>u.id===raId);const raL=leads.filter(l=>l.raId===raId);const raA=apps.filter(a=>a.raId===raId);return <div key={raId} style={{padding:"8px 0",borderBottom:`1px solid ${T.border}`}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><div style={{fontSize:12,fontWeight:800}}>{ra&&ra.name}</div><div style={{fontSize:13,fontWeight:800,color:T.accent}}>{fmt(raWalBal(raId,apps))}</div></div><div style={{display:"flex",gap:10}}><span style={{fontSize:10,color:T.mute}}>{raL.length} leads</span><span style={{fontSize:10,color:T.mute}}>{raA.length} apps</span></div></div>;})} </Card>}
+    <Card><Lbl>Recent Leads</Lbl>{myLeads.slice(-3).reverse().map(l=><div key={l.id} style={{padding:"6px 0",borderBottom:`1px solid ${T.border}`}}><div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontSize:11,fontWeight:700}}>{l.make} {l.model} {l.year}</span><Badge s={l.status} sm/></div><div style={{fontSize:10,color:T.mute}}>{l.regNo} · {l.createdAt}</div></div>)}{myLeads.length===0&&<div style={{fontSize:11,color:T.mute,padding:"8px 0"}}>No leads yet</div>}</Card>
+  </div>;
+}
+
+// ═══════════════════════════════════════════════
+// STAGE DIALOG COMPONENT
+// ═══════════════════════════════════════════════
+const LEAD_STATUSES=["Lead Created","Inspection Done","Token Done","SI Done"];
+
+function calcServiceCharge(quote){return Math.round((quote||0)*0.02);}
+function calcFinalPayable(quote,sc){return (quote||0)-(sc||0);}
+function calcDeliveryPayment(finalPayable,challan,otherCharges,partyPeshi,tokenCount){
+  // delivery payment = finalPayable - challan - (otherCharges if applicable) - partyPeshi - tokenCount (token deduction = 1 per token)
+  return Math.max(0,(finalPayable||0)-(challan||0)-(otherCharges||0)-(partyPeshi||0)-(tokenCount||0));
+}
+
+function StageDialog({lead,onSave,onClose,targetStatus}){
+  const requiredStatus=targetStatus||"Lead Created";
+  // pre-fill from existing lead data
+  const[sf,setSf]=useState({
+    newStatus:requiredStatus,
+    c24Quote:lead.c24Quote||lead.price||"",
+    inspectionNotes:lead.inspectionNotes||"",
+    tokenCount:lead.tokenCount||1,
+    challan:lead.challan||"",
+    otherCharges:lead.otherCharges||"",
+    partyPeshi:lead.partyPeshi||"",
+    siGsType:lead.siGsType||"GS",
+    siNotes:lead.siNotes||"",
+    releaseDelivery:false,
+  });
+  const s=(k,v)=>setSf(p=>({...p,[k]:v}));
+  const stIdx=LEAD_STATUSES.indexOf(sf.newStatus);
+  const needsInspection=stIdx>=1;
+  const needsToken=stIdx>=2;
+  const needsSI=stIdx>=3;
+
+  const sc=calcServiceCharge(Number(sf.c24Quote)||0);
+  const fp=calcFinalPayable(Number(sf.c24Quote)||0,sc);
+  const dp=calcDeliveryPayment(fp,Number(sf.challan)||0,Number(sf.otherCharges)||0,Number(sf.partyPeshi)||0,Number(sf.tokenCount)||1);
+
+  function save(){
+    const nowTs=new Date().toLocaleString("en-IN",{hour12:false}).slice(0,16);
+    const updates={status:sf.newStatus};
+    if(needsInspection){
+      updates.inspectionDone=true;
+      updates.inspectionAt=lead.inspectionAt||nowTs;
+      updates.c24Quote=Number(sf.c24Quote)||0;
+      updates.serviceCharge=sc;
+      updates.finalPayableCx=fp;
+      updates.inspectionNotes=sf.inspectionNotes||"";
+    }
+    if(needsToken){
+      updates.tokenDone=true;
+      updates.tokenAt=lead.tokenAt||nowTs;
+      updates.tokenCount=Number(sf.tokenCount)||1;
+      updates.challan=Number(sf.challan)||0;
+      updates.otherCharges=Number(sf.otherCharges)||0;
+      updates.partyPeshi=Number(sf.partyPeshi)||0;
+      updates.deliveryPayment=dp;
+      if(sf.releaseDelivery){updates.deliveryReleased=true;}
+    }
+    if(needsSI){
+      updates.siDone=true;
+      updates.siAt=lead.siAt||nowTs;
+      updates.siGsType=sf.siGsType||"GS";
+      updates.siNotes=sf.siNotes||"";
+      // propagate to app
+    }
+    onSave(updates);
+  }
+
+  const panelBg="#FAFBFF";
+  const divider=<div style={{height:1,background:"#E2E8F0",margin:"14px 0"}}/>;
+
+  return <div style={{position:"fixed",inset:0,background:"rgba(13,27,46,0.6)",zIndex:200,display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+    <div style={{background:"#fff",borderRadius:"20px 20px 0 0",width:"100%",maxWidth:520,maxHeight:"92vh",overflowY:"auto",padding:"20px 16px 32px"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+        <div><div style={{fontSize:15,fontWeight:900,color:T.text}}>{lead.make} {lead.model} {lead.year}</div><div style={{fontSize:11,color:T.mute}}>{lead.regNo}</div></div>
+        <button onClick={onClose} style={{background:"#F1F5F9",border:"none",borderRadius:8,padding:"5px 10px",fontSize:13,fontWeight:700,cursor:"pointer",color:T.mid}}>✕</button>
+      </div>
+
+      <Sel label="Update Lead Stage" value={sf.newStatus} onChange={v=>s("newStatus",v)} options={LEAD_STATUSES}/>
+
+      {needsInspection&&<>
+        {divider}
+        <div style={{fontSize:12,fontWeight:900,color:"#5B21B6",marginBottom:8}}>🔍 Inspection Details</div>
+        <Fld label="C24 Evaluated Quote (₹)" value={sf.c24Quote} onChange={v=>s("c24Quote",v)} type="number" required placeholder="e.g. 720000"/>
+        {sf.c24Quote>0&&<div style={{background:"#F5F3FF",borderRadius:10,padding:12,marginBottom:10}}>
+          <div style={{fontSize:10,fontWeight:800,color:"#5B21B6",marginBottom:8}}>INSPECTION PRICE BREAKUP</div>
+          <Row label="C24 Quote" value={fmt(Number(sf.c24Quote))}/>
+          <Row label="Service Charge (2%)" value={`- ${fmt(sc)}`}/>
+          <div style={{borderTop:"2px solid #7C3AED",marginTop:6,paddingTop:6}}><Row label="Final Payable to CX" value={fmt(fp)}/></div>
+        </div>}
+        <Fld label="Inspection Notes" value={sf.inspectionNotes} onChange={v=>s("inspectionNotes",v)} placeholder="e.g. Clean car, minor tyre wear"/>
+      </>}
+
+      {needsToken&&<>
+        {divider}
+        <div style={{fontSize:12,fontWeight:900,color:"#065F46",marginBottom:8}}>🤝 PR & Token Details</div>
+        <Fld label="No. of Tokens (default 1)" value={sf.tokenCount} onChange={v=>s("tokenCount",v)} type="number" hint="Each token = ₹1 deduction"/>
+        <Fld label="Challan (₹)" value={sf.challan} onChange={v=>s("challan",v)} type="number" placeholder="0"/>
+        <Fld label="Other Charges (₹)" value={sf.otherCharges} onChange={v=>s("otherCharges",v)} type="number" placeholder="e.g. 18000" hint="Cars24 other charges bucket"/>
+        <Fld label="Party Peshi (₹)" value={sf.partyPeshi} onChange={v=>s("partyPeshi",v)} type="number" placeholder="0"/>
+        {fp>0&&<div style={{background:"#ECFDF5",borderRadius:10,padding:12,marginBottom:10}}>
+          <div style={{fontSize:10,fontWeight:800,color:"#065F46",marginBottom:8}}>DELIVERY PAYMENT BREAKUP</div>
+          <Row label="Final Payable to CX" value={fmt(fp)}/>
+          <Row label="Challan Deduction" value={`- ${fmt(Number(sf.challan)||0)}`}/>
+          <Row label="Other Charges Deduction" value={`- ${fmt(Number(sf.otherCharges)||0)}`}/>
+          <Row label="Party Peshi" value={`- ${fmt(Number(sf.partyPeshi)||0)}`}/>
+          <Row label="Token Deduction" value={`- ${fmt(Number(sf.tokenCount)||1)}`}/>
+          <div style={{borderTop:"2px solid #10B981",marginTop:6,paddingTop:6}}><Row label="Final Delivery Payment" value={fmt(dp)}/></div>
+        </div>}
+        <label style={{display:"flex",alignItems:"center",gap:8,margin:"6px 0 10px",cursor:"pointer"}}><input type="checkbox" checked={sf.releaseDelivery} onChange={e=>s("releaseDelivery",e.target.checked)}/><span style={{fontSize:12,fontWeight:700,color:T.text}}>Mark Delivery Payment as Released (₹{dp.toLocaleString("en-IN")})</span></label>
+      </>}
+
+      {needsSI&&<>
+        {divider}
+        <div style={{fontSize:12,fontWeight:900,color:"#0F4C81",marginBottom:8}}>✅ Stock-In Details</div>
+        <Sel label="GS Type" value={sf.siGsType} onChange={v=>s("siGsType",v)} options={["GS","Non-GS"]}/>
+        <Fld label="SI Notes" value={sf.siNotes} onChange={v=>s("siNotes",v)} placeholder="e.g. All docs verified, keys handed over"/>
+        <Alrt type="info">Marking SI Done will unlock the wallet for payout and set stockIn=true on the App_ID.</Alrt>
+      </>}
+
+      <div style={{display:"flex",gap:10,marginTop:16}}>
+        <Btn v="secondary" full onClick={onClose}>Cancel</Btn>
+        <Btn v="success" full icon="✓" onClick={save}>Save Stage</Btn>
+      </div>
+    </div>
+  </div>;
+}
+
+// ═══════════════════════════════════════════════
+// LEADS MODULE — with stage dialog on create + open
+// ═══════════════════════════════════════════════
+function LeadsModule({user,shared}){
+  const{dealers,counters,leads,setLeads,apps,setApps}=shared;
+  const[view,setView]=useState("list");
+  const[step,setStep]=useState(0);
+  const[sel,setSel]=useState(null);     // lead id being viewed
+  const[stageFor,setStageFor]=useState(null); // lead id for stage dialog
+  const[form,setForm]=useState({});
+  const f=(k,v)=>setForm(p=>({...p,[k]:v}));
+
+  const isOpsView=["TM","Central Ops","Business Head","Finance"].includes(user.role);
+  let raIds=[user.id];
+  if(user.role==="RM"&&user.raIds)raIds=[user.id,...user.raIds];
+  const myLeads=isOpsView?leads:leads.filter(l=>raIds.includes(l.raId));
+
+  const myDealers=isOpsView?dealers.filter(d=>d.status==="Active"):dealers.filter(d=>raIds.includes(d.raId)&&d.status==="Active");
+  const dealerCtrs=counters.filter(c=>c.dealerId===form.dealerId&&c.status==="Active");
+  const selCtr=counters.find(c=>c.id===form.counterId);
+  const selDealer=dealers.find(d=>d.id===form.dealerId);
+
+  const calcPrice=()=>{let base=0;const yr=parseInt(form.year||"2020");const km=parseInt(form.km||"0");const mk=form.make||"";if(["Mercedes-Benz","BMW","Audi","Volvo"].includes(mk))base=1200000;else if(["Kia","Skoda","Volkswagen","Jeep","MG Motors"].includes(mk))base=800000;else if(["Hyundai","Honda","Toyota","Tata Motors","Mahindra"].includes(mk))base=600000;else base=450000;base=base*Math.pow(0.82,2026-yr);base=base*(1-(km/200000)*0.25);if(form.accident==="Major")base*=0.80;else if(form.accident==="Minor")base*=0.92;if(form.flood==="Yes")base*=0.75;if(form.tyres==="Poor")base*=0.96;if(form.ownership==="2nd")base*=0.95;else if(form.ownership==="3rd+")base*=0.88;return Math.round(base/1000)*1000;};
+
+  // new lead: after submit open stage dialog immediately
+  const[pendingStageLeadId,setPendingStageLeadId]=useState(null);
+  function submitLead(){const price=calcPrice();const newLead={id:`L${uid()}`,raId:user.id,...form,price,status:"Lead Created",appId:"",createdAt:now(),inspectionDone:false,c24Quote:0,serviceCharge:0,finalPayableCx:0,inspectionNotes:"",tokenDone:false,tokenCount:1,challan:0,otherCharges:0,partyPeshi:0,deliveryPayment:0,deliveryReleased:false,siDone:false,siAt:"",siNotes:"",siGsType:""};
+    setLeads(p=>[...p,newLead]);setView("list");setStep(0);setForm({});
+    setTimeout(()=>setPendingStageLeadId(newLead.id),50);
+  }
+
+  function saveStage(leadId,updates){
+    const actualId=leadId||pendingStageLeadId;
+    const lead=leads.find(l=>l.id===actualId);
+    if(!lead)return;
+    let newAppId=lead.appId;
+    // AUTO App_ID GENERATION: create App_ID on Inspection Done if none exists
+    if(updates.inspectionDone && !lead.appId){
+      const appUid=`APP${uid()}`;
+      const dealer=dealers.find(d=>d.id===lead.dealerId);
+      const counter=counters.find(c=>c.id===lead.counterId);
+      const newApp={id:appUid,dealerId:lead.dealerId,counterId:lead.counterId,raId:lead.raId,vehicle:`${lead.year} ${lead.make} ${lead.model}${lead.variant?" "+lead.variant:""}`,regNo:lead.regNo,quote:updates.c24Quote||lead.price,serviceCharge:updates.serviceCharge||0,challan:updates.challan||0,estRefurb:0,gsType:"",stockIn:false,otherCharges:0,splitReleased:0,incentiveReleased:0,status:"Active",inspectionDone:true,inspectionAt:updates.inspectionAt||"",inspectionNotes:updates.inspectionNotes||"",tokenDone:false,tokenAt:"",tokenAmount:0,tokenNotes:"",siDone:false,siAt:"",siNotes:"",siOtherCharges:0,siGsType:""};
+      setApps(prev=>[...prev,newApp]);
+      newAppId=appUid;
+      updates.appId=appUid;
+    }
+    // SYNC on Token Done: update linked App_ID with challan, otherCharges, token data
+    if(updates.tokenDone && newAppId){
+      setApps(prev=>prev.map(a=>a.id===newAppId?{...a,tokenDone:true,tokenAt:updates.tokenAt||a.tokenAt,tokenAmount:updates.tokenCount||a.tokenAmount,tokenNotes:"",challan:updates.challan>0?updates.challan:a.challan,otherCharges:updates.otherCharges>0?updates.otherCharges:a.otherCharges,serviceCharge:updates.serviceCharge>0?updates.serviceCharge:a.serviceCharge}:a));
+    }
+    // SYNC on SI Done: set stockIn, gsType, unlock wallet on linked App_ID
+    if(updates.siDone && newAppId){
+      setApps(prev=>prev.map(a=>a.id===newAppId?{...a,stockIn:true,siDone:true,siAt:updates.siAt||"",siNotes:updates.siNotes||"",siGsType:updates.siGsType||a.siGsType,gsType:updates.siGsType||a.gsType,otherCharges:updates.otherCharges>0?updates.otherCharges:a.otherCharges,serviceCharge:updates.serviceCharge>0?updates.serviceCharge:a.serviceCharge,challan:updates.challan>0?updates.challan:a.challan,siOtherCharges:updates.otherCharges>0?updates.otherCharges:a.siOtherCharges}:a));
+    }
+    setLeads(prev=>prev.map(l=>l.id===actualId?{...l,...updates}:l));
+    setStageFor(null);setPendingStageLeadId(null);
+  }
+
+  // stage dialog open
+  const stageDialogLead=leads.find(l=>l.id===(stageFor||pendingStageLeadId));
+
+  // LEAD DETAIL VIEW
+  if(sel&&view==="list"){const lead=leads.find(l=>l.id===sel);if(!lead)return null;
+    const ld=dealers.find(d=>d.id===lead.dealerId);const lc=counters.find(c=>c.id===lead.counterId);const ra=ALL_USERS.find(u=>u.id===lead.raId);
+    return <div>
+      {stageDialogLead&&stageDialogLead.id===sel&&<StageDialog lead={stageDialogLead} targetStatus={lead.status} onSave={u=>saveStage(sel,u)} onClose={()=>setStageFor(null)}/>}
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+        <Btn v="ghost" onClick={()=>{setSel(null);}} sm>← Back</Btn>
+        <span style={{fontSize:14,fontWeight:800,flex:1}}>{lead.make} {lead.model} {lead.year}</span>
+        <Badge s={lead.status}/>
+      </div>
+      <Card style={{marginBottom:10}}><ST>Vehicle Identity</ST>{[["Reg. No.",lead.regNo],["Make",lead.make],["Model",lead.model],["Year",lead.year],["Variant",lead.variant||"—"],["Fuel",lead.fuel],["Transmission",lead.transmission],["Color",lead.color||"—"],["KM",Number(lead.km||0).toLocaleString("en-IN")+" km"],["Ownership",lead.ownership],["Accident",lead.accident+(lead.accidentDesc?` (${lead.accidentDesc})`:"")],["Flood",lead.flood],["Tyres",lead.tyres]].map(([l,v])=><Row key={l} label={l} value={v}/>)}</Card>
+      <Card style={{marginBottom:10}}><ST>Dealership & Counter</ST>{[["Dealer",ld&&ld.name],["Dealer Code",ld&&ld.code],["Counter",lc&&lc.name],["City",lc&&lc.city],["UCM Name",lc&&lc.ucmName],["UCM Mobile",lc&&lc.ucmMobile],["RA",ra&&ra.name]].map(([l,v])=><Row key={l} label={l} value={v||"—"}/>)}</Card>
+      {lead.inspectionDone&&<Card style={{marginBottom:10}}><ST>🔍 Inspection</ST>{[["C24 Quote",fmt(lead.c24Quote||0)],["Service Charge (2%)",fmt(lead.serviceCharge||0)],["Final Payable to CX",fmt(lead.finalPayableCx||0)],["Inspection Notes",lead.inspectionNotes||"—"],["Inspected At",lead.inspectionAt]].map(([l,v])=><Row key={l} label={l} value={v}/>)}</Card>}
+      {lead.tokenDone&&<Card style={{marginBottom:10}}><ST>🤝 Token & PR</ST>{[["Challan",fmt(lead.challan||0)],["Other Charges",fmt(lead.otherCharges||0)],["Party Peshi",fmt(lead.partyPeshi||0)],["Token Count",lead.tokenCount||1],["Delivery Payment",fmt(lead.deliveryPayment||0)],["Delivery Released",lead.deliveryReleased?"✅ Yes":"❌ Not yet"],["Token At",lead.tokenAt]].map(([l,v])=><Row key={l} label={l} value={v}/>)}</Card>}
+      {lead.siDone&&<Card style={{marginBottom:10}}><ST>✅ Stock-In</ST>{[["GS Type",lead.siGsType],["SI At",lead.siAt],["Notes",lead.siNotes||"—"]].map(([l,v])=><Row key={l} label={l} value={v||"—"}/>)}</Card>}
+      <Card style={{marginBottom:10}}><ST>Indicative Price</ST><div style={{background:`linear-gradient(135deg,${T.accentD},${T.accent})`,borderRadius:10,padding:14,textAlign:"center",marginBottom:8}}><div style={{fontSize:10,color:"rgba(255,255,255,0.7)",fontWeight:800,marginBottom:4}}>INDICATIVE C24 PRICE</div><div style={{fontSize:26,fontWeight:900,color:"#fff"}}>{fmt(lead.price)}</div></div>{[["Lead ID",lead.id],["App_ID",lead.appId||"Not yet created"],["Created",lead.createdAt]].map(([l,v])=><Row key={l} label={l} value={v}/>)}</Card>
+      <Btn full v="primary" icon="✎" onClick={()=>setStageFor(sel)}>Update Stage / Status</Btn>
+    </div>;
+  }
+
+  // CREATE LEAD FORM
+  if(view==="form")return <div>
+    {stageDialogLead&&<StageDialog lead={stageDialogLead} targetStatus="Lead Created" onSave={u=>saveStage(stageDialogLead.id,u)} onClose={()=>setPendingStageLeadId(null)}/>}
+    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}><Btn v="ghost" onClick={()=>{setView("list");setStep(0);setForm({});}} sm>← Back</Btn><span style={{fontSize:14,fontWeight:800}}>New Lead</span></div>
+    <StepBar steps={["Location","Vehicle","Condition","Submit"]} cur={step}/>
+    {step===0&&<Card><ST>Step 1 — Dealership & Counter</ST>
+      <Sel label="Dealership" value={form.dealerId} onChange={v=>f("dealerId",v)} options={myDealers.map(d=>({value:d.id,label:`${d.name} (${d.code})`}))} placeholder="Select dealer..." required/>
+      {form.dealerId&&<>{dealerCtrs.length===0?<Alrt type="warning">No active counters. Contact Central Ops.</Alrt>:<Sel label="Counter" value={form.counterId} onChange={v=>f("counterId",v)} options={dealerCtrs.map(c=>({value:c.id,label:`${c.name} — ${c.city}`}))} placeholder="Select counter..." required/>}{selCtr&&<div style={{background:T.accentL,borderRadius:8,padding:10,marginBottom:10}}><div style={{fontSize:10,fontWeight:800,color:T.accent,marginBottom:4}}>COUNTER INFO</div><Row label="Counter" value={selCtr.name}/><Row label="City" value={selCtr.city}/><Row label="UCM Name" value={selCtr.ucmName}/><Row label="UCM Mobile" value={selCtr.ucmMobile}/></div>}</>}
+      <Fld label="Registration Number" value={form.regNo} onChange={v=>f("regNo",v.toUpperCase())} required placeholder="e.g. DL3CAB1234" maxLength={15}/>
+      <div style={{display:"flex",justifyContent:"flex-end",marginTop:4}}><Btn disabled={!form.dealerId||!form.counterId||!form.regNo} onClick={()=>setStep(1)}>Next →</Btn></div>
+    </Card>}
+    {step===1&&<Card><ST>Step 2 — Vehicle Details</ST>
+      <G2><Sel label="Make" value={form.make} onChange={v=>f("make",v)} options={CAR_MAKES} placeholder="Select make..." required/><Fld label="Model" value={form.model} onChange={v=>f("model",v)} required placeholder="e.g. Creta"/></G2>
+      <G2><Sel label="Year" value={form.year} onChange={v=>f("year",v)} options={Array.from({length:15},(_,i)=>String(2026-i))} placeholder="Year..." required/><Fld label="Variant" value={form.variant} onChange={v=>f("variant",v)} placeholder="e.g. SX 1.5D"/></G2>
+      <G2><Sel label="Fuel" value={form.fuel} onChange={v=>f("fuel",v)} options={["Petrol","Diesel","CNG","Electric","Hybrid"]} placeholder="Select..." required/><Sel label="Transmission" value={form.transmission} onChange={v=>f("transmission",v)} options={["Manual","Automatic","AMT","CVT","DCT"]} placeholder="Select..." required/></G2>
+      <G2><Fld label="Color" value={form.color} onChange={v=>f("color",v)} placeholder="Pearl White"/><Fld label="KM Driven" value={form.km} onChange={v=>f("km",v)} type="number" required placeholder="35000"/></G2>
+      <Sel label="Ownership" value={form.ownership} onChange={v=>f("ownership",v)} options={["1st","2nd","3rd+"]} placeholder="Select..." required/>
+      <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}><Btn v="secondary" onClick={()=>setStep(0)}>← Back</Btn><Btn disabled={!form.make||!form.model||!form.year||!form.fuel||!form.transmission||!form.km||!form.ownership} onClick={()=>setStep(2)}>Next →</Btn></div>
+    </Card>}
+    {step===2&&<Card><ST>Step 3 — Condition</ST>
+      <Sel label="Accident History" value={form.accident} onChange={v=>f("accident",v)} options={["No","Minor","Major"]} placeholder="Select..." required/>
+      {form.accident&&form.accident!=="No"&&<Fld label="Accident Details" value={form.accidentDesc} onChange={v=>f("accidentDesc",v)} placeholder="e.g. Front bumper damage"/>}
+      <Sel label="Flood / Waterlogging" value={form.flood} onChange={v=>f("flood",v)} options={["No","Yes"]} placeholder="Select..." required/>
+      <Sel label="Tyre Condition" value={form.tyres} onChange={v=>f("tyres",v)} options={["Excellent","Good","Fair","Poor"]} placeholder="Select..." required/>
+      <Sel label="Engine Condition" value={form.engine} onChange={v=>f("engine",v)} options={["No issues","Minor issue","Major issue"]} placeholder="Select..." required/>
+      <Sel label="Electrical Condition" value={form.electrical} onChange={v=>f("electrical",v)} options={["No issues","Minor issue","Major issue"]} placeholder="Select..." required/>
+      <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}><Btn v="secondary" onClick={()=>setStep(1)}>← Back</Btn><Btn disabled={!form.accident||!form.flood||!form.tyres||!form.engine||!form.electrical} onClick={()=>setStep(3)}>Next →</Btn></div>
+    </Card>}
+    {step===3&&<Card><ST>Step 4 — Review & Submit</ST>
+      <div style={{background:`linear-gradient(135deg,${T.accentD},${T.accent})`,borderRadius:12,padding:18,textAlign:"center",marginBottom:12}}><div style={{fontSize:11,color:"rgba(255,255,255,0.7)",fontWeight:800,letterSpacing:1,marginBottom:4}}>INDICATIVE C24 PRICE</div><div style={{fontSize:32,fontWeight:900,color:"#fff"}}>{fmt(calcPrice())}</div><div style={{fontSize:11,color:"rgba(255,255,255,0.6)",marginTop:4}}>Subject to inspection</div></div>
+      <Alrt type="info">After submitting you'll be asked to set the current stage — Inspection, Token or SI Done — if already at a later stage.</Alrt>
+      {[["Reg. No.",form.regNo],["Vehicle",`${form.make} ${form.model} ${form.year}`],["KM",Number(form.km||0).toLocaleString("en-IN")+" km"],["Dealer",selDealer&&selDealer.name],["Counter",selCtr&&selCtr.name],["UCM",selCtr&&selCtr.ucmName]].map(([l,v])=><Row key={l} label={l} value={v||"—"}/>)}
+      <div style={{display:"flex",justifyContent:"space-between",marginTop:10}}><Btn v="secondary" onClick={()=>setStep(2)}>← Edit</Btn><Btn v="success" icon="✓" onClick={submitLead}>Submit Lead</Btn></div>
+    </Card>}
+  </div>;
+
+  // LIST VIEW
+  const statusOrder={...LEAD_STATUSES.reduce((a,s,i)=>({...a,[s]:i}),{})};
+  const sortedLeads=[...myLeads].sort((a,b)=>(statusOrder[b.status]||0)-(statusOrder[a.status]||0));
+  return <div>
+    {stageDialogLead&&<StageDialog lead={stageDialogLead} targetStatus={stageDialogLead.status} onSave={u=>saveStage(stageDialogLead.id,u)} onClose={()=>{setStageFor(null);setPendingStageLeadId(null);}}/>}
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><Lbl>Leads ({myLeads.length})</Lbl>{!isOpsView&&<Btn sm icon="+" onClick={()=>setView("form")}>New Lead</Btn>}</div>
+    {myLeads.length===0&&<div style={{textAlign:"center",padding:36,color:T.mute}}><div style={{fontSize:28,marginBottom:8}}>📋</div><div>No leads yet</div>{!isOpsView&&<div style={{marginTop:10}}><Btn onClick={()=>setView("form")}>Create First Lead</Btn></div>}</div>}
+    {sortedLeads.map(l=>{const d=dealers.find(dd=>dd.id===l.dealerId);const c=counters.find(cc=>cc.id===l.counterId);const ra=ALL_USERS.find(u=>u.id===l.raId);
+      const stagePct=Math.round((LEAD_STATUSES.indexOf(l.status))/(LEAD_STATUSES.length-1)*100);
+      return <Card key={l.id} style={{marginBottom:10}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}} onClick={()=>setSel(l.id)}>
+          <div style={{flex:1}}><div style={{fontSize:13,fontWeight:800}}>{l.make} {l.model} {l.year}</div><div style={{fontSize:11,color:T.mute}}>{l.regNo} · {l.km} km · {d&&d.name}</div></div>
+          <Badge s={l.status} sm/>
+        </div>
+        <div style={{height:4,background:"#F1F5F9",borderRadius:4,marginBottom:8}}><div style={{height:4,background:l.status==="SI Done"?T.accent:l.status==="Token Done"?T.warn:l.status==="Inspection Done"?"#7C3AED":T.border,borderRadius:4,width:stagePct+"%",transition:"width 0.3s"}}/></div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div style={{display:"flex",gap:8}}>
+            {l.c24Quote>0&&<span style={{fontSize:11,fontWeight:800,color:T.accent}}>{fmt(l.c24Quote)}</span>}
+            {l.appId&&<span style={{fontSize:10,color:T.success,fontWeight:700,background:T.successL,borderRadius:6,padding:"1px 6px"}}>{l.appId}</span>}
+            {l.deliveryReleased&&<span style={{fontSize:10,color:"#fff",fontWeight:700,background:T.success,borderRadius:6,padding:"1px 6px"}}>Delivery ✓</span>}
+          </div>
+          <Btn sm v="secondary" onClick={()=>setStageFor(l.id)}>Update Stage</Btn>
+        </div>
+        {isOpsView&&<div style={{fontSize:10,color:T.mute,marginTop:3}}>RA: {ra&&ra.name} · UCM: {c&&c.ucmName}</div>}
+      </Card>;
+    })}
+  </div>;
+}
+
+// ═══════════════════════════════════════════════
+// APP_IDs MODULE — with lead stage data embedded
+// ═══════════════════════════════════════════════
+function AppIDsModule({user,shared}){
+  const{apps,setApps,dealers,counters,leads,setLeads}=shared;
+  const[sel,setSel]=useState(null);
+  const[stageFor,setStageFor]=useState(null); // appId string → open stage dialog for linked lead
+
+  const isOpsView=["TM","Central Ops","Business Head","Finance"].includes(user.role);
+  let raIds=[user.id];
+  if(user.role==="RM"&&user.raIds)raIds=[user.id,...user.raIds];
+  const myApps=isOpsView?apps:apps.filter(a=>raIds.includes(a.raId));
+
+  function saveStageFromApp(leadId,updates){
+    const lead=leads.find(l=>l.id===leadId);
+    if(!lead)return;
+    const appId=lead.appId;
+    if(updates.tokenDone && appId){
+      setApps(prev=>prev.map(a=>a.id===appId?{...a,tokenDone:true,tokenAt:updates.tokenAt||a.tokenAt,challan:updates.challan>0?updates.challan:a.challan,otherCharges:updates.otherCharges>0?updates.otherCharges:a.otherCharges,serviceCharge:updates.serviceCharge>0?updates.serviceCharge:a.serviceCharge}:a));
+    }
+    if(updates.siDone && appId){
+      setApps(prev=>prev.map(a=>a.id===appId?{...a,stockIn:true,siDone:true,siAt:updates.siAt||"",siNotes:updates.siNotes||"",siGsType:updates.siGsType||a.siGsType,gsType:updates.siGsType||a.gsType,otherCharges:updates.otherCharges>0?updates.otherCharges:a.otherCharges,serviceCharge:updates.serviceCharge>0?updates.serviceCharge:a.serviceCharge,challan:updates.challan>0?updates.challan:a.challan,siOtherCharges:updates.otherCharges>0?updates.otherCharges:a.siOtherCharges}:a));
+    }
+    setLeads(prev=>prev.map(l=>l.id===leadId?{...l,...updates}:l));
+    setStageFor(null);
+  }
+
+  const stageForLead=stageFor?leads.find(l=>l.appId===stageFor):null;
+
+  const STAGE_COLOR={
+    "Lead Created":{bar:T.border,label:"Lead Created"},
+    "Inspection Done":{bar:"#7C3AED",label:"Inspected"},
+    "Token Done":{bar:T.warn,label:"Token Done"},
+    "SI Done":{bar:T.accent,label:"SI Done"},
+  };
+
+  const renderApp=(a,extra)=>{
+    const d=dealers.find(dd=>dd.id===a.dealerId);const c=counters.find(cc=>cc.id===a.counterId);
+    const lead=leads.find(l=>l.appId===a.id);
+    const isOpen=sel===a.id;
+    const sc=STAGE_COLOR[lead?.status]||{bar:T.border,label:"No Lead"};
+    return <Card key={a.id} style={{marginBottom:10,border:`1.5px solid ${isOpen?T.accent:T.border}`,background:isOpen?T.accentL:"#fff"}}>
+      <div onClick={()=>setSel(isOpen?null:a.id)}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+          <span style={{fontSize:12,fontWeight:800,color:T.accent}}>{a.id}</span>
+          <Badge s={a.stockIn?"Active":"Stock-In Pending"} sm/>
+        </div>
+        <div style={{fontSize:12,fontWeight:700,marginBottom:2}}>{a.vehicle}</div>
+        <div style={{fontSize:11,color:T.mute,marginBottom:6}}>{a.regNo} · {d&&d.name}</div>
+        {/* Lead stage progress bar */}
+        {lead&&<div style={{marginBottom:8}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:10,color:T.mute}}>Lead Stage</span><span style={{fontSize:10,fontWeight:700,color:sc.bar}}>{sc.label}</span></div>
+          <div style={{height:4,background:"#F1F5F9",borderRadius:4}}><div style={{height:4,background:sc.bar,borderRadius:4,width:({
+            "Lead Created":"10%","Inspection Done":"40%","Token Done":"70%","SI Done":"100%"
+          }[lead.status]||"0%"),transition:"width 0.3s"}}/></div>
+        </div>}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:5}}>
+          {[["Wallet",fmt(a.otherCharges-a.splitReleased)],["Quote",fmt(lead?.c24Quote||a.quote)],["GS",a.gsType]].map(([l,v])=><div key={l} style={{background:"#F8FAFC",borderRadius:6,padding:"5px 7px"}}><div style={{fontSize:9,color:T.mute,fontWeight:700}}>{l}</div><div style={{fontSize:10,fontWeight:800,marginTop:1}}>{v}</div></div>)}
+        </div>
+      </div>
+      {isOpen&&<div style={{marginTop:10,borderTop:`1px solid ${T.border}`,paddingTop:10}}>
+        <ST>App_ID Details</ST>
+        {[["Reg. No.",a.regNo],["Dealer",d&&d.name],["Dealer Code",d&&d.code],["Counter",c&&c.name],["City",c&&c.city],["UCM Name",c&&c.ucmName],["UCM Mobile",c&&c.ucmMobile],["C24 Quote",fmt(lead?.c24Quote||a.quote)],["Service Charge",fmt(lead?.serviceCharge||a.serviceCharge)],["Challan",fmt(lead?.challan||a.challan)],["Est. Refurb",fmt(a.estRefurb)],["Other Charges",fmt(lead?.otherCharges||a.otherCharges)],["Wallet Available",fmt(a.otherCharges-a.splitReleased)],["GS Type",a.gsType],["Stock-In",a.stockIn?"✓ Complete":"✗ Pending"],...(extra||[])].map(([l,v])=><Row key={l} label={l} value={v||"—"}/>)}
+        {lead&&<><div style={{marginTop:8,marginBottom:6}}><ST>Lead Stage</ST></div>
+          {lead.inspectionDone&&<>{[["C24 Quote",fmt(lead.c24Quote||0)],["Service Charge",fmt(lead.serviceCharge||0)],["Final Payable to CX",fmt(lead.finalPayableCx||0)]].map(([l,v])=><Row key={l} label={l} value={v}/>)}</>}
+          {lead.tokenDone&&<>{[["Challan",fmt(lead.challan||0)],["Other Charges",fmt(lead.otherCharges||0)],["Delivery Payment",fmt(lead.deliveryPayment||0)],["Delivery Released",lead.deliveryReleased?"✅ Yes":"❌ No"]].map(([l,v])=><Row key={l} label={l} value={v}/>)}</>}
+          {lead.siDone&&<Row label="GS Type (SI)" value={lead.siGsType}/>}
+          <div style={{marginTop:8}}><Btn sm full v="secondary" onClick={e=>{e.stopPropagation();setStageFor(a.id);}}>✎ Update Lead Stage</Btn></div>
+        </>}
+      </div>}
+    </Card>;
+  };
+
+  return <div>
+    {stageFor&&stageForLead&&<StageDialog lead={stageForLead} targetStatus={stageForLead.status} onSave={u=>saveStageFromApp(stageForLead.id,u)} onClose={()=>setStageFor(null)}/>}
+    <Lbl>App_IDs ({myApps.length})</Lbl>
+    {user.role==="RM"&&user.raIds&&user.raIds.map(raId=>{const ra=ALL_USERS.find(u=>u.id===raId);const raApps=myApps.filter(a=>a.raId===raId);return <div key={raId} style={{marginBottom:14}}><div style={{fontSize:11,fontWeight:800,color:T.accent,marginBottom:6,padding:"4px 0",borderBottom:`1px solid ${T.accentL}`}}>{ra&&ra.name} — Wallet: {fmt(raWalBal(raId,apps))}</div>{raApps.map(a=>renderApp(a,[["RA",ra&&ra.name]]))}</div>;})}
+    {(user.role==="RA"||isOpsView)&&myApps.map(a=>renderApp(a))}
+  </div>;
+}
+
+function OnboardingModuleRA({user,shared}){
+  const{dealers,onboarding,setOnboarding,setDealers}=shared;
+  const[view,setView]=useState("list");const[step,setStep]=useState(0);const[form,setForm]=useState({});const[docs,setDocs]=useState({gst:"",pan:"",bank:"",cancelledCheque:"",other:""});const[oemDocs,setOemDocs]=useState({franchiseAgreement:"",oemLetter:"",other:""});
+  let raIds=[user.id];if(user.role==="RM"&&user.raIds)raIds=[user.id,...user.raIds];
+  const myOB=onboarding.filter(o=>raIds.includes(o.raId));const f=(k,v)=>setForm(p=>({...p,[k]:v}));
+  function submit(){setOnboarding(p=>[...p,{id:`OB${uid()}`,raId:user.id,submittedBy:user.role,...form,docs,oemDocs,status:"Admin Panel Pending",dealerCode:"",submittedAt:now()}]);setView("list");setStep(0);setForm({});setDocs({gst:"",pan:"",bank:"",cancelledCheque:"",other:""});setOemDocs({franchiseAgreement:"",oemLetter:"",other:""});alert("✓ Submitted! Auto-email sent to Admin Panel team. This now appears in Ops Panel queue.");}
+  function simCode(id){const code=String(100000+Math.floor(Math.random()*99999));setOnboarding(p=>p.map(o=>o.id===id?{...o,dealerCode:code,status:"OEM Tagging Pending"}:o));alert(`Dealer code ${code} received from Admin Panel team.`);}
+
+  if(view==="form")return <div>
+    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}><Btn v="ghost" onClick={()=>{setView("list");setStep(0);setForm({});}} sm>← Back</Btn><span style={{fontSize:14,fontWeight:800}}>New Dealer Onboarding</span></div>
+    <StepBar steps={["Dealer Info","Bank & Docs","OEM Details","Review"]} cur={step}/>
+    {step===0&&<Card><ST>Dealer Information</ST>
+      <Fld label="Dealer / Company Name" value={form.dealerName} onChange={v=>f("dealerName",v)} required placeholder="e.g. Landmark Cars Ltd"/>
+      <G2><Sel label="Region" value={form.region} onChange={v=>f("region",v)} options={REGIONS} placeholder="Select region..." required/><Sel label="City" value={form.city} onChange={v=>f("city",v)} options={CITIES} placeholder="Select city..." required/></G2>
+      <G2><Fld label="Mobile" value={form.mobile} onChange={v=>f("mobile",v)} required/><Fld label="Email" value={form.email} onChange={v=>f("email",v)}/></G2>
+      <Fld label="Full Address" value={form.address} onChange={v=>f("address",v)} required/>
+      <div style={{display:"flex",justifyContent:"flex-end",marginTop:4}}><Btn disabled={!form.dealerName||!form.region||!form.city||!form.mobile||!form.address} onClick={()=>setStep(1)}>Next →</Btn></div>
+    </Card>}
+    {step===1&&<Card><ST>Bank & Tax Details</ST>
+      <G2><Fld label="PAN Number" value={form.pan} onChange={v=>f("pan",v.toUpperCase())} required maxLength={10}/><Fld label="GST Number" value={form.gst} onChange={v=>f("gst",v.toUpperCase())}/></G2>
+      <Sel label="Bank Name" value={form.bank} onChange={v=>f("bank",v)} options={BANK_LIST} placeholder="Select bank..." required/>
+      <G2><Fld label="Account Number" value={form.account} onChange={v=>f("account",v)} required/><Fld label="IFSC Code" value={form.ifsc} onChange={v=>f("ifsc",v.toUpperCase())} required/></G2>
+      <ST>Mandatory Documents</ST>
+      <FileInput label="GST Certificate" value={docs.gst} onChange={v=>setDocs(p=>({...p,gst:v}))} required hint="GST registration certificate"/>
+      <FileInput label="PAN Card" value={docs.pan} onChange={v=>setDocs(p=>({...p,pan:v}))} required hint="Company/proprietor PAN"/>
+      <FileInput label="Bank Statement (3 months)" value={docs.bank} onChange={v=>setDocs(p=>({...p,bank:v}))} required hint="Latest 3-month statement"/>
+      <FileInput label="Cancelled Cheque" value={docs.cancelledCheque} onChange={v=>setDocs(p=>({...p,cancelledCheque:v}))} required hint="Account name must match dealer"/>
+      <ST>Other (Optional)</ST><FileInput label="Other Document" value={docs.other} onChange={v=>setDocs(p=>({...p,other:v}))}/>
+      <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}><Btn v="secondary" onClick={()=>setStep(0)}>← Back</Btn><Btn disabled={!form.pan||!form.bank||!form.account||!form.ifsc||!docs.gst||!docs.pan||!docs.bank||!docs.cancelledCheque} onClick={()=>setStep(2)}>Next →</Btn></div>
+    </Card>}
+    {step===2&&<Card><ST>OEM & Dealer Type</ST>
+      <Alrt type="info">OEM tagging processed by Central Ops ONLY after dealer code is confirmed.</Alrt>
+      <G2><Sel label="Dealer Type" value={form.type} onChange={v=>f("type",v)} options={DEALER_TYPES} placeholder="Select..." required/><Sel label="OEM Brand" value={form.oem} onChange={v=>f("oem",v)} options={OEM_BRANDS} placeholder="Select OEM..." required/></G2>
+      <Sel label="Company Code" value={form.companyCode} onChange={v=>f("companyCode",v)} options={COMPANY_CODES} placeholder="Select company code..." required/>
+      <ST>Dealer Location</ST>
+      <div style={{display:"flex",gap:8,marginBottom:8}}>
+        <Btn v={form.latMode==="auto"?"primary":"secondary"} sm onClick={()=>{f("latMode","auto");if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{f("lat",pos.coords.latitude.toFixed(6));f("long",pos.coords.longitude.toFixed(6));},()=>alert("Location access denied"));}}}>📍 Auto-detect</Btn>
+        <Btn v={form.latMode==="manual"?"primary":"secondary"} sm onClick={()=>f("latMode","manual")}>✏️ Enter manually</Btn>
+      </div>
+      {(form.latMode==="manual"||form.lat)&&<G2><Fld label="Latitude" value={form.lat} onChange={v=>f("lat",v)} placeholder="e.g. 28.6139" required={form.latMode==="manual"}/><Fld label="Longitude" value={form.long} onChange={v=>f("long",v)} placeholder="e.g. 77.2090" required={form.latMode==="manual"}/></G2>}
+      {form.lat&&form.long&&<div style={{background:"#ECFDF5",border:"1px solid #BBF7D0",borderRadius:7,padding:"6px 10px",marginBottom:8,fontSize:11,color:"#065F46",fontWeight:700}}>📍 {form.lat}, {form.long}</div>}
+      <ST>OEM Documents (Mandatory)</ST>
+      <FileInput label="Franchise Agreement / Appointment Letter" value={oemDocs.franchiseAgreement} onChange={v=>setOemDocs(p=>({...p,franchiseAgreement:v}))} required/>
+      <FileInput label="OEM Authorization Letter" value={oemDocs.oemLetter} onChange={v=>setOemDocs(p=>({...p,oemLetter:v}))} required/>
+      <ST>Other OEM (Optional)</ST><FileInput label="Other OEM Document" value={oemDocs.other} onChange={v=>setOemDocs(p=>({...p,other:v}))}/>
+      <div style={{display:"flex",justifyContent:"space-between",marginTop:4}}><Btn v="secondary" onClick={()=>setStep(1)}>← Back</Btn><Btn disabled={!form.type||!form.oem||!form.companyCode||!oemDocs.franchiseAgreement||!oemDocs.oemLetter} onClick={()=>setStep(3)}>Review →</Btn></div>
+    </Card>}
+    {step===3&&<Card><ST>Review & Submit</ST>
+      {[["Dealer",form.dealerName],["Region",form.region],["City",form.city],["Type",form.type],["OEM",form.oem],["Company Code",form.companyCode],["Lat",form.lat||"—"],["Long",form.long||"—"],["PAN",form.pan],["Bank",form.bank],["GST Doc",docs.gst],["PAN Doc",docs.pan],["Franchise Agr.",oemDocs.franchiseAgreement],["OEM Letter",oemDocs.oemLetter]].map(([l,v])=><Row key={l} label={l} value={v||"—"}/>)}
+      <Alrt type="warning">Submitting triggers auto-email to Admin Panel team AND adds to Ops Panel queue.</Alrt>
+      <div style={{display:"flex",justifyContent:"space-between",marginTop:10}}><Btn v="secondary" onClick={()=>setStep(2)}>← Edit</Btn><Btn v="success" icon="✓" onClick={submit}>Submit</Btn></div>
+    </Card>}
+  </div>;
+
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><Lbl>Onboarding Requests ({myOB.length})</Lbl><Btn sm icon="+" onClick={()=>setView("form")}>New Dealer</Btn></div>
+    {myOB.map(ob=><Card key={ob.id} style={{marginBottom:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><div><div style={{fontSize:13,fontWeight:800}}>{ob.dealerName}</div><div style={{fontSize:10,color:T.mute}}>{ob.type} · {ob.oem} · {ob.region}</div></div><Badge s={ob.status}/></div>{ob.status==="Admin Panel Pending"&&<div><Alrt type="info">Auto-email sent. Waiting for dealer code.</Alrt><Btn sm v="secondary" onClick={()=>simCode(ob.id)}>🔄 Simulate Code Received</Btn></div>}{ob.dealerCode&&<div style={{fontSize:11,fontWeight:800,color:T.success,marginTop:3}}>Dealer Code: {ob.dealerCode}</div>}{ob.status==="OEM Tagging Pending"&&<Alrt type="warning">Code received. Waiting for Central Ops OEM tagging.</Alrt>}{ob.status==="Active"&&<Alrt type="success">Dealer activated!</Alrt>}{ob.status==="Rejected"&&<Alrt type="error">Rejected: {ob.rejectionReason}</Alrt>}</Card>)}
+    <div style={{marginTop:14}}><Lbl>Active Dealers</Lbl>{dealers.filter(d=>raIds.includes(d.raId)).map(d=><Card key={d.id} style={{marginBottom:8}}><div style={{display:"flex",justifyContent:"space-between"}}><div><div style={{fontSize:12,fontWeight:800}}>{d.name}</div><div style={{fontSize:10,color:T.mute}}>Code: {d.code||"Pending"} · {d.type} · {d.oem}</div></div><Badge s={d.status} sm/></div></Card>)}</div>
+  </div>;
+}
+
+function CounterModuleRA({user,shared}){
+  const{dealers,counterReqs,setCounterReqs}=shared;
+  const[show,setShow]=useState(false);const[form,setForm]=useState({});const f=(k,v)=>setForm(p=>({...p,[k]:v}));
+  let raIds=[user.id];if(user.role==="RM"&&user.raIds)raIds=[user.id,...user.raIds];
+  const myReqs=counterReqs.filter(r=>raIds.includes(r.raId));const myDealers=dealers.filter(d=>raIds.includes(d.raId)&&d.status==="Active");
+  function submit(){if(!form.dealerId||!form.counterName||!form.city||!form.ucmName||!form.ucmMobile){alert("Fill required fields");return;}setCounterReqs(p=>[...p,{id:`CR${uid()}`,raId:user.id,dealerId:form.dealerId,counterName:form.counterName,city:form.city,ucmName:form.ucmName,ucmMobile:form.ucmMobile,ucmEmail:form.ucmEmail||"",status:"Ops Review",submittedAt:now(),rejectionReason:null}]);setShow(false);setForm({});alert("✓ Submitted to Central Ops.");}
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><Lbl>Counter Requests ({myReqs.length})</Lbl><Btn sm icon="+" onClick={()=>setShow(!show)}>New Mapping</Btn></div>
+    {show&&<Card style={{marginBottom:12,border:`1.5px solid ${T.accent}`}}><ST>Counter & UCM Form</ST>
+      <Sel label="Dealer" value={form.dealerId} onChange={v=>f("dealerId",v)} options={myDealers.map(d=>({value:d.id,label:`${d.name} (${d.code})`}))} placeholder="Select dealer..." required/>
+      <Fld label="Counter Name" value={form.counterName} onChange={v=>f("counterName",v)} required/>
+      <Sel label="City" value={form.city} onChange={v=>f("city",v)} options={CITIES} placeholder="Select city..." required/>
+      <G2><Fld label="UCM Name" value={form.ucmName} onChange={v=>f("ucmName",v)} required/><Fld label="UCM Mobile" value={form.ucmMobile} onChange={v=>f("ucmMobile",v)} required/></G2>
+      <Fld label="UCM Email" value={form.ucmEmail} onChange={v=>f("ucmEmail",v)}/>
+      <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}><Btn v="secondary" sm onClick={()=>{setShow(false);setForm({});}}>Cancel</Btn><Btn sm icon="✓" onClick={submit}>Submit</Btn></div>
+    </Card>}
+    {myReqs.map(r=>{const d=dealers.find(d=>d.id===r.dealerId);return <Card key={r.id} style={{marginBottom:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,fontWeight:800}}>{r.counterName}</span><Badge s={r.status} sm/></div><div style={{fontSize:11,color:T.mute}}>{d&&d.name} · {r.city} · UCM: {r.ucmName}</div>{r.status==="Rejected"&&r.rejectionReason&&<Alrt type="error">Rejected: {r.rejectionReason}</Alrt>}</Card>;})}
+  </div>;
+}
+
+function SAPModuleRA({user,shared}){
+  const{dealers,sapReqs,setSapReqs}=shared;
+  const[show,setShow]=useState(false);const[form,setForm]=useState({});const[selD,setSelD]=useState([]);const[docs,setDocs]=useState({pan:"",cancelledCheque:"",other:""});const f=(k,v)=>setForm(p=>({...p,[k]:v}));
+  let raIds=[user.id];if(user.role==="RM"&&user.raIds)raIds=[user.id,...user.raIds];
+  const myReqs=sapReqs.filter(r=>raIds.includes(r.raId));const myDealers=dealers.filter(d=>raIds.includes(d.raId)&&d.status==="Active");
+  function submit(){if(!form.payeeName||!form.pan||!form.bank||!form.account||!form.ifsc||selD.length===0){alert("Fill all required fields");return;}if(!docs.pan||!docs.cancelledCheque){alert("PAN card and Cancelled Cheque are mandatory");return;}setSapReqs(p=>[...p,{id:`SR${uid()}`,raId:user.id,dealerIds:selD,payeeName:form.payeeName,pan:form.pan,bank:form.bank,account:form.account,ifsc:form.ifsc,mobile:form.mobile||"",docs,status:"Ops Review",submittedAt:now(),sapCode:""}]);setShow(false);setForm({});setSelD([]);setDocs({pan:"",cancelledCheque:"",other:""});}
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><Lbl>SAP / Payee Requests ({myReqs.length})</Lbl><Btn sm icon="+" onClick={()=>setShow(!show)}>New Payee</Btn></div>
+    {show&&<Card style={{marginBottom:12,border:`1.5px solid ${T.accent}`}}><ST>SAP Creation Form</ST>
+      <Alrt type="info">A payee can be linked to multiple dealers.</Alrt>
+      <MultiDealerSel dealers={myDealers} selected={selD} onChange={setSelD}/>
+      <Fld label="Payee Name" value={form.payeeName} onChange={v=>f("payeeName",v)} required/>
+      <G2><Fld label="PAN" value={form.pan} onChange={v=>f("pan",v.toUpperCase())} required maxLength={10}/><Fld label="Mobile" value={form.mobile} onChange={v=>f("mobile",v)}/></G2>
+      <Sel label="Bank" value={form.bank} onChange={v=>f("bank",v)} options={BANK_LIST} placeholder="Select bank..." required/>
+      <G2><Fld label="Account No." value={form.account} onChange={v=>f("account",v)} required/><Fld label="IFSC" value={form.ifsc} onChange={v=>f("ifsc",v.toUpperCase())} required/></G2>
+      <ST>Mandatory Documents</ST>
+      <FileInput label="PAN Card" value={docs.pan} onChange={v=>setDocs(p=>({...p,pan:v}))} required hint="Payee PAN card copy"/>
+      <FileInput label="Cancelled Cheque" value={docs.cancelledCheque} onChange={v=>setDocs(p=>({...p,cancelledCheque:v}))} required hint="Account name must match payee"/>
+      <ST>Other (Optional)</ST><FileInput label="Other Document" value={docs.other} onChange={v=>setDocs(p=>({...p,other:v}))}/>
+      <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:4}}><Btn v="secondary" sm onClick={()=>{setShow(false);setForm({});setSelD([]);}}>Cancel</Btn><Btn sm icon="✓" onClick={submit}>Submit</Btn></div>
+    </Card>}
+    {myReqs.map(r=>{const ds=r.dealerIds.map(id=>dealers.find(d=>d.id===id)).filter(Boolean);return <Card key={r.id} style={{marginBottom:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:13,fontWeight:800}}>{r.payeeName}</span><Badge s={r.status} sm/></div><div style={{fontSize:11,color:T.mute,marginBottom:2}}>{r.bank} · {r.pan}</div><div style={{fontSize:10,color:T.accent,fontWeight:700}}>Linked: {ds.map(d=>d.name).join(", ")}</div>{r.sapCode&&<div style={{fontSize:11,fontWeight:800,color:T.success,fontFamily:"monospace",marginTop:2}}>{r.sapCode}</div>}</Card>;})}
+  </div>;
+}
+
+function PayoutsModule({user,shared}){
+  const{apps,dealers,counters,payoutRequests}=shared;
+  let raIds=[user.id];if(user.role==="RM"&&user.raIds)raIds=[user.id,...user.raIds];
+  const myPR=payoutRequests.filter(p=>raIds.includes(p.raId));
+  return <div><Lbl>Payout Requests ({myPR.length})</Lbl><Alrt type="info">Payments raised by TM/City Head only. This is your status tracker.</Alrt>
+    {myPR.map(pr=>{const a=apps.find(a=>a.id===pr.appId);const d=a?dealers.find(d=>d.id===a.dealerId):null;const ra=ALL_USERS.find(u=>u.id===pr.raId);return <Card key={pr.id} style={{marginBottom:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,fontWeight:800,color:T.accent}}>{pr.id}</span><Badge s={pr.status} sm/></div><div style={{fontSize:14,fontWeight:700,marginBottom:3}}>{fmt(pr.amount)}</div><div style={{fontSize:11,color:T.mute}}>{pr.appId} · {pr.type} · {d&&d.name}</div>{user.role==="RM"&&<div style={{fontSize:10,color:T.accent,marginTop:2}}>RA: {ra&&ra.name}</div>}{pr.utr&&<div style={{fontSize:10,fontWeight:800,color:T.success,fontFamily:"monospace",marginTop:2}}>UTR: {pr.utr}</div>}<div style={{fontSize:10,color:T.mute,marginTop:2}}>{pr.createdAt}</div></Card>;})}
+  </div>;
+}
+
+// ═══════════════════════════════════════════════
+// OPS PANEL MODULES
+// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// DASHBOARD DRAWER — clickable drill-down
+// ═══════════════════════════════════════════════
+function DashboardDrawer({title,icon,color,data,columns,onClose}){
+  if(!data)return null;
+  return <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:9400,display:"flex",alignItems:"flex-end",justifyContent:"center",animation:"fadeIn 0.2s ease"}} onClick={e=>{if(e.target===e.currentTarget)onClose();}}>
+    <div style={{width:"100%",maxWidth:600,background:"#fff",borderRadius:"20px 20px 0 0",maxHeight:"75vh",overflowY:"auto",animation:"slideUp 0.3s cubic-bezier(0.4,0,0.2,1)"}}>
+      <div style={{background:`linear-gradient(135deg,${color}dd,${color})`,padding:"14px 18px",display:"flex",justifyContent:"space-between",alignItems:"center",borderRadius:"20px 20px 0 0",position:"sticky",top:0,zIndex:1}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:22}}>{icon}</span><span style={{color:"#fff",fontSize:14,fontWeight:800}}>{title}</span><span style={{background:"rgba(255,255,255,0.2)",color:"#fff",padding:"2px 8px",borderRadius:10,fontSize:10,fontWeight:800}}>{data.length}</span></div>
+        <button onClick={onClose} style={{background:"rgba(255,255,255,0.15)",border:"none",color:"#fff",width:30,height:30,borderRadius:8,cursor:"pointer",fontSize:16,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>×</button>
+      </div>
+      <div style={{padding:"12px 16px 24px"}}>
+        {data.length===0&&<div style={{textAlign:"center",padding:32,color:T.mute}}><div style={{fontSize:28,marginBottom:8}}>📭</div>No items</div>}
+        {data.map((row,i)=><div key={i} style={{padding:"10px 12px",borderBottom:`1px solid ${T.border}`,background:i%2===0?"#FAFBFC":"#fff",borderRadius:i===0?"8px 8px 0 0":i===data.length-1?"0 0 8px 8px":0}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+            <span style={{fontSize:12,fontWeight:800,color:T.text}}>{row.primary}</span>
+            {row.badge&&<Badge s={row.badge} sm/>}
+            {row.amount&&<span style={{fontSize:13,fontWeight:900,color:color}}>{row.amount}</span>}
+          </div>
+          {row.secondary&&<div style={{fontSize:11,color:T.mid}}>{row.secondary}</div>}
+          {row.detail&&<div style={{fontSize:10,color:T.mute,marginTop:2}}>{row.detail}</div>}
+        </div>)}
+      </div>
+    </div>
+  </div>;
+}
+
+function DashStatCard({icon,label,value,color,bg,onClick}){
+  return <div onClick={onClick} style={{background:bg,borderRadius:12,padding:14,border:`1px solid ${color}22`,cursor:onClick?"pointer":"default",transition:"all 0.25s cubic-bezier(0.4,0,0.2,1)",position:"relative",overflow:"hidden"}} onMouseEnter={e=>{if(onClick){e.currentTarget.style.transform="translateY(-3px)";e.currentTarget.style.boxShadow=`0 8px 24px ${color}20`;}}} onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="";}}>
+    <div style={{fontSize:20,marginBottom:4}}>{icon}</div>
+    <div style={{fontSize:20,fontWeight:900,color:T.text}}>{value}</div>
+    <div style={{fontSize:9,fontWeight:800,color:color,letterSpacing:0.7,textTransform:"uppercase",marginTop:2}}>{label}</div>
+    {onClick&&<div style={{position:"absolute",top:8,right:8,fontSize:10,color:color,opacity:0.5}}>▶</div>}
+  </div>;
+}
+
+function OpsDashboard({user,shared}){
+  const{apps,dealers,onboarding,payoutRequests,counterReqs,sapReqs,configs,leads}=shared;
+  const allRAs=ALL_USERS.filter(u=>u.role==="RA");
+  const totalWallet=allRAs.reduce((s,ra)=>s+raWalBal(ra.id,apps),0);
+  const pendingApprovals=payoutRequests.filter(r=>!["Released","Auto-Approved","Rejected"].includes(r.status)).length;
+  const obPending=onboarding.filter(o=>["Admin Panel Pending","OEM Tagging Pending","Ops Review"].includes(o.status)).length;
+  const[drawer,setDrawer]=useState(null);
+  const isBH=user.role==="Business Head";
+
+  function openDrawer(type){
+    if(type==="wallet"){
+      const items=apps.filter(a=>a.otherCharges-a.splitReleased>0).map(a=>{const d=dealers.find(dd=>dd.id===a.dealerId);return{primary:`${a.id} — ${a.vehicle}`,amount:fmt(a.otherCharges-a.splitReleased),secondary:`Dealer: ${d?d.name:"—"} · Other Charges: ${fmt(a.otherCharges)} · Released: ${fmt(a.splitReleased)}`,detail:`GS: ${a.gsType} · Stock-In: ${a.stockIn?"✓":"✗"}`};});
+      setDrawer({title:"Wallet Breakdown",icon:"💰",color:T.accent,data:items});
+    } else if(type==="approvals"){
+      const items=payoutRequests.filter(r=>!["Released","Auto-Approved","Rejected"].includes(r.status)).map(r=>{const a=apps.find(aa=>aa.id===r.appId);return{primary:`${r.id} — ${r.type}`,amount:fmt(r.amount),badge:r.status,secondary:a?`${a.vehicle} · ${a.id}`:"—"};});
+      setDrawer({title:"Pending Approvals",icon:"⏳",color:T.warn,data:items});
+    } else if(type==="dealers"){
+      const items=dealers.filter(d=>d.status==="Active").map(d=>{const ra=ALL_USERS.find(u=>u.id===d.raId);return{primary:d.name,badge:"Active",secondary:`Code: ${d.code||"—"} · ${d.type} · ${d.oem}`,detail:`RA: ${ra?ra.name:"—"} · ${d.region}`};});
+      setDrawer({title:"Active Dealers",icon:"🏢",color:T.success,data:items});
+    } else if(type==="appids"){
+      const items=apps.filter(a=>a.status==="Active").map(a=>{const d=dealers.find(dd=>dd.id===a.dealerId);return{primary:`${a.id} — ${a.vehicle}`,amount:fmt(a.otherCharges-a.splitReleased),secondary:`Dealer: ${d?d.name:"—"} · Quote: ${fmt(a.quote)}`,detail:`GS: ${a.gsType} · SI: ${a.stockIn?"Done":"Pending"}`};});
+      setDrawer({title:"Active App_IDs",icon:"🚗",color:T.success,data:items});
+    } else if(type==="onboarding"){
+      const items=onboarding.filter(o=>["Admin Panel Pending","OEM Tagging Pending","Ops Review"].includes(o.status)).map(o=>{const ra=ALL_USERS.find(u=>u.id===o.raId);return{primary:o.dealerName,badge:o.status,secondary:`${o.type} · ${o.oem} · ${o.region}`,detail:`By: ${ra?ra.name:"—"} · ${o.submittedAt}`};});
+      setDrawer({title:"Onboarding Queue",icon:"🏢",color:T.purple,data:items});
+    } else if(type==="counters"){
+      const items=counterReqs.filter(r=>r.status==="Ops Review").map(r=>{const d=dealers.find(dd=>dd.id===r.dealerId);return{primary:r.counterName,badge:"Ops Review",secondary:`${d?d.name:"—"} · ${r.city} · UCM: ${r.ucmName}`};});
+      setDrawer({title:"Counter Requests",icon:"🔗",color:T.orange,data:items});
+    } else if(type==="sap"){
+      const items=sapReqs.filter(r=>r.status==="Ops Review").map(r=>({primary:r.payeeName,badge:"Ops Review",secondary:`${r.bank} · PAN: ${r.pan}`}));
+      setDrawer({title:"SAP Requests",icon:"🏦",color:T.accent,data:items});
+    } else if(type==="released"){
+      const items=payoutRequests.filter(r=>["Released","Auto-Approved"].includes(r.status)).map(r=>{const a=apps.find(aa=>aa.id===r.appId);return{primary:`${r.id}`,amount:fmt(r.amount),badge:r.status,secondary:a?`${a.vehicle} · ${r.type}`:r.type,detail:r.utr?`UTR: ${r.utr}`:""};});
+      setDrawer({title:"Released Payouts",icon:"💸",color:T.success,data:items});
+    } else if(type==="pipeline"){
+      const items=payoutRequests.filter(r=>!["Released","Auto-Approved","Rejected"].includes(r.status)).map(r=>({primary:r.id,amount:fmt(r.amount),badge:r.status,secondary:`${r.type} · ${r.appId}`}));
+      setDrawer({title:"Payout Pipeline",icon:"🔄",color:T.warn,data:items});
+    }
+  }
+
+  if(isBH){
+    const bhPend=payoutRequests.filter(r=>["BH Review","Ops Approved"].includes(r.status)).length;
+    const releasedMTD=payoutRequests.filter(r=>["Released","Auto-Approved"].includes(r.status)).reduce((s,r)=>s+r.amount,0);
+    const pipeAmt=payoutRequests.filter(r=>!["Released","Auto-Approved","Rejected"].includes(r.status)).reduce((s,r)=>s+r.amount,0);
+    return <div>
+      {drawer&&<DashboardDrawer {...drawer} onClose={()=>setDrawer(null)}/>}
+      <div onClick={()=>openDrawer("wallet")} style={{background:`linear-gradient(135deg,${T.accentD},${T.accent})`,borderRadius:14,padding:18,color:"#fff",marginBottom:14,cursor:"pointer",transition:"transform 0.2s",position:"relative"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"} onMouseLeave={e=>e.currentTarget.style.transform=""}>
+        <div style={{fontSize:10,fontWeight:800,letterSpacing:1,opacity:0.7,marginBottom:4}}>TEAM WALLET — ALL RAs · TAP TO VIEW BREAKDOWN</div>
+        <div style={{fontSize:30,fontWeight:900}}>{fmt(totalWallet)}</div>
+        <div style={{fontSize:12,opacity:0.7,marginTop:2}}>Total available across all RA portfolios</div>
+        <div style={{position:"absolute",top:18,right:18,fontSize:12,opacity:0.5}}>▶</div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+        <DashStatCard icon="⏳" label="BH Approvals" value={bhPend} color={bhPend>0?T.warn:T.success} bg={bhPend>0?T.warnL:T.successL} onClick={()=>openDrawer("approvals")}/>
+        <DashStatCard icon="💸" label="Released MTD" value={fmt(releasedMTD)} color={T.success} bg={T.successL} onClick={()=>openDrawer("released")}/>
+        <DashStatCard icon="🔄" label="Payout Pipeline" value={fmt(pipeAmt)} color={T.warn} bg={T.warnL} onClick={()=>openDrawer("pipeline")}/>
+        <DashStatCard icon="🏢" label="Active Dealers" value={dealers.filter(d=>d.status==="Active").length} color={T.success} bg={T.successL} onClick={()=>openDrawer("dealers")}/>
+      </div>
+      <Card style={{marginBottom:14}}><Lbl>Team Wallet by RA</Lbl>
+        {allRAs.map(ra=>{const rApps=apps.filter(a=>a.raId===ra.id);const bal=raWalBal(ra.id,apps);const released=rApps.reduce((s,a)=>s+a.splitReleased,0);return <div key={ra.id} style={{padding:"8px 0",borderBottom:`1px solid ${T.border}`}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><div style={{fontSize:12,fontWeight:800}}>{ra.name} <span style={{fontSize:10,color:T.mute,fontWeight:400}}>({ra.region})</span></div><div style={{fontSize:14,fontWeight:900,color:bal>0?T.accent:T.danger}}>{fmt(bal)}</div></div><div style={{display:"flex",gap:10}}><span style={{fontSize:10,color:T.mute}}>{rApps.length} apps</span><span style={{fontSize:10,color:T.mute}}>Released: {fmt(released)}</span></div></div>;})}
+      </Card>
+      <Card><Lbl>Recent Payout Activity</Lbl>{payoutRequests.slice(-4).reverse().map(r=>{const a=apps.find(aa=>aa.id===r.appId);return <div key={r.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${T.border}`}}><div><div style={{fontSize:12,fontWeight:700}}>{r.id} — {fmt(r.amount)}</div><div style={{fontSize:10,color:T.mute}}>{a&&a.vehicle} · {r.type}</div></div><Badge s={r.status} sm/></div>;})} </Card>
+    </div>;
+  }
+  return <div>
+    {drawer&&<DashboardDrawer {...drawer} onClose={()=>setDrawer(null)}/>}
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+      <DashStatCard icon="💰" label="Team Wallet" value={fmt(totalWallet)} color={T.accent} bg={T.accentL} onClick={()=>openDrawer("wallet")}/>
+      <DashStatCard icon="⏳" label="Pending Approvals" value={pendingApprovals} color={pendingApprovals>0?T.warn:T.success} bg={pendingApprovals>0?T.warnL:T.successL} onClick={()=>openDrawer("approvals")}/>
+      <DashStatCard icon="🏢" label="Onboarding Pending" value={obPending} color={T.purple} bg={T.purpleL} onClick={()=>openDrawer("onboarding")}/>
+      <DashStatCard icon="🔗" label="Counter Requests" value={counterReqs.filter(r=>r.status==="Ops Review").length} color={T.orange} bg={T.orangeL} onClick={()=>openDrawer("counters")}/>
+      <DashStatCard icon="🏦" label="SAP Pending" value={sapReqs.filter(r=>r.status==="Ops Review").length} color={T.accent} bg={T.accentL} onClick={()=>openDrawer("sap")}/>
+      <DashStatCard icon="🚗" label="Active App_IDs" value={apps.filter(a=>a.status==="Active").length} color={T.success} bg={T.successL} onClick={()=>openDrawer("appids")}/>
+    </div>
+    <Card style={{marginBottom:14}}><Lbl>RA Snapshot</Lbl>{ALL_USERS.filter(u=>["RA","RM"].includes(u.role)).map(u=>{const uApps=apps.filter(a=>a.raId===u.id);const bal=raWalBal(u.id,apps);return <div key={u.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:`1px solid ${T.border}`}}><div><div style={{fontSize:12,fontWeight:700}}>{u.name} <span style={{background:u.role==="RM"?T.purpleL:T.accentL,color:u.role==="RM"?T.purple:T.accent,padding:"0 5px",borderRadius:6,fontSize:9,fontWeight:800}}>{u.role}</span></div><div style={{fontSize:10,color:T.mute}}>{u.region} · {uApps.length} apps</div></div><div style={{fontSize:13,fontWeight:800,color:bal>0?T.accent:T.danger}}>{fmt(bal)}</div></div>;})} </Card>
+    <Card><Lbl>Onboarding Pipeline</Lbl>{onboarding.map(ob=>{const ra=ALL_USERS.find(u=>u.id===ob.raId);return <div key={ob.id} style={{display:"flex",justifyContent:"space-between",padding:"7px 0",borderBottom:`1px solid ${T.border}`}}><div><div style={{fontSize:12,fontWeight:700}}>{ob.dealerName}</div><div style={{fontSize:10,color:T.mute}}>By: {ra&&ra.name} ({ob.submittedBy}) · {ob.submittedAt}</div></div><Badge s={ob.status} sm/></div>;})} </Card>
+  </div>;
+}
+
+function RaisePayoutModule({user,shared}){
+  const{apps,setApps,dealers,counters,payees,payoutRequests,setPayoutRequests,configs}=shared;
+  const[step,setStep]=useState(0);const[appId,setAppId]=useState("");const[payeeId,setPayeeId]=useState("");const[type,setType]=useState("");const[amount,setAmount]=useState("");const[reason,setReason]=useState("");const[ackCross,setAckCross]=useState(false);const[result,setResult]=useState(null);const[done,setDone]=useState(false);
+  if(user.role!=="TM")return <div style={{textAlign:"center",padding:60,color:T.mute}}><div style={{fontSize:40,marginBottom:12}}>🔒</div><div style={{fontSize:14,fontWeight:700,color:T.text}}>Only TM / City Head can raise payments.</div></div>;
+  const selApp=apps.find(a=>a.id===appId);const selDealer=selApp?dealers.find(d=>d.id===selApp.dealerId):null;const selCounter=selApp?counters.find(ct=>ct.id===selApp.counterId):null;const selRA=selApp?ALL_USERS.find(u=>u.id===selApp.raId):null;const walBal=selApp?raWalBal(selApp.raId,apps):0;const avail=selApp?selApp.otherCharges-selApp.splitReleased:0;
+  const dealerPayees=selApp?payees.filter(p=>p.status==="Active"&&p.fluxStatus==="Validated"&&p.dealerIds&&p.dealerIds.includes(selApp.dealerId)):[];
+  const selPayee=payees.find(p=>p.id===payeeId);const isCross=selPayee&&selApp&&!selPayee.dealerIds.includes(selApp.dealerId);
+  const base=selApp?selApp.quote-(selApp.serviceCharge+selApp.challan+selApp.estRefurb):0;
+  const calcInc=selApp?Math.min((configs.NONGS_RATE/100)*base,configs.NONGS_CAP):0;
+  useEffect(()=>{if(type==="Incentive"&&selApp&&selApp.gsType==="Non-GS")setAmount(String(Math.round(calcInc)));else if(type!=="Incentive")setAmount("");},[type,appId]);
+  const amtErr=type==="Split"&&Number(amount)>avail?`Exceeds bucket (${fmt(avail)} available)`:"";const walErr=type==="Split"&&walBal<=0?"RA wallet is zero — split blocked":"";
+  function preview(){if(!appId||!type||!amount||!reason||!payeeId){alert("Fill all required fields");return;}if(!selApp.stockIn){alert("Stock-In not complete");return;}setResult(autoApprove({type,amount:Number(amount)},selApp,configs));setStep(1);}
+  function submit(){const amt=Number(amount);const newReq={id:`PR${uid()}`,appId,payeeId,raId:selApp.raId,type,amount:amt,status:result.ok?"Auto-Approved":result.route.includes("Finance")||result.route.includes("Ops")?"Submitted":"BH Review",createdBy:"TM",createdAt:now(),reason,rejectionReason:null,bhEdited:false,originalAmount:amt,utr:result.ok?`UTR${Math.floor(Math.random()*9e8+1e8)}`:null,crossDealerFlag:isCross||false};if(result.ok&&type==="Split")setApps(prev=>prev.map(a=>a.id===appId?{...a,splitReleased:a.splitReleased+amt}:a));setPayoutRequests(p=>[...p,newReq]);setDone(true);setTimeout(()=>{setDone(false);setStep(0);setAppId("");setPayeeId("");setType("");setAmount("");setReason("");setAckCross(false);setResult(null);},1800);}
+  if(done)return <div style={{textAlign:"center",padding:60}}><div style={{fontSize:50,marginBottom:14}}>{result&&result.ok?"✅":"📋"}</div><div style={{fontSize:16,fontWeight:800}}>{result&&result.ok?"Auto-Released!":"Submitted for Approval"}</div></div>;
+  return <div>
+    <StepBar steps={["Configure","Review & Submit"]} cur={step}/>
+    {step===0&&<Card>
+      <ST>Select App_ID</ST>
+      <Sel value={appId} onChange={v=>{setAppId(v);setPayeeId("");setType("");}} options={apps.map(a=>({value:a.id,label:`${a.id} — ${a.vehicle}`}))} placeholder="Choose App_ID..." required/>
+      {selApp&&<>
+        <div style={{background:T.accentL,borderRadius:9,padding:12,marginBottom:10}}>
+          <div style={{fontSize:10,fontWeight:800,color:T.accent,marginBottom:8}}>AUTO-FILLED FROM CARS24 ADMIN PANEL</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+            {[["Dealer",selDealer&&selDealer.name],["Code",selDealer&&selDealer.code],["Counter",selCounter&&selCounter.name],["City",selCounter&&selCounter.city],["UCM Name",selCounter&&selCounter.ucmName],["UCM Mobile",selCounter&&selCounter.ucmMobile],["RA",selRA&&selRA.name],["GS Type",selApp.gsType]].map(([l,v])=><div key={l} style={{background:"rgba(255,255,255,0.7)",borderRadius:6,padding:"5px 8px"}}><div style={{fontSize:9,color:T.accent,fontWeight:700,marginBottom:1}}>{l.toUpperCase()}</div><div style={{fontSize:11,fontWeight:800,wordBreak:"break-word"}}>{v||"—"}</div></div>)}
+          </div>
+        </div>
+        {!selApp.stockIn&&<Alrt type="error">Stock-In not complete — payouts blocked.</Alrt>}
+        <Sel label="Payout Type" value={type} onChange={setType} options={[{value:"Split",label:"Split Payment (Other Charges bucket)"},{value:"Incentive",label:"Incentive"}]} placeholder="Select type..." required/>
+        {type==="Split"&&<WalletDrillDown apps={apps} dealers={dealers} raId={selApp.raId} walBal={walBal} avail={avail} currentAppId={appId}/>}
+        {type&&<><Sel label="Payee (linked to this dealer)" value={payeeId} onChange={setPayeeId} options={dealerPayees.map(p=>({value:p.id,label:`${p.payeeName} — ${p.bank} · ${p.fluxStatus}`}))} placeholder="Select payee..." required/>{dealerPayees.length===0&&<Alrt type="warning">No active payees linked to this dealer. Ask RA/RM to submit a SAP request.</Alrt>}
+        {type==="Incentive"&&selApp.gsType==="Non-GS"&&<div style={{background:T.successL,borderRadius:8,padding:10,marginBottom:10}}><Lbl color={T.success}>Non-GS Calculation</Lbl><Row label="Base Amount" value={fmt(base)}/><Row label={`${configs.NONGS_RATE}% of Base`} value={fmt((configs.NONGS_RATE/100)*base)}/><Row label="Cap" value={fmt(configs.NONGS_CAP)}/><Row label="Pre-filled" value={fmt(calcInc)}/></div>}
+        <Fld label="Amount (₹)" value={amount} onChange={setAmount} type="number" required hint={type==="Split"?`Bucket: ${fmt(avail)}`:""} error={amtErr||walErr}/>
+        <Fld label="Reason / Remarks" value={reason} onChange={setReason} required/></>}
+      </>}
+      <div style={{display:"flex",justifyContent:"flex-end",marginTop:4}}><Btn onClick={preview} disabled={!appId||!type||!amount||!reason||!payeeId||!!amtErr||!!walErr}>Check Rules →</Btn></div>
+    </Card>}
+    {step===1&&result&&<>
+      <Card style={{marginBottom:12,border:`1.5px solid ${result.ok?"#BBF7D0":result.route==="BLOCKED"?"#FECACA":"#FDE68A"}`}}>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:10}}><div style={{fontSize:36}}>{result.ok?"✅":result.route==="BLOCKED"?"🚫":"🔀"}</div><div><div style={{fontSize:15,fontWeight:900,color:result.ok?T.success:result.route==="BLOCKED"?T.danger:T.warn}}>{result.route}</div><div style={{fontSize:12,color:T.mid,marginTop:2}}>{result.reason}</div></div></div>
+      </Card>
+      <Card style={{marginBottom:12}}><Lbl>Summary</Lbl>{[["App_ID",appId],["Dealer",selDealer&&selDealer.name],["Counter",selCounter&&selCounter.name],["UCM",selCounter&&selCounter.ucmName],["RA",selRA&&selRA.name],["Type",type],["Amount",fmt(amount)],["Payee",selPayee&&selPayee.payeeName],["Reason",reason]].map(([l,v])=><Row key={l} label={l} value={v||"—"}/>)}</Card>
+      <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}><Btn v="secondary" onClick={()=>setStep(0)}>← Edit</Btn><Btn v={result.route==="BLOCKED"?"secondary":result.ok?"success":"primary"} disabled={result.route==="BLOCKED"} onClick={submit}>{result.ok?"✓ Confirm & Release":"Submit for Approval"}</Btn></div>
+    </>}
+  </div>;
+}
+
+function OnboardingModuleOps({user,shared}){
+  const{dealers,setDealers,onboarding,setOnboarding,counterReqs,setCounterReqs}=shared;
+  const[sel,setSel]=useState(null);const[rejectReason,setRejectReason]=useState("");const[showRej,setShowRej]=useState(false);
+  const[view,setView]=useState("list");const[step,setStep]=useState(0);const[form,setForm]=useState({});const[docs,setDocs]=useState({gst:"",pan:"",bank:"",cancelledCheque:"",other:""});const[oemDocs,setOemDocs]=useState({franchiseAgreement:"",oemLetter:"",other:""});
+  const f=(k,v)=>setForm(p=>({...p,[k]:v}));
+  const queue=onboarding.filter(o=>["Admin Panel Pending","OEM Tagging Pending","Ops Review"].includes(o.status));
+  const ob=sel?onboarding.find(o=>o.id===sel):null;const ra=ob?ALL_USERS.find(u=>u.id===ob.raId):null;
+  function simCode(id){const code=String(100000+Math.floor(Math.random()*99999));setOnboarding(p=>p.map(o=>o.id===id?{...o,dealerCode:code,status:"OEM Tagging Pending"}:o));alert(`Dealer code ${code} received!`);}
+  function completeOEM(id){setOnboarding(p=>p.map(o=>o.id===id?{...o,status:"Ops Review"}:o));setSel(null);}
+  function activate(id){const o=onboarding.find(ob=>ob.id===id);setOnboarding(p=>p.map(ob=>ob.id===id?{...ob,status:"Active"}:ob));setDealers(p=>[...p,{id:`D${uid()}`,name:o.dealerName,code:o.dealerCode,type:o.type,oem:o.oem,region:o.region,city:o.city||"",raId:o.raId,status:"Active",onboardedAt:new Date().toISOString().slice(0,10)}]);alert(`✓ ${o.dealerName} activated! Now visible to all roles.`);setSel(null);}
+  function reject(id){if(!rejectReason){alert("Reason required");return;}setOnboarding(p=>p.map(o=>o.id===id?{...o,status:"Rejected",rejectionReason:rejectReason}:o));setSel(null);setRejectReason("");setShowRej(false);}
+  function submitTMForm(){setOnboarding(p=>[...p,{id:`OB${uid()}`,raId:user.id,submittedBy:"TM",...form,docs,oemDocs,status:"Admin Panel Pending",dealerCode:"",submittedAt:now()}]);setView("list");setStep(0);setForm({});setDocs({gst:"",pan:"",bank:"",cancelledCheque:"",other:""});setOemDocs({franchiseAgreement:"",oemLetter:"",other:""});}
+
+  if(user.role==="TM"&&view==="form")return <div>
+    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}><Btn v="ghost" onClick={()=>{setView("list");setStep(0);setForm({});}} sm>← Back</Btn><span style={{fontSize:14,fontWeight:800}}>New Dealer Onboarding (TM)</span></div>
+    <StepBar steps={["Dealer Info","Bank & Docs","OEM Details","Review"]} cur={step}/>
+    {step===0&&<Card><ST>Dealer Information</ST><Fld label="Dealer / Company Name" value={form.dealerName} onChange={v=>f("dealerName",v)} required/><G2><Sel label="Region" value={form.region} onChange={v=>f("region",v)} options={REGIONS} placeholder="Select..." required/><Sel label="City" value={form.city} onChange={v=>f("city",v)} options={CITIES} placeholder="Select..." required/></G2><G2><Fld label="Mobile" value={form.mobile} onChange={v=>f("mobile",v)} required/><Fld label="Email" value={form.email} onChange={v=>f("email",v)}/></G2><Fld label="Full Address" value={form.address} onChange={v=>f("address",v)} required/><div style={{display:"flex",justifyContent:"flex-end",marginTop:4}}><Btn disabled={!form.dealerName||!form.region||!form.city||!form.mobile||!form.address} onClick={()=>setStep(1)}>Next →</Btn></div></Card>}
+    {step===1&&<Card><ST>Bank & Tax</ST><G2><Fld label="PAN" value={form.pan} onChange={v=>f("pan",v.toUpperCase())} required maxLength={10}/><Fld label="GST" value={form.gst} onChange={v=>f("gst",v.toUpperCase())}/></G2><Sel label="Bank" value={form.bank} onChange={v=>f("bank",v)} options={BANK_LIST} placeholder="Select bank..." required/><G2><Fld label="Account No." value={form.account} onChange={v=>f("account",v)} required/><Fld label="IFSC" value={form.ifsc} onChange={v=>f("ifsc",v.toUpperCase())} required/></G2><ST>Mandatory Documents</ST><FileInput label="GST Certificate" value={docs.gst} onChange={v=>setDocs(p=>({...p,gst:v}))} required/><FileInput label="PAN Card" value={docs.pan} onChange={v=>setDocs(p=>({...p,pan:v}))} required/><FileInput label="Bank Statement" value={docs.bank} onChange={v=>setDocs(p=>({...p,bank:v}))} required/><FileInput label="Cancelled Cheque" value={docs.cancelledCheque} onChange={v=>setDocs(p=>({...p,cancelledCheque:v}))} required/><ST>Other (Optional)</ST><FileInput label="Other" value={docs.other} onChange={v=>setDocs(p=>({...p,other:v}))}/><div style={{display:"flex",justifyContent:"space-between",marginTop:4}}><Btn v="secondary" onClick={()=>setStep(0)}>← Back</Btn><Btn disabled={!form.pan||!form.bank||!form.account||!form.ifsc||!docs.gst||!docs.pan||!docs.bank||!docs.cancelledCheque} onClick={()=>setStep(2)}>Next →</Btn></div></Card>}
+    {step===2&&<Card><ST>OEM & Dealer Type</ST><G2><Sel label="Dealer Type" value={form.type} onChange={v=>f("type",v)} options={DEALER_TYPES} placeholder="Select..." required/><Sel label="OEM Brand" value={form.oem} onChange={v=>f("oem",v)} options={OEM_BRANDS} placeholder="Select..." required/></G2><Sel label="Company Code" value={form.companyCode} onChange={v=>f("companyCode",v)} options={COMPANY_CODES} placeholder="Select company code..." required/><ST>Dealer Location</ST><div style={{display:"flex",gap:8,marginBottom:8}}><Btn v={form.latMode==="auto"?"primary":"secondary"} sm onClick={()=>{f("latMode","auto");if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>{f("lat",pos.coords.latitude.toFixed(6));f("long",pos.coords.longitude.toFixed(6));},()=>alert("Location access denied"));}}}>📍 Auto-detect</Btn><Btn v={form.latMode==="manual"?"primary":"secondary"} sm onClick={()=>f("latMode","manual")}>✏️ Enter manually</Btn></div>{(form.latMode==="manual"||form.lat)&&<G2><Fld label="Latitude" value={form.lat} onChange={v=>f("lat",v)} placeholder="e.g. 28.6139" required={form.latMode==="manual"}/><Fld label="Longitude" value={form.long} onChange={v=>f("long",v)} placeholder="e.g. 77.2090" required={form.latMode==="manual"}/></G2>}{form.lat&&form.long&&<div style={{background:"#ECFDF5",border:"1px solid #BBF7D0",borderRadius:7,padding:"6px 10px",marginBottom:8,fontSize:11,color:"#065F46",fontWeight:700}}>📍 {form.lat}, {form.long}</div>}<ST>OEM Documents</ST><FileInput label="Franchise Agreement" value={oemDocs.franchiseAgreement} onChange={v=>setOemDocs(p=>({...p,franchiseAgreement:v}))} required/><FileInput label="OEM Authorization Letter" value={oemDocs.oemLetter} onChange={v=>setOemDocs(p=>({...p,oemLetter:v}))} required/><ST>Other (Optional)</ST><FileInput label="Other OEM Doc" value={oemDocs.other} onChange={v=>setOemDocs(p=>({...p,other:v}))}/><div style={{display:"flex",justifyContent:"space-between",marginTop:4}}><Btn v="secondary" onClick={()=>setStep(1)}>← Back</Btn><Btn disabled={!form.type||!form.oem||!form.companyCode||!oemDocs.franchiseAgreement||!oemDocs.oemLetter} onClick={()=>setStep(3)}>Review →</Btn></div></Card>}
+    {step===3&&<Card><ST>Review & Submit</ST>{[["Dealer",form.dealerName],["Region",form.region],["City",form.city],["Type",form.type],["OEM",form.oem]].map(([l,v])=><Row key={l} label={l} value={v||"—"}/>)}<Alrt type="warning">Submitting adds to Ops Panel queue and sends auto-email to Admin Panel.</Alrt><div style={{display:"flex",justifyContent:"space-between",marginTop:10}}><Btn v="secondary" onClick={()=>setStep(2)}>← Edit</Btn><Btn v="success" icon="✓" onClick={submitTMForm}>Submit</Btn></div></Card>}
+  </div>;
+
+  return <div>
+    {user.role==="TM"&&<div style={{marginBottom:12}}><Btn icon="+" onClick={()=>setView("form")}>Request New Dealer Onboarding</Btn></div>}
+    <Lbl>Pending Queue ({queue.length})</Lbl>
+    {queue.length===0&&<div style={{textAlign:"center",padding:32,color:T.mute}}><div style={{fontSize:28,marginBottom:8}}>✓</div>All clear</div>}
+    {queue.map(o=>{const rUser=ALL_USERS.find(u=>u.id===o.raId);return <Card key={o.id} onClick={()=>{setSel(sel===o.id?null:o.id);setShowRej(false);setRejectReason("");}} style={{marginBottom:8,border:`1.5px solid ${sel===o.id?T.accent:T.border}`,background:sel===o.id?T.accentL:"#fff"}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:13,fontWeight:800}}>{o.dealerName}</span><Badge s={o.status} sm/></div><div style={{fontSize:11,color:T.mute}}>{o.type} · {o.oem} · {o.region} · By: {rUser&&rUser.name}</div>{o.dealerCode&&<div style={{fontSize:11,fontWeight:800,color:T.success,marginTop:2}}>Code: {o.dealerCode}</div>}</Card>;})}
+    {ob&&<Card style={{marginTop:12,border:`1.5px solid ${T.accent}`}}>
+      <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><div><div style={{fontSize:14,fontWeight:800}}>{ob.dealerName}</div><div style={{fontSize:11,color:T.mute}}>By: {ra&&ra.name} · {ob.submittedAt}</div></div><Badge s={ob.status}/></div>
+      {[["Region",ob.region],["City",ob.city],["Type",ob.type],["OEM",ob.oem],["PAN",ob.pan],["Bank",ob.bank]].map(([l,v])=>v?<Row key={l} label={l} value={v}/>:null)}
+      {ob.docs&&<div style={{marginTop:8}}>{Object.entries(ob.docs).filter(([,v])=>v).map(([k,v])=><div key={k} style={{fontSize:11,color:T.mid,padding:"2px 0"}}>📄 {v}</div>)}</div>}
+      {user.role==="Central Ops"&&<div style={{marginTop:12}}>
+        {ob.status==="Admin Panel Pending"&&<><Alrt type="info">Auto-email sent. Waiting for dealer code.</Alrt><Btn v="secondary" sm onClick={()=>simCode(ob.id)}>🔄 Simulate Code Received</Btn></>}
+        {ob.status==="OEM Tagging Pending"&&<><Alrt type="warning">Code: <strong>{ob.dealerCode}</strong> — OEM tagging gated until code confirmed.</Alrt><div style={{display:"flex",gap:8,marginTop:8}}>{!showRej&&<Btn v="danger" sm onClick={()=>setShowRej(true)}>Reject</Btn>}<Btn v="success" onClick={()=>completeOEM(ob.id)} icon="✓">Complete OEM Tagging</Btn></div></>}
+        {ob.status==="Ops Review"&&<><Alrt type="info">OEM done. Review and activate.</Alrt><div style={{display:"flex",gap:8,marginTop:8}}>{!showRej&&<Btn v="danger" sm onClick={()=>setShowRej(true)}>Reject</Btn>}<Btn v="success" onClick={()=>activate(ob.id)} icon="✓">Activate Dealer</Btn></div></>}
+        {showRej&&<div style={{marginTop:10,padding:12,background:T.dangerL,borderRadius:8}}><Fld label="Rejection Reason *" value={rejectReason} onChange={setRejectReason}/><div style={{display:"flex",gap:8}}><Btn v="danger" sm onClick={()=>reject(ob.id)}>Confirm</Btn><Btn v="ghost" sm onClick={()=>{setShowRej(false);setRejectReason("");}}>Cancel</Btn></div></div>}
+      </div>}
+    </Card>}
+    <div style={{marginTop:14}}><Lbl>All Onboarding ({onboarding.length})</Lbl>{onboarding.map(o=>{const rUser=ALL_USERS.find(u=>u.id===o.raId);return <div key={o.id} style={{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:`1px solid ${T.border}`}}><div><div style={{fontSize:12,fontWeight:700}}>{o.dealerName}</div><div style={{fontSize:10,color:T.mute}}>By: {rUser&&rUser.name}</div></div><Badge s={o.status} sm/></div>;})} </div>
+  </div>;
+}
+
+function CounterModuleOps({user,shared}){
+  const{dealers,counters,setCounters,counterReqs,setCounterReqs}=shared;
+  const[sel,setSel]=useState(null);const[rejectReason,setRejectReason]=useState("");const[showRej,setShowRej]=useState(false);
+  const[showForm,setShowForm]=useState(false);const[form,setForm]=useState({});const f=(k,v)=>setForm(p=>({...p,[k]:v}));
+  const queue=counterReqs.filter(r=>r.status==="Ops Review");const req=sel?counterReqs.find(r=>r.id===sel):null;const reqDealer=req?dealers.find(d=>d.id===req.dealerId):null;
+  function approve(id){const r=counterReqs.find(r=>r.id===id);setCounterReqs(p=>p.map(rr=>rr.id===id?{...rr,status:"Active"}:rr));setCounters(p=>[...p,{id:`C${uid()}`,dealerId:r.dealerId,name:r.counterName,city:r.city,ucmName:r.ucmName,ucmMobile:r.ucmMobile,raId:r.raId,status:"Active"}]);alert("✓ Counter created!");setSel(null);}
+  function reject(id){if(!rejectReason){alert("Reason required");return;}setCounterReqs(p=>p.map(r=>r.id===id?{...r,status:"Rejected",rejectionReason:rejectReason}:r));setSel(null);setRejectReason("");setShowRej(false);}
+  function submitTMForm(){if(!form.dealerId||!form.counterName||!form.city||!form.ucmName||!form.ucmMobile){alert("Fill required fields");return;}setCounterReqs(p=>[...p,{id:`CR${uid()}`,raId:user.id,dealerId:form.dealerId,counterName:form.counterName,city:form.city,ucmName:form.ucmName,ucmMobile:form.ucmMobile,ucmEmail:form.ucmEmail||"",status:"Ops Review",submittedAt:now(),rejectionReason:null}]);setShowForm(false);setForm({});alert("Counter request submitted to Central Ops.");}
+  return <div>
+    {user.role==="TM"&&<div style={{marginBottom:12}}>{!showForm&&<Btn icon="+" onClick={()=>setShowForm(true)}>Request Counter & UCM Mapping</Btn>}{showForm&&<Card style={{marginBottom:12,border:`1.5px solid ${T.accent}`}}><ST>Counter & UCM Form (TM)</ST><Sel label="Dealer" value={form.dealerId} onChange={v=>f("dealerId",v)} options={dealers.filter(d=>d.status==="Active").map(d=>({value:d.id,label:`${d.name} (${d.code})`}))} placeholder="Select dealer..." required/><Fld label="Counter Name" value={form.counterName} onChange={v=>f("counterName",v)} required/><Sel label="City" value={form.city} onChange={v=>f("city",v)} options={CITIES} placeholder="Select city..." required/><G2><Fld label="UCM Name" value={form.ucmName} onChange={v=>f("ucmName",v)} required/><Fld label="UCM Mobile" value={form.ucmMobile} onChange={v=>f("ucmMobile",v)} required/></G2><div style={{display:"flex",gap:8,justifyContent:"flex-end"}}><Btn v="secondary" sm onClick={()=>{setShowForm(false);setForm({});}}>Cancel</Btn><Btn sm icon="✓" onClick={submitTMForm}>Submit</Btn></div></Card>}</div>}
+    <Lbl>Queue ({queue.length})</Lbl>
+    {queue.length===0&&<div style={{textAlign:"center",padding:28,color:T.mute,fontSize:13}}><div style={{fontSize:28,marginBottom:8}}>✓</div>All clear</div>}
+    {queue.map(r=>{const d=dealers.find(d=>d.id===r.dealerId);const rUser=ALL_USERS.find(u=>u.id===r.raId);return <Card key={r.id} onClick={()=>{setSel(sel===r.id?null:r.id);setShowRej(false);setRejectReason("");}} style={{marginBottom:8,border:`1.5px solid ${sel===r.id?T.accent:T.border}`,background:sel===r.id?T.accentL:"#fff"}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,fontWeight:800}}>{r.counterName}</span><Badge s={r.status} sm/></div><div style={{fontSize:11,color:T.mute}}>{d&&d.name} · {r.city} · UCM: {r.ucmName}</div><div style={{fontSize:10,color:T.mute}}>By: {rUser&&rUser.name} · {r.submittedAt}</div></Card>;})}
+    {req&&<Card style={{marginTop:12,border:`1.5px solid ${T.accent}`}}>
+      <div style={{fontSize:14,fontWeight:800,marginBottom:8}}>{req.counterName}</div>
+      {[["Dealer",reqDealer&&reqDealer.name],["City",req.city],["UCM Name",req.ucmName],["UCM Mobile",req.ucmMobile]].map(([l,v])=><Row key={l} label={l} value={v||"—"}/>)}
+      {user.role==="Central Ops"&&req.status==="Ops Review"&&<div style={{marginTop:10}}>
+        {!showRej&&<div style={{display:"flex",gap:8}}><Btn v="danger" sm onClick={()=>setShowRej(true)}>Reject</Btn><Btn v="success" onClick={()=>approve(req.id)} icon="✓">Approve & Create Counter</Btn></div>}
+        {showRej&&<div style={{padding:12,background:T.dangerL,borderRadius:8,marginTop:8}}><Fld label="Rejection Reason *" value={rejectReason} onChange={setRejectReason}/><div style={{display:"flex",gap:8}}><Btn v="danger" sm onClick={()=>reject(req.id)}>Confirm</Btn><Btn v="ghost" sm onClick={()=>setShowRej(false)}>Cancel</Btn></div></div>}
+      </div>}
+    </Card>}
+    <div style={{marginTop:14}}><Lbl>Active Counters ({counters.length})</Lbl>{counters.map(c=>{const d=dealers.find(d=>d.id===c.dealerId);return <div key={c.id} style={{padding:"7px 0",borderBottom:`1px solid ${T.border}`}}><div style={{display:"flex",justifyContent:"space-between"}}><div style={{fontSize:12,fontWeight:700}}>{c.name}</div><Badge s={c.status} sm/></div><div style={{fontSize:11,color:T.mute}}>{d&&d.name} · {c.city} · UCM: {c.ucmName}</div></div>;})} </div>
+  </div>;
+}
+
+function SAPModuleOps({user,shared}){
+  const{dealers,sapReqs,setSapReqs,payees,setPayees}=shared;
+  const[sel,setSel]=useState(null);const[rejectReason,setRejectReason]=useState("");const[showRej,setShowRej]=useState(false);
+  const[showForm,setShowForm]=useState(false);const[form,setForm]=useState({});const[selD,setSelD]=useState([]);const[docs,setDocs]=useState({pan:"",cancelledCheque:"",other:""});const f=(k,v)=>setForm(p=>({...p,[k]:v}));
+  function approve(id){const r=sapReqs.find(sr=>sr.id===id);const sapCode=`SAP-${uid()}`;setSapReqs(p=>p.map(sr=>sr.id===id?{...sr,status:"Active",sapCode}:sr));setPayees(p=>[...p,{id:`P${uid()}`,dealerIds:r.dealerIds,raId:r.raId,payeeName:r.payeeName,pan:r.pan,bank:r.bank,account:r.account,ifsc:r.ifsc,mobile:r.mobile||"",sapCode,fluxStatus:"Validated",status:"Active",createdAt:new Date().toISOString().slice(0,10)}]);alert(`✓ SAP created: ${sapCode}`);setSel(null);}
+  function reject(id){if(!rejectReason){alert("Reason required");return;}setSapReqs(p=>p.map(r=>r.id===id?{...r,status:"Rejected",rejectionReason:rejectReason}:r));setSel(null);setRejectReason("");setShowRej(false);}
+  function submitTMForm(){if(!form.payeeName||!form.pan||!form.bank||!form.account||!form.ifsc||selD.length===0){alert("Fill all required fields");return;}if(!docs.pan||!docs.cancelledCheque){alert("PAN card and Cancelled Cheque are mandatory");return;}setSapReqs(p=>[...p,{id:`SR${uid()}`,raId:user.id,dealerIds:selD,payeeName:form.payeeName,pan:form.pan,bank:form.bank,account:form.account,ifsc:form.ifsc,mobile:form.mobile||"",docs,status:"Ops Review",submittedAt:now(),sapCode:""}]);setShowForm(false);setForm({});setSelD([]);setDocs({pan:"",cancelledCheque:"",other:""});}
+  const req=sel?sapReqs.find(r=>r.id===sel):null;const queue=sapReqs.filter(r=>r.status==="Ops Review");
+  return <div>
+    {user.role==="TM"&&<div style={{marginBottom:12}}>{!showForm&&<Btn icon="+" onClick={()=>setShowForm(true)}>Request New Payee / SAP</Btn>}{showForm&&<Card style={{marginBottom:12,border:`1.5px solid ${T.accent}`}}><ST>SAP Form (TM)</ST><Alrt type="info">Payee can be linked to multiple dealers.</Alrt><MultiDealerSel dealers={dealers.filter(d=>d.status==="Active")} selected={selD} onChange={setSelD}/><Fld label="Payee Name" value={form.payeeName} onChange={v=>f("payeeName",v)} required/><G2><Fld label="PAN" value={form.pan} onChange={v=>f("pan",v.toUpperCase())} required maxLength={10}/><Fld label="Mobile" value={form.mobile} onChange={v=>f("mobile",v)}/></G2><Sel label="Bank" value={form.bank} onChange={v=>f("bank",v)} options={BANK_LIST} placeholder="Select bank..." required/><G2><Fld label="Account No." value={form.account} onChange={v=>f("account",v)} required/><Fld label="IFSC" value={form.ifsc} onChange={v=>f("ifsc",v.toUpperCase())} required/></G2><ST>Mandatory Documents</ST><FileInput label="PAN Card" value={docs.pan} onChange={v=>setDocs(p=>({...p,pan:v}))} required/><FileInput label="Cancelled Cheque" value={docs.cancelledCheque} onChange={v=>setDocs(p=>({...p,cancelledCheque:v}))} required/><ST>Other (Optional)</ST><FileInput label="Other Document" value={docs.other} onChange={v=>setDocs(p=>({...p,other:v}))}/><div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:4}}><Btn v="secondary" sm onClick={()=>{setShowForm(false);setForm({});setSelD([]);}}>Cancel</Btn><Btn sm icon="✓" onClick={submitTMForm}>Submit</Btn></div></Card>}</div>}
+    <Lbl>SAP Requests ({sapReqs.length})</Lbl>
+    {queue.map(r=>{const ds=r.dealerIds.map(id=>dealers.find(d=>d.id===id)).filter(Boolean);const rUser=ALL_USERS.find(u=>u.id===r.raId);return <Card key={r.id} onClick={()=>{setSel(sel===r.id?null:r.id);setShowRej(false);setRejectReason("");}} style={{marginBottom:8,border:`1.5px solid ${sel===r.id?T.accent:T.border}`,background:sel===r.id?T.accentL:"#fff"}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:13,fontWeight:800}}>{r.payeeName}</span><Badge s={r.status} sm/></div><div style={{fontSize:11,color:T.mute,marginBottom:2}}>{r.bank} · {r.pan}</div><div style={{fontSize:10,color:T.accent,fontWeight:700}}>Linked: {ds.map(d=>d.name).join(", ")}</div><div style={{fontSize:10,color:T.mute}}>By: {rUser&&rUser.name}</div></Card>;})}
+    {req&&<Card style={{marginTop:12,border:`1.5px solid ${T.accent}`}}>
+      <div style={{fontSize:14,fontWeight:800,marginBottom:10}}>{req.payeeName}</div>
+      {[["PAN",req.pan],["Bank",req.bank],["Account",req.account],["IFSC",req.ifsc]].map(([l,v])=><Row key={l} label={l} value={v} mono/>)}
+      <div style={{marginTop:6}}>{req.dealerIds.map(id=>{const d=dealers.find(d=>d.id===id);return <div key={id} style={{fontSize:11,color:T.mid}}>🏢 {d&&d.name}</div>;})}</div>
+      {user.role==="Central Ops"&&req.status==="Ops Review"&&<div style={{marginTop:10}}>
+        <Alrt type="info">Approving triggers SAP integration and assigns SAP code.</Alrt>
+        {!showRej&&<div style={{display:"flex",gap:8}}><Btn v="danger" sm onClick={()=>setShowRej(true)}>Reject</Btn><Btn v="success" onClick={()=>approve(req.id)} icon="✓">Approve & Create SAP</Btn></div>}
+        {showRej&&<div style={{padding:12,background:T.dangerL,borderRadius:8,marginTop:8}}><Fld label="Rejection Reason *" value={rejectReason} onChange={setRejectReason}/><div style={{display:"flex",gap:8}}><Btn v="danger" sm onClick={()=>reject(req.id)}>Confirm</Btn><Btn v="ghost" sm onClick={()=>setShowRej(false)}>Cancel</Btn></div></div>}
+      </div>}
+    </Card>}
+    <div style={{marginTop:14}}><Lbl>Active Payees ({payees.length})</Lbl>{payees.map((p,i)=>{const ds=p.dealerIds.map(id=>dealers.find(d=>d.id===id)).filter(Boolean);return <div key={p.id} style={{background:i%2===0?"#fff":"#F7F9FC",padding:"8px 10px",borderRadius:8,marginBottom:4,border:`1px solid ${T.border}`}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}><span style={{fontSize:12,fontWeight:800}}>{p.payeeName}</span><Badge s={p.fluxStatus} sm/></div><div style={{fontSize:11,color:T.mute}}>{p.bank} · {p.pan}</div><div style={{fontSize:10,color:T.accent,fontWeight:700}}>Dealers: {ds.map(d=>d.name).join(", ")}</div>{p.sapCode&&<div style={{fontSize:10,fontFamily:"monospace",color:T.success,fontWeight:700}}>{p.sapCode}</div>}</div>;})}</div>
+  </div>;
+}
+
+function ApprovalsModule({user,shared}){
+  const{apps,setApps,dealers,payees,payoutRequests,setPayoutRequests,configs}=shared;
+  const[sel,setSel]=useState(null);const[bhAmt,setBhAmt]=useState("");const[rejectReason,setRejectReason]=useState("");const[showRej,setShowRej]=useState(false);
+  if(user.role==="TM")return <div style={{textAlign:"center",padding:60,color:T.mute}}><div style={{fontSize:40,marginBottom:10}}>🔒</div><div style={{fontSize:14,fontWeight:700}}>TM does not have approval access.</div></div>;
+  const queue=payoutRequests.filter(r=>{if(user.role==="Central Ops")return r.status==="Submitted";if(user.role==="Business Head")return["BH Review","Ops Approved"].includes(r.status)||(r.crossDealerFlag&&r.status==="Submitted");if(user.role==="Finance")return r.status==="BH Approved"&&r.amount>=configs.FINANCE_GATE;return false;});
+  const req=sel?payoutRequests.find(r=>r.id===sel):null;const app=req?apps.find(a=>a.id===req.appId):null;const dealer=app?dealers.find(d=>d.id===app.dealerId):null;const ra=app?ALL_USERS.find(u=>u.id===app.raId):null;const payee=req?payees.find(p=>p.id===req.payeeId):null;
+  function approve(){let newStatus;const amt=bhAmt?Number(bhAmt):req.amount;if(user.role==="Central Ops")newStatus="Ops Approved";else if(user.role==="Business Head"){newStatus=amt>=configs.FINANCE_GATE?"BH Approved":"Released";if(newStatus==="Released")setApps(prev=>prev.map(a=>a.id===req.appId?{...a,splitReleased:req.type==="Split"?a.splitReleased+amt:a.splitReleased}:a));}else if(user.role==="Finance"){newStatus="Released";setApps(prev=>prev.map(a=>a.id===req.appId?{...a,splitReleased:req.type==="Split"?a.splitReleased+req.amount:a.splitReleased}:a));}const edited=user.role==="Business Head"&&bhAmt&&Number(bhAmt)!==req.amount;setPayoutRequests(prev=>prev.map(r=>r.id===sel?{...r,status:newStatus,bhEdited:edited||r.bhEdited,amount:user.role==="Business Head"&&bhAmt?Number(bhAmt):r.amount,originalAmount:r.originalAmount||r.amount,utr:newStatus==="Released"?`UTR${Math.floor(Math.random()*9e8+1e8)}`:r.utr}:r));alert(`✓ ${sel} → ${newStatus}`);setSel(null);setBhAmt("");setShowRej(false);setRejectReason("");}
+  function reject(){if(!rejectReason){alert("Reason required");return;}setPayoutRequests(prev=>prev.map(r=>r.id===sel?{...r,status:"Rejected",rejectionReason:rejectReason}:r));setSel(null);setRejectReason("");setShowRej(false);}
+  return <div>
+    <Lbl>Queue ({queue.length})</Lbl>
+    {queue.length===0&&<div style={{textAlign:"center",padding:32,color:T.mute}}><div style={{fontSize:28,marginBottom:8}}>✓</div>No pending items</div>}
+    {queue.map(r=>{const rApp=apps.find(a=>a.id===r.appId);return <Card key={r.id} onClick={()=>{setSel(sel===r.id?null:r.id);setBhAmt("");setShowRej(false);setRejectReason("");}} style={{marginBottom:8,border:`1.5px solid ${sel===r.id?T.accent:T.border}`,background:sel===r.id?T.accentL:"#fff"}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}><span style={{fontSize:12,fontWeight:800}}>{r.id}</span><Badge s={r.status} sm/></div>{r.crossDealerFlag&&<div style={{fontSize:9,fontWeight:800,color:T.warn,marginBottom:2}}>⚠ CROSS-DEALER</div>}<div style={{fontSize:11,color:T.mute}}>{r.appId} · {r.type}</div><div style={{fontSize:16,fontWeight:900,color:T.accent}}>{fmt(r.amount)}</div></Card>;})}
+    {req&&app&&<Card style={{marginTop:12,border:`1.5px solid ${T.accent}`}}>
+      <div style={{display:"flex",justifyContent:"space-between",marginBottom:10}}><div style={{fontSize:14,fontWeight:800}}>{req.id}</div><Badge s={req.status}/></div>
+      {req.crossDealerFlag&&<Alrt type="warning">Cross-dealer payment — verify before approving.</Alrt>}
+      {[["App_ID",req.appId],["Vehicle",app.vehicle],["Dealer",dealer&&dealer.name],["RA",ra&&ra.name],["RA Wallet",fmt(raWalBal(app.raId,apps))],["Payee",payee&&payee.payeeName||"—"],["Type",req.type],["Amount",fmt(req.amount)],["Reason",req.reason]].map(([l,v])=><Row key={l} label={l} value={v||"—"}/>)}
+      {req.bhEdited&&<Row label="Original Amount" value={fmt(req.originalAmount)}/>}
+      {user.role==="Business Head"&&!showRej&&<div style={{marginTop:12}}><Fld label="Override Amount (blank = approve as-is)" value={bhAmt} onChange={setBhAmt} type="number" hint={`Original: ${fmt(req.amount)}`}/>{bhAmt&&Number(bhAmt)!==req.amount&&<Alrt type="warning">Changing to {fmt(bhAmt)}. Permanently flagged.</Alrt>}</div>}
+      {showRej&&<div style={{padding:12,background:T.dangerL,borderRadius:8,marginTop:8}}><Fld label="Rejection Reason *" value={rejectReason} onChange={setRejectReason}/><div style={{display:"flex",gap:8}}><Btn v="danger" sm onClick={reject}>Confirm Reject</Btn><Btn v="ghost" sm onClick={()=>setShowRej(false)}>Cancel</Btn></div></div>}
+      {!showRej&&<div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:10}}><Btn v="secondary" sm onClick={()=>setShowRej(true)}>Reject</Btn><Btn v="success" icon="✓" onClick={approve}>{user.role==="Finance"?"Final Approve & Release":"Approve →"}</Btn></div>}
+    </Card>}
+    <div style={{marginTop:14}}><Lbl>All Requests ({payoutRequests.length})</Lbl>{payoutRequests.slice().reverse().map(r=>{const rApp=apps.find(a=>a.id===r.appId);return <div key={r.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:`1px solid ${T.border}`}}><div><div style={{fontSize:12,fontWeight:700}}>{r.id} — {fmt(r.amount)}</div><div style={{fontSize:10,color:T.mute}}>{r.type} · {rApp&&rApp.vehicle}</div></div><Badge s={r.status} sm/></div>;})} </div>
+  </div>;
+}
+
+function DataTransferModule({user,shared}){
+  const{dealers,setDealers,counters,setCounters,apps,setApps,payees,setPayees}=shared;
+  const[fromId,setFromId]=useState("");const[toId,setToId]=useState("");const[reason,setReason]=useState("");const[scope,setScope]=useState("all");const[confirmed,setConfirmed]=useState(false);const[auditLog,setAuditLog]=useState([]);
+  const[mapMode,setMapMode]=useState("bulk");const[entityType,setEntityType]=useState("");const[entityId,setEntityId]=useState("");const[newVal,setNewVal]=useState("");
+  if(!["Central Ops","Business Head"].includes(user.role))return <div style={{textAlign:"center",padding:60,color:T.mute}}><div style={{fontSize:40,marginBottom:10}}>🔒</div><div style={{fontSize:14,fontWeight:700}}>Central Ops & Business Head only.</div></div>;
+  const ras=ALL_USERS.filter(u=>["RA","RM"].includes(u.role));const fromUser=ALL_USERS.find(u=>u.id===fromId);const toUser=ALL_USERS.find(u=>u.id===toId);
+  function executeBulk(){if(!fromId||!toId||!reason||!confirmed){alert("Fill all and confirm");return;}if(fromId===toId){alert("Cannot transfer to same person");return;}if(scope==="all"||scope==="dealers")setDealers(prev=>prev.map(d=>d.raId===fromId?{...d,raId:toId}:d));if(scope==="all"||scope==="appids")setApps(prev=>prev.map(a=>a.raId===fromId?{...a,raId:toId}:a));if(scope==="all"||scope==="payees")setPayees(prev=>prev.map(p=>p.raId===fromId?{...p,raId:toId}:p));setAuditLog(p=>[...p,{id:`TXF${uid()}`,mode:"bulk",fromName:fromUser&&fromUser.name,toName:toUser&&toUser.name,scope,reason,executedBy:user.role,at:now()}]);alert(`✓ Transfer done!`);setFromId("");setToId("");setReason("");setConfirmed(false);}
+  function executeEntity(){if(!entityType||!entityId||!reason){alert("Fill all fields");return;}let desc="";if(entityType==="dealer_ra"){setDealers(prev=>prev.map(d=>d.id===entityId?{...d,raId:newVal}:d));desc=`Dealer ${entityId} → RA ${newVal}`;}if(entityType==="app_ra"){setApps(prev=>prev.map(a=>a.id===entityId?{...a,raId:newVal}:a));desc=`App_ID ${entityId} → RA ${newVal}`;}if(entityType==="payee_dealer"){setPayees(prev=>prev.map(p=>p.id===entityId?{...p,dealerIds:p.dealerIds.includes(newVal)?p.dealerIds:[...p.dealerIds,newVal]}:p));desc=`Payee ${entityId} added dealer ${newVal}`;}if(entityType==="counter_dealer"){setCounters(prev=>prev.map(c=>c.id===entityId?{...c,dealerId:newVal}:c));desc=`Counter ${entityId} → Dealer ${newVal}`;}setAuditLog(p=>[...p,{id:`TXF${uid()}`,mode:"entity",desc,reason,executedBy:user.role,at:now()}]);alert(`✓ Re-mapping applied`);setEntityType("");setEntityId("");setNewVal("");setReason("");}
+  return <div>
+    <Alrt type="warning">All changes are permanently audit-logged. Central Ops & BH have full access.</Alrt>
+    <div style={{display:"flex",gap:8,marginBottom:12}}><Btn v={mapMode==="bulk"?"primary":"secondary"} sm onClick={()=>setMapMode("bulk")}>Bulk Transfer</Btn><Btn v={mapMode==="entity"?"primary":"secondary"} sm onClick={()=>setMapMode("entity")}>Single Entity Re-map</Btn></div>
+    {mapMode==="bulk"&&<Card style={{marginBottom:12}}>
+      <ST>Bulk Data Transfer</ST>
+      <G2><Sel label="Transfer FROM" value={fromId} onChange={v=>{setFromId(v);setConfirmed(false);}} options={ras.map(u=>({value:u.id,label:`${u.name} (${u.role})`}))} placeholder="Select..." required/><Sel label="Transfer TO" value={toId} onChange={v=>{setToId(v);setConfirmed(false);}} options={ras.filter(u=>u.id!==fromId).map(u=>({value:u.id,label:`${u.name} (${u.role})`}))} placeholder="Select..." required/></G2>
+      <Sel label="Scope" value={scope} onChange={v=>{setScope(v);setConfirmed(false);}} options={[{value:"all",label:"All data (dealers + App_IDs + payees)"},{value:"dealers",label:"Dealers only"},{value:"appids",label:"App_IDs only"},{value:"payees",label:"Payees only"}]}/>
+      <Fld label="Reason *" value={reason} onChange={setReason} required placeholder="e.g. RA resigned"/>
+      {fromId&&toId&&<div style={{background:"#F7F9FC",borderRadius:8,padding:10,marginBottom:10}}><Lbl>Preview</Lbl><Row label="Dealers to transfer" value={dealers.filter(d=>d.raId===fromId).length}/><Row label="App_IDs to transfer" value={apps.filter(a=>a.raId===fromId).length}/></div>}
+      <label style={{display:"flex",alignItems:"center",gap:8,marginBottom:12,cursor:"pointer"}}><input type="checkbox" checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/><span style={{fontSize:12,color:T.danger,fontWeight:700}}>I confirm this is authorised and permanent</span></label>
+      <Btn v="danger" icon="⚡" disabled={!fromId||!toId||!reason||!confirmed} onClick={executeBulk}>Execute Bulk Transfer</Btn>
+    </Card>}
+    {mapMode==="entity"&&<Card style={{marginBottom:12}}>
+      <ST>Single Entity Re-mapping</ST>
+      <Sel label="Mapping Type" value={entityType} onChange={v=>{setEntityType(v);setEntityId("");setNewVal("");}} options={[{value:"dealer_ra",label:"Change Dealer → RA mapping"},{value:"app_ra",label:"Change App_ID → RA mapping"},{value:"counter_dealer",label:"Change Counter → Dealer mapping"},{value:"payee_dealer",label:"Add Dealer to Payee"}]} placeholder="Select type..."/>
+      {entityType==="dealer_ra"&&<><Sel label="Select Dealer" value={entityId} onChange={setEntityId} options={dealers.map(d=>({value:d.id,label:d.name}))} placeholder="Select dealer..."/><Sel label="New RA" value={newVal} onChange={setNewVal} options={ALL_USERS.filter(u=>u.role==="RA").map(u=>({value:u.id,label:u.name}))} placeholder="Select new RA..."/></>}
+      {entityType==="app_ra"&&<><Sel label="Select App_ID" value={entityId} onChange={setEntityId} options={apps.map(a=>({value:a.id,label:`${a.id} — ${a.vehicle}`}))} placeholder="Select App_ID..."/><Sel label="New RA" value={newVal} onChange={setNewVal} options={ALL_USERS.filter(u=>u.role==="RA").map(u=>({value:u.id,label:u.name}))} placeholder="Select new RA..."/></>}
+      {entityType==="counter_dealer"&&<><Sel label="Select Counter" value={entityId} onChange={setEntityId} options={counters.map(c=>({value:c.id,label:c.name}))} placeholder="Select counter..."/><Sel label="New Dealer" value={newVal} onChange={setNewVal} options={dealers.filter(d=>d.status==="Active").map(d=>({value:d.id,label:d.name}))} placeholder="Select new dealer..."/></>}
+      {entityType==="payee_dealer"&&<><Sel label="Select Payee" value={entityId} onChange={setEntityId} options={payees.map(p=>({value:p.id,label:p.payeeName}))} placeholder="Select payee..."/><Sel label="Add Dealer" value={newVal} onChange={setNewVal} options={dealers.filter(d=>d.status==="Active").map(d=>({value:d.id,label:d.name}))} placeholder="Select dealer..."/></>}
+      {entityType&&<Fld label="Reason *" value={reason} onChange={setReason} required/>}
+      <Btn v="warning" icon="⚡" disabled={!entityType||!entityId||!newVal||!reason} onClick={executeEntity}>Apply Re-mapping</Btn>
+    </Card>}
+    {auditLog.length>0&&<Card><Lbl>Audit Log ({auditLog.length})</Lbl>{auditLog.slice().reverse().map(e=><div key={e.id} style={{padding:"7px 0",borderBottom:`1px solid ${T.border}`}}><div style={{display:"flex",justifyContent:"space-between"}}><span style={{fontSize:12,fontWeight:700}}>{e.mode==="bulk"?`${e.fromName} → ${e.toName}`:e.desc}</span><span style={{fontSize:10,color:T.mute}}>{e.at}</span></div><div style={{fontSize:11,color:T.mute}}>Reason: {e.reason} · By: {e.executedBy}</div></div>)}</Card>}
+  </div>;
+}
+
+function ConfigModule({user,shared}){
+  const{configs,setConfigs}=shared;const[local,setLocal]=useState({...configs});
+  if(user.role!=="Business Head")return <div style={{textAlign:"center",padding:60,color:T.mute}}><div style={{fontSize:40,marginBottom:10}}>🔒</div><div style={{fontSize:14,fontWeight:700}}>Config: Business Head only.</div></div>;
+  const LABELS={SPLIT_SAME_APP_GATE:["Split Same App_ID Gate (₹)","Auto-approve splits below this"],SPLIT_CROSS_APP_GATE:["Split Cross App_ID Gate (₹)","Cross-app gate"],NONGS_RATE:["Non-GS Incentive Rate (%)","Applied on base amount"],NONGS_CAP:["Non-GS Cap (₹)","Max incentive per vehicle"],NONGS_AUTO_GATE:["Non-GS Auto-Approve Gate (₹)","Incentive below this auto-approved"],FINANCE_GATE:["Finance Gate (₹)","Routes to Finance at/above this"]};
+  return <div><Alrt type="warning">Changes apply immediately to all new requests and are audit-logged.</Alrt>
+    <Card>{Object.entries(local).map(([k,v])=><div key={k} style={{marginBottom:14}}><div style={{fontSize:12,fontWeight:700,color:T.text}}>{LABELS[k]&&LABELS[k][0]||k}</div><div style={{fontSize:11,color:T.mute,marginBottom:4}}>{LABELS[k]&&LABELS[k][1]}</div><div style={{display:"flex",gap:8,alignItems:"center"}}><input value={v} type="number" onChange={e=>setLocal(p=>({...p,[k]:Number(e.target.value)}))} style={{flex:1,padding:"9px 10px",border:`1.5px solid ${T.border}`,borderRadius:8,fontSize:14,fontWeight:700,fontFamily:"inherit",color:T.text,outline:"none"}}/><span style={{fontSize:13,color:T.mute,width:20}}>{k.includes("RATE")?"%":"₹"}</span></div></div>)}
+      <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:8}}><Btn v="secondary" sm onClick={()=>setLocal({...CONFIGS_DEFAULT})}>Reset</Btn><Btn sm icon="✓" onClick={()=>{setConfigs({...local});alert("✓ Config saved!");}}>Save Config</Btn></div>
+    </Card>
+  </div>;
+}
+
+// ═══════════════════════════════════════════════
+// STAGE MARKING MODULE (RA/RM + Ops/TM view)
+// ═══════════════════════════════════════════════
+function StageModule({user,shared}){
+  const{apps,setApps,leads,setLeads,dealers,counters}=shared;
+  const[selAppId,setSelAppId]=useState("");const[activeStage,setActiveStage]=useState(null);const[form,setForm]=useState({});const[showConfirm,setShowConfirm]=useState(false);
+  const isOps=["TM","Central Ops","Business Head"].includes(user.role);
+  let raIds=[user.id];if(user.role==="RM"&&user.raIds)raIds=[user.id,...user.raIds];
+  const myApps=isOps?apps:apps.filter(a=>raIds.includes(a.raId));
+  const selApp=apps.find(a=>a.id===selAppId);
+  const selDealer=selApp?dealers.find(d=>d.id===selApp.dealerId):null;
+  const selCounter=selApp?counters.find(c=>c.id===selApp.counterId):null;
+  const lead=selApp?leads.find(l=>l.appId===selApp.id):null;
+  const f=(k,v)=>setForm(p=>({...p,[k]:v}));
+
+  const stages=[
+    {id:"inspection",label:"Inspection Done",icon:"🔍",doneKey:"inspectionDone",atKey:"inspectionAt",color:"#5B21B6",bg:"#F5F3FF",
+     fields:[{k:"inspectionNotes",l:"Inspection Notes / Remarks",ph:"e.g. Clean car, AC works fine, minor tyre wear"}]},
+    {id:"token",label:"Token Done",icon:"🤝",doneKey:"tokenDone",atKey:"tokenAt",color:"#065F46",bg:"#ECFDF5",
+     fields:[{k:"tokenAmount",l:"Token Amount (₹)",type:"number",ph:"e.g. 5000"},{k:"tokenNotes",l:"Token Notes",ph:"e.g. Cheque received"}]},
+    {id:"si",label:"Stock-In (SI) Done",icon:"✅",doneKey:"siDone",atKey:"siAt",color:"#0F4C81",bg:"#EBF4FF",
+     fields:[{k:"siOtherCharges",l:"Other Charges (₹)",type:"number",ph:"e.g. 18000"},{k:"siGsType",l:"GS Type",type:"sel",opts:["GS","Non-GS"]},{k:"siServiceCharge",l:"Service Charge (₹)",type:"number",ph:"optional override"},{k:"siChallan",l:"Challan (₹)",type:"number",ph:"optional"},{k:"siEstRefurb",l:"Est. Refurb (₹)",type:"number",ph:"optional"},{k:"siNotes",l:"SI Notes",ph:"e.g. All docs verified"}]},
+  ];
+
+  function openStage(stageId){
+    if(!selAppId){alert("Select an App_ID first");return;}
+    const st=stages.find(s=>s.id===stageId);
+    if(selApp[st.doneKey]){if(!window.confirm("This stage is already marked. Re-mark / update?"))return;}
+    const prefill={};st.fields.forEach(f=>{if(selApp[f.k]!==undefined)prefill[f.k]=String(selApp[f.k]);});
+    setForm(prefill);setActiveStage(stageId);setShowConfirm(false);
+  }
+
+  function saveStage(){
+    const st=stages.find(s=>s.id===activeStage);const nowTs=new Date().toLocaleString("en-IN",{hour12:false}).slice(0,16);
+    const updates={[st.doneKey]:true,[st.atKey]:nowTs};
+    st.fields.forEach(f=>{updates[f.k]=f.type==="number"?Number(form[f.k]||0):(form[f.k]||"");});
+    // if SI marked, update stock-in, otherCharges, gsType on the app
+    if(activeStage==="si"){
+      updates.stockIn=true;
+      if(form.siOtherCharges)updates.otherCharges=Number(form.siOtherCharges);
+      if(form.siGsType)updates.gsType=form.siGsType;
+      if(form.siServiceCharge)updates.serviceCharge=Number(form.siServiceCharge);
+      if(form.siChallan)updates.challan=Number(form.siChallan);
+      if(form.siEstRefurb)updates.estRefurb=Number(form.siEstRefurb);
+    }
+    setApps(prev=>prev.map(a=>a.id===selAppId?{...a,...updates}:a));
+    // also update linked lead status
+    const leadStatus=activeStage==="inspection"?"Inspection Done":activeStage==="token"?"Token Done":"App_ID Created";
+    setLeads(prev=>prev.map(l=>l.appId===selAppId?{...l,status:activeStage==="si"?"App_ID Created":leadStatus}:l));
+    setActiveStage(null);setForm({});
+    alert("✓ Stage marked! Lead status and App_ID updated.");
+  }
+
+  const stageColor={inspection:{c:"#5B21B6",bg:"#F5F3FF"},token:{c:"#065F46",bg:"#ECFDF5"},si:{c:"#0F4C81",bg:"#EBF4FF"}};
+
+  return <div>
+    <Alrt type="info">Select any App_ID to mark/update stage milestones. SI marking updates stockIn flag, wallet, and GS type in real time.</Alrt>
+    <Card style={{marginBottom:14}}>
+      <ST>Select App_ID</ST>
+      <Sel value={selAppId} onChange={v=>{setSelAppId(v);setActiveStage(null);setForm({});}} options={myApps.map(a=>{const d=dealers.find(dd=>dd.id===a.dealerId);return{value:a.id,label:`${a.id} — ${a.vehicle} (${d?d.name:""})`};})} placeholder="Choose App_ID..."/>
+      {selApp&&<>
+        <div style={{background:T.accentL,borderRadius:9,padding:12,marginTop:10}}>
+          <div style={{fontSize:10,fontWeight:800,color:T.accent,marginBottom:6}}>APP_ID DETAILS</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+            {[["Vehicle",selApp.vehicle],["Reg. No.",selApp.regNo],["Dealer",selDealer&&selDealer.name],["Counter",selCounter&&selCounter.name],["UCM",selCounter&&selCounter.ucmName],["GS Type",selApp.gsType],["Quote",fmt(selApp.quote)],["Wallet",fmt(selApp.otherCharges-selApp.splitReleased)]].map(([l,v])=><div key={l} style={{background:"rgba(255,255,255,0.7)",borderRadius:6,padding:"5px 8px"}}><div style={{fontSize:9,color:T.accent,fontWeight:700}}>{l.toUpperCase()}</div><div style={{fontSize:11,fontWeight:800,wordBreak:"break-word"}}>{v||"—"}</div></div>)}
+          </div>
+        </div>
+        {lead&&<div style={{marginTop:8,fontSize:11,color:T.mid}}>Linked Lead: <strong>{lead.id}</strong> · Status: <Badge s={lead.status} sm/></div>}
+      </>}
+    </Card>
+
+    {selApp&&<>
+      <Lbl>Stage Timeline</Lbl>
+      <div style={{position:"relative",marginBottom:14}}>
+        <div style={{position:"absolute",left:18,top:0,bottom:0,width:2,background:T.border,zIndex:0}}/>
+        {stages.map((st,i)=>{const done=selApp[st.doneKey];const at=selApp[st.atKey];const sc=stageColor[st.id];return <div key={st.id} style={{display:"flex",gap:12,marginBottom:12,position:"relative",zIndex:1}}>
+          <div style={{width:36,height:36,borderRadius:"50%",background:done?sc.bg:"#F1F5F9",border:`2px solid ${done?sc.c:T.border}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0}}>{done?st.icon:"○"}</div>
+          <div style={{flex:1}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
+              <div><span style={{fontSize:13,fontWeight:800,color:done?sc.c:T.mute}}>{st.label}</span>{done&&<span style={{marginLeft:6,fontSize:10,color:T.mute}}>· {at}</span>}</div>
+              <Btn sm v={done?"secondary":"primary"} onClick={()=>openStage(st.id)}>{done?"Update":"Mark Done"}</Btn>
+            </div>
+            {done&&st.id==="inspection"&&selApp.inspectionNotes&&<div style={{fontSize:11,color:T.mid,background:sc.bg,borderRadius:6,padding:"4px 8px"}}>{selApp.inspectionNotes}</div>}
+            {done&&st.id==="token"&&<div style={{fontSize:11,color:T.mid,background:sc.bg,borderRadius:6,padding:"4px 8px"}}>Token: {fmt(selApp.tokenAmount||0)}{selApp.tokenNotes?` · ${selApp.tokenNotes}`:""}</div>}
+            {done&&st.id==="si"&&<div style={{fontSize:11,color:T.mid,background:sc.bg,borderRadius:6,padding:"4px 8px"}}>Other Charges: {fmt(selApp.siOtherCharges||0)} · GS: {selApp.siGsType}{selApp.siNotes?` · ${selApp.siNotes}`:""}</div>}
+          </div>
+        </div>;})}
+      </div>
+
+      {activeStage&&<Card style={{border:`1.5px solid ${stageColor[activeStage].c}`,background:stageColor[activeStage].bg+"44"}}>
+        <ST>{stages.find(s=>s.id===activeStage).icon} {stages.find(s=>s.id===activeStage).label}</ST>
+        {activeStage==="si"&&<Alrt type="info">Marking SI Done will set stockIn=true on this App_ID, unlock the wallet, and update GS type. RA will see wallet as available immediately.</Alrt>}
+        {stages.find(s=>s.id===activeStage).fields.map(fld=>fld.type==="sel"?<Sel key={fld.k} label={fld.l} value={form[fld.k]||""} onChange={v=>f(fld.k,v)} options={fld.opts} placeholder="Select..."/>:<Fld key={fld.k} label={fld.l} value={form[fld.k]||""} onChange={v=>f(fld.k,v)} type={fld.type||"text"} placeholder={fld.ph}/>)}
+        <div style={{display:"flex",gap:8,justifyContent:"flex-end",marginTop:8}}><Btn v="secondary" sm onClick={()=>{setActiveStage(null);setForm({});}}>Cancel</Btn><Btn v="success" icon="✓" onClick={saveStage}>Confirm & Save</Btn></div>
+      </Card>}
+    </>}
+  </div>;
+}
+
+// ═══════════════════════════════════════════════
+// COUNTER/UCM OVERRIDE MODULE (TM / Central Ops / BH)
+// ═══════════════════════════════════════════════
+function CounterUCMOverride({user,shared}){
+  const{apps,setApps,counters,dealers}=shared;
+  const canAccess=["TM","Central Ops","Business Head"].includes(user.role);
+  if(!canAccess)return <div style={{textAlign:"center",padding:60,color:T.mute}}><div style={{fontSize:40,marginBottom:10}}>🔒</div><div style={{fontSize:14,fontWeight:700}}>TM, Central Ops & BH only.</div></div>;
+
+  const[selAppId,setSelAppId]=useState("");
+  const[newDealerId,setNewDealerId]=useState("");
+  const[newCounterId,setNewCounterId]=useState("");
+  const[reason,setReason]=useState("");
+  const[log,setLog]=useState([]);
+  const[flash,setFlash]=useState(false);
+
+  const selApp=apps.find(a=>a.id===selAppId);
+  const currentDealer=selApp?dealers.find(d=>d.id===selApp.dealerId):null;
+  const currentCounter=selApp?counters.find(c=>c.id===selApp.counterId):null;
+
+  // When app changes, reset dealer/counter selection
+  const handleAppChange=v=>{setSelAppId(v);setNewDealerId("");setNewCounterId("");};
+  // When dealer changes, reset counter
+  const handleDealerChange=v=>{setNewDealerId(v);setNewCounterId("");};
+
+  const targetDealer=newDealerId?dealers.find(d=>d.id===newDealerId):null;
+  // counters for the newly selected dealer only
+  const dealerCounters=newDealerId?counters.filter(c=>c.dealerId===newDealerId&&c.status==="Active"):[];
+  const newCounter=counters.find(c=>c.id===newCounterId);
+
+  function applyOverride(){
+    if(!selAppId||!newDealerId||!newCounterId||!reason){alert("Select App_ID, Dealer, Counter and enter a reason");return;}
+    const entry={
+      id:`OVR${Math.random().toString(36).slice(2,7).toUpperCase()}`,
+      appId:selAppId,vehicle:selApp.vehicle,
+      prevDealer:currentDealer?.name,prevCounter:currentCounter?.name,prevUCM:currentCounter?.ucmName,
+      newDealer:targetDealer?.name,newCounter:newCounter?.name,newUCM:newCounter?.ucmName,
+      reason,by:user.role,at:new Date().toLocaleString("en-IN",{hour12:false}).slice(0,16)
+    };
+    setApps(prev=>prev.map(a=>a.id===selAppId?{...a,dealerId:newDealerId,counterId:newCounterId}:a));
+    setLog(p=>[entry,...p]);
+    setFlash(true);setTimeout(()=>{setFlash(false);setSelAppId("");setNewDealerId("");setNewCounterId("");setReason("");},1500);
+  }
+
+  if(flash)return <div style={{textAlign:"center",padding:60}}><div style={{fontSize:48,marginBottom:12}}>✅</div><div style={{fontSize:15,fontWeight:800}}>Dealer, Counter & UCM Updated!</div><div style={{fontSize:12,color:T.mute,marginTop:4}}>All payout & lead references now use the new mapping</div></div>;
+
+  return <div>
+    <Alrt type="warning">Changes Dealer + Counter + UCM on any App_ID. All payout auto-fills, lead details and approval views will reflect the new mapping immediately.</Alrt>
+    <Card style={{marginBottom:14}}>
+      <ST>Step 1 — Select App_ID</ST>
+      <Sel value={selAppId} onChange={handleAppChange} options={apps.map(a=>{const d=dealers.find(dd=>dd.id===a.dealerId);return{value:a.id,label:`${a.id} — ${a.vehicle} (${d?d.name:""})`};})} placeholder="Choose App_ID..." label="App_ID"/>
+      {selApp&&<div style={{background:T.accentL,borderRadius:9,padding:12,marginTop:8}}>
+        <div style={{fontSize:10,fontWeight:800,color:T.accent,marginBottom:6}}>CURRENT MAPPING</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+          {[["Dealer",currentDealer?.name],["Dealer Code",currentDealer?.code],["Counter",currentCounter?.name],["UCM Name",currentCounter?.ucmName],["UCM Mobile",currentCounter?.ucmMobile],["City",currentCounter?.city]].map(([l,v])=><div key={l} style={{background:"rgba(255,255,255,0.7)",borderRadius:6,padding:"5px 8px"}}><div style={{fontSize:9,color:T.accent,fontWeight:700}}>{l.toUpperCase()}</div><div style={{fontSize:11,fontWeight:800}}>{v||"—"}</div></div>)}
+        </div>
+      </div>}
+    </Card>
+
+    {selApp&&<Card style={{marginBottom:14}}>
+      <ST>Step 2 — Select New Dealer</ST>
+      <Sel label="New Dealer" value={newDealerId} onChange={handleDealerChange} options={dealers.filter(d=>d.status==="Active").map(d=>({value:d.id,label:`${d.name} (${d.code}) — ${d.city}`}))} placeholder="Select dealer..."/>
+      {newDealerId&&dealerCounters.length===0&&<Alrt type="warning">No active counters for this dealer. Approve a counter request first.</Alrt>}
+      {newDealerId&&dealerCounters.length>0&&<>
+        <ST>Step 3 — Select Counter & UCM</ST>
+        <Sel label="Counter" value={newCounterId} onChange={setNewCounterId} options={dealerCounters.map(c=>({value:c.id,label:`${c.name} — UCM: ${c.ucmName} (${c.city})`}))} placeholder="Select counter..."/>
+        {newCounter&&<div style={{background:T.successL,border:"1px solid #BBF7D0",borderRadius:9,padding:12,marginBottom:10}}>
+          <div style={{fontSize:10,fontWeight:800,color:T.success,marginBottom:6}}>NEW MAPPING PREVIEW</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+            {[["Dealer",targetDealer?.name],["Counter",newCounter.name],["UCM Name",newCounter.ucmName],["UCM Mobile",newCounter.ucmMobile],["City",newCounter.city]].map(([l,v])=><div key={l} style={{background:"rgba(255,255,255,0.7)",borderRadius:6,padding:"5px 8px"}}><div style={{fontSize:9,color:T.success,fontWeight:700}}>{l.toUpperCase()}</div><div style={{fontSize:11,fontWeight:800}}>{v||"—"}</div></div>)}
+          </div>
+          {newDealerId!==selApp.dealerId&&<div style={{fontSize:10,color:T.orange,fontWeight:700,marginTop:6}}>⚠ Dealer is changing — this will also update the App_ID's dealer mapping</div>}
+        </div>}
+        <Fld label="Reason / Note *" value={reason} onChange={setReason} placeholder="e.g. Admin mapped to different counter, testing UCM scenario" required/>
+        <Btn full v="primary" icon="⚡" disabled={!newCounterId||!reason} onClick={applyOverride}>Apply Override</Btn>
+      </>}
+    </Card>}
+
+    {log.length>0&&<Card><Lbl>Override History ({log.length})</Lbl>{log.map(e=><div key={e.id} style={{padding:"9px 0",borderBottom:`1px solid ${T.border}`}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:2}}><span style={{fontSize:12,fontWeight:800}}>{e.appId} — {e.vehicle}</span><span style={{fontSize:10,color:T.mute}}>{e.at}</span></div><div style={{fontSize:11,color:T.mid}}>From dealer: <b>{e.prevDealer}</b> / {e.prevCounter} (UCM: {e.prevUCM})</div><div style={{fontSize:11,color:T.success,fontWeight:700}}>→ {e.newDealer} / {e.newCounter} (UCM: {e.newUCM})</div><div style={{fontSize:10,color:T.mute,marginTop:2}}>Reason: {e.reason} · By: {e.by}</div></div>)}</Card>}
+  </div>;
+}
+
+// ═══════════════════════════════════════════════
+// ROLE GUIDE
+// ═══════════════════════════════════════════════
+const ROLE_GUIDES={
+  "RA":{icon:"📱",color:"#0F4C81",bg:"#EBF4FF",title:"Relationship Associate",desc:"Field agent. Create leads, track vehicle journey from Inspection to SI Done.",steps:[
+    {icon:"📋",title:"Create Lead",body:"Leads tab → + New Lead. Fill dealer, counter, vehicle, condition in 4 steps. After submit a stage dialog opens automatically."},
+    {icon:"🎯",title:"Update Stage",body:"On any lead card tap Update Stage. Pick a target stage — all required inputs appear. You can jump straight to SI Done and fill everything at once."},
+    {icon:"🔍",title:"Inspection Done",body:"Enter C24 Quote. Service Charge (2%) auto-calculates. Final Payable to CX shown."},
+    {icon:"🤝",title:"Token & PR Done",body:"Enter token count (default 1), challan, other charges, party peshi. Final Delivery Payment auto-calculates."},
+    {icon:"✅",title:"SI Done",body:"Select GS/Non-GS. Marks stockIn=true on App_ID — TM can now raise payouts. Wallet unlocks."},
+    {icon:"🏢",title:"Requests",body:"Counter tab for UCM mapping requests. SAP tab for payee creation. Dealers tab for onboarding. All go to Central Ops queue."},
+  ]},
+  "RM":{icon:"👥",color:"#5B21B6",bg:"#F5F3FF",title:"Regional Manager",desc:"Supervise RA team. Monitor pipeline, wallets, and update stages on behalf of team.",steps:[
+    {icon:"🏠",title:"Dashboard",body:"Team wallet breakdown per RA. KPIs for leads, stock-in pending, active deals."},
+    {icon:"📋",title:"Team Leads",body:"Leads grouped by RA. Tap Update Stage to mark any lead on behalf of your team."},
+    {icon:"🚗",title:"App_IDs",body:"Stage pills (Insp/Token/SI) on each card. Wallet balance and pricing visible. Expand for full detail."},
+    {icon:"💸",title:"Payouts",body:"View payout requests for your team. Released payments show UTR numbers."},
+  ]},
+  "TM":{icon:"🏙",color:"#065F46",bg:"#ECFDF5",title:"TM / City Head",desc:"Payout authority. Raise payment requests, override counters, manage onboarding.",steps:[
+    {icon:"📋",title:"Leads (Full City)",body:"See all leads in your city. Update stages exactly like RA. SI Done unlocks wallet."},
+    {icon:"💸",title:"Raise Payout",body:"Select App_ID (only SI=Done apps have wallet). Fields auto-fill. Choose Split or Incentive, select payee, enter amount. Auto-approval rules run instantly."},
+    {icon:"🔄",title:"Counter Override",body:"Pick App_ID → select new Dealer → counter filters to that dealer → apply. Changes reflect everywhere immediately."},
+    {icon:"🏢",title:"Requests",body:"TM can raise onboarding, counter, and SAP requests — goes to Central Ops queue."},
+  ]},
+  "Central Ops":{icon:"⚙️",color:"#92400E",bg:"#FFFBEB",title:"Central Ops",desc:"Owns approval queues for onboarding, counters, SAP, and payout routing.",steps:[
+    {icon:"🏢",title:"Onboarding Queue",body:"Review dealer requests. Simulate code received → OEM tagging → activate. Activated dealer appears in RA lead form instantly."},
+    {icon:"🔗",title:"Counter Queue",body:"Approve counter+UCM mapping. Approved counters appear in RA/TM forms immediately."},
+    {icon:"🏦",title:"SAP Queue",body:"Approve payee creation. Assigns SAP code — payee appears in TM payout form."},
+    {icon:"✓",title:"Payout Approvals",body:"Submitted requests appear here. Approve routes to BH or Finance based on amount."},
+    {icon:"⚡",title:"Data Transfer",body:"Bulk transfer all RA data to another RA, or remap individual entities. Full audit log."},
+    {icon:"🔄",title:"Counter Override",body:"Override dealer+counter+UCM. New dealer selected first, then only that dealer's counters shown."},
+  ]},
+  "Business Head":{icon:"👔",color:"#C2410C",bg:"#FFF7ED",title:"Business Head",desc:"Broadest visibility — approvals, config, team metrics, data transfer.",steps:[
+    {icon:"▦",title:"Dashboard",body:"Full team wallet with per-RA breakdown. Released MTD, pipeline, recent payout activity."},
+    {icon:"✓",title:"Approvals",body:"BH Review queue. You can override the payout amount (flagged permanently). Approve routes to Finance if over gate, else releases directly."},
+    {icon:"⚙",title:"Config Keys",body:"Change auto-approval gates, Non-GS rate/cap, Finance gate. Apply immediately to all new requests."},
+    {icon:"⚡",title:"Data Transfer",body:"Same as Central Ops — bulk and single entity remapping with audit logs."},
+  ]},
+  "Finance":{icon:"💰",color:"#991B1B",bg:"#FEF2F2",title:"Finance",desc:"Final approver for high-value payouts.",steps:[
+    {icon:"✓",title:"Finance Queue",body:"Only BH Approved requests with amount over Finance Gate (default Rs.15,000) appear here."},
+    {icon:"💸",title:"Approve & Release",body:"Review full details — dealer, App_ID, payee. Click Final Approve to release and auto-generate UTR."},
+    {icon:"📊",title:"All History",body:"Scroll down to see all historical payout requests and statuses for reference."},
+  ]},
+};
+
+function RoleGuide({user,onClose}){
+  const[tab,setTab]=useState(0);
+  const g=ROLE_GUIDES[user.role]||ROLE_GUIDES["RA"];
+  const step=g.steps[Math.min(tab,g.steps.length-1)];
+  return <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.65)",zIndex:9500,display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={function(e){if(e.target===e.currentTarget)onClose();}}>
+    <div style={{width:"100%",maxWidth:520,background:"#fff",borderRadius:"20px 20px 0 0",maxHeight:"88vh",overflowY:"auto",paddingBottom:32}}>
+      <div style={{background:"linear-gradient(135deg,"+g.color+"dd,"+g.color+")",padding:"16px 18px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div>
+          <div style={{fontSize:10,color:"rgba(255,255,255,0.65)",fontWeight:800,marginBottom:2,letterSpacing:1}}>HOW TO USE THIS SIMULATION</div>
+          <div style={{color:"#fff",fontSize:15,fontWeight:900}}>{g.icon} {g.title}</div>
+        </div>
+        <button onClick={onClose} style={{background:"rgba(255,255,255,0.15)",border:"none",color:"#fff",width:32,height:32,borderRadius:8,cursor:"pointer",fontSize:18,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>x</button>
+      </div>
+      <div style={{padding:"8px 18px",background:g.bg,borderBottom:"1px solid "+g.color+"22",fontSize:12,color:g.color,fontWeight:600,lineHeight:1.5}}>{g.desc}</div>
+      <div style={{background:"#FEF2F2",padding:"7px 18px",fontSize:10,color:"#7F1D1D",fontWeight:700,borderBottom:"1px solid #FECACA"}}>Simulation only — no real payments. Switch roles via top-right dropdown to test every perspective.</div>
+      <div style={{display:"flex",overflowX:"auto",padding:"10px 12px 0",gap:6,borderBottom:"1px solid "+T.border,WebkitOverflowScrolling:"touch"}}>
+        {g.steps.map(function(s,i){return <button key={i} onClick={function(){setTab(i);}} style={{flexShrink:0,padding:"5px 10px",borderRadius:20,border:"1.5px solid "+(tab===i?g.color:T.border),background:tab===i?g.bg:"#fff",color:tab===i?g.color:T.mute,cursor:"pointer",fontSize:10,fontWeight:700,fontFamily:"inherit",whiteSpace:"nowrap",marginBottom:8}}>{s.icon} {s.title}</button>;})}
+      </div>
+      <div style={{padding:"20px 18px 16px"}}>
+        <div style={{fontSize:28,marginBottom:8}}>{step.icon}</div>
+        <div style={{fontSize:15,fontWeight:900,color:T.text,marginBottom:10}}>{step.title}</div>
+        <div style={{fontSize:13,color:T.mid,lineHeight:1.7}}>{step.body}</div>
+      </div>
+      <div style={{padding:"0 18px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{fontSize:11,color:T.mute}}>{tab+1} / {g.steps.length}</div>
+        <div style={{display:"flex",gap:8}}>
+          {tab>0?<Btn v="secondary" sm onClick={function(){setTab(function(t){return t-1;});}}>Back</Btn>:null}
+          {tab<g.steps.length-1?<Btn sm onClick={function(){setTab(function(t){return t+1;});}}>Next</Btn>:<Btn v="success" sm onClick={onClose}>Got it!</Btn>}
+        </div>
+      </div>
+    </div>
+  </div>;
+}
+
+// ═══════════════════════════════════════════════
+// ROLE META
+// ═══════════════════════════════════════════════
+const ROLE_COLOR={"RA":"#3498DB","RM":"#8E44AD","TM":"#27AE60","Central Ops":"#F39C12","Business Head":"#FF6B35","Finance":"#E74C3C"};
+const isFieldRole=r=>["RA","RM"].includes(r);
+const isOpsRole=r=>["TM","Central Ops","Business Head","Finance"].includes(r);
+
+function getNavForUser(user){
+  if(isFieldRole(user.role))return fieldNav;
+  return opsNav.filter(n=>!n.roles||n.roles.includes(user.role));
+}
+
+// ═══════════════════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// WALLET DRILL-DOWN — expandable in Raise Payout
+// ═══════════════════════════════════════════════
+function WalletDrillDown({apps,dealers,raId,walBal,avail,currentAppId}){
+  const[open,setOpen]=useState(false);
+  const raApps=apps.filter(a=>a.raId===raId&&(a.otherCharges-a.splitReleased)>0);
+  return <div style={{marginBottom:10}}>
+    <div onClick={()=>setOpen(!open)} style={{background:walBal>0?T.accentL:T.dangerL,border:`1px solid ${walBal>0?"#BFDBFE":"#FECACA"}`,borderRadius:10,padding:14,cursor:"pointer",transition:"all 0.25s"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div>
+          <div style={{fontSize:10,fontWeight:800,color:walBal>0?T.accentD:T.danger,marginBottom:2}}>RA WALLET (SPLIT ONLY) · TAP TO EXPAND</div>
+          <div style={{fontSize:24,fontWeight:900,color:walBal>0?T.accent:T.danger}}>{fmt(walBal)}</div>
+          <div style={{fontSize:11,color:T.mute,marginTop:2}}>Bucket available: {fmt(avail)}</div>
+        </div>
+        <div style={{fontSize:18,color:walBal>0?T.accent:T.danger,transition:"transform 0.2s",transform:open?"rotate(90deg)":""}}>{open?"▼":"▶"}</div>
+      </div>
+    </div>
+    {open&&<div style={{border:`1px solid ${T.border}`,borderTop:"none",borderRadius:"0 0 10px 10px",overflow:"hidden",animation:"fadeIn 0.25s ease"}}>
+      <div style={{background:"#F8FAFC",padding:"8px 12px",fontSize:9,fontWeight:800,color:T.mute,letterSpacing:1,display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr"}}>  <span>APP_ID / VEHICLE</span><span style={{textAlign:"right"}}>CHARGES</span><span style={{textAlign:"right"}}>RELEASED</span><span style={{textAlign:"right"}}>AVAILABLE</span></div>
+      {raApps.map(a=>{const d=dealers.find(dd=>dd.id===a.dealerId);const bal=a.otherCharges-a.splitReleased;const isCurrent=a.id===currentAppId;return <div key={a.id} style={{padding:"8px 12px",borderTop:`1px solid ${T.border}`,display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr",alignItems:"center",background:isCurrent?T.accentL:"#fff"}}>
+        <div><div style={{fontSize:11,fontWeight:isCurrent?800:600,color:isCurrent?T.accent:T.text}}>{a.id}</div><div style={{fontSize:9,color:T.mute}}>{a.vehicle}{d?` · ${d.name}`:""}</div></div>
+        <div style={{textAlign:"right",fontSize:11,fontWeight:600}}>{fmt(a.otherCharges)}</div>
+        <div style={{textAlign:"right",fontSize:11,fontWeight:600,color:T.mute}}>{fmt(a.splitReleased)}</div>
+        <div style={{textAlign:"right",fontSize:12,fontWeight:800,color:bal>0?T.accent:T.danger}}>{fmt(bal)}</div>
+      </div>;})}
+      {raApps.length===0&&<div style={{padding:16,textAlign:"center",color:T.mute,fontSize:11}}>No App_IDs with available balance</div>}
+    </div>}
+  </div>;
+}
+
+function App(){
+  const[userId,setUserId]=useState("RA001");
+  const[page,setPage]=useState("dashboard");
+  const[toast,setToast]=useState(null);
+  const[guideOpen,setGuideOpen]=useState(true);
+
+  // SHARED STATE — single source of truth for ALL roles
+  const[apps,setApps]=useState(INIT_APPS);
+  const[dealers,setDealers]=useState(INIT_DEALERS);
+  const[counters,setCounters]=useState(INIT_COUNTERS);
+  const[leads,setLeads]=useState(INIT_LEADS);
+  const[payees,setPayees]=useState(INIT_PAYEES);
+  const[payoutRequests,setPayoutRequests]=useState(INIT_PR);
+  const[onboarding,setOnboarding]=useState(INIT_OB);
+  const[counterReqs,setCounterReqs]=useState(INIT_COUNTER_REQS);
+  const[sapReqs,setSapReqs]=useState(INIT_SAP_REQS);
+  const[configs,setConfigs]=useState({...CONFIGS_DEFAULT});
+
+  const shared={apps,setApps,dealers,setDealers,counters,setCounters,leads,setLeads,payees,setPayees,payoutRequests,setPayoutRequests,onboarding,setOnboarding,counterReqs,setCounterReqs,sapReqs,setSapReqs,configs,setConfigs};
+
+  const user=ALL_USERS.find(u=>u.id===userId);
+  const nav=getNavForUser(user);
+  const roleColor=ROLE_COLOR[user.role]||T.accent;
+
+  // FIX: Compute valid page SYNCHRONOUSLY during render (prevents white page crash)
+  const isPageValid=nav.some(n=>n.id===page);
+  const activePage=isPageValid?page:(nav[0]&&nav[0].id||"dashboard");
+
+  // Badges for ops nav
+  const badges={apr:payoutRequests.filter(r=>{if(user.role==="Central Ops")return r.status==="Submitted";if(user.role==="Business Head")return["BH Review","Ops Approved"].includes(r.status);if(user.role==="Finance")return r.status==="BH Approved"&&r.amount>=configs.FINANCE_GATE;return false;}).length,ob:onboarding.filter(o=>["Admin Panel Pending","OEM Tagging Pending","Ops Review"].includes(o.status)).length,ctr:counterReqs.filter(r=>r.status==="Ops Review").length,sap:sapReqs.filter(r=>r.status==="Ops Review").length};
+
+  // Sync page state after role change (only to persist in state, activePage is already correct)
+  useEffect(()=>{if(activePage!==page)setPage(activePage);setGuideOpen(true);},[userId]);
+
+  const showToast=useCallback((msg,type="success")=>setToast({msg,type,k:Date.now()}),[]);
+
+  const TITLES={dashboard:"Dashboard",leads:"Leads",appids:"App_IDs",override:"Counter & UCM Override",onboarding:"Dealer Onboarding",counter:"Counter & UCM",sap:"SAP & Payees",payouts:"Payout Status",payout:"Raise Payout",approvals:"Approvals",transfer:"Data Transfer",config:"Config Keys",stages:"Stage Marking"};
+
+  function renderPage(){
+    try{
+    if(isFieldRole(user.role)){
+      if(activePage==="dashboard")return <RADashboard user={user} shared={shared}/>;
+      if(activePage==="leads")     return <LeadsModule user={user} shared={shared}/>;
+      if(activePage==="appids")    return <AppIDsModule user={user} shared={shared}/>;
+      if(activePage==="stages")    return <StageModule user={user} shared={shared}/>;
+      if(activePage==="onboarding")return <OnboardingModuleRA user={user} shared={shared}/>;
+      if(activePage==="counter")   return <CounterModuleRA user={user} shared={shared}/>;
+      if(activePage==="sap")       return <SAPModuleRA user={user} shared={shared}/>;
+      if(activePage==="payouts")   return <PayoutsModule user={user} shared={shared}/>;
+    } else {
+      if(activePage==="dashboard") return <OpsDashboard user={user} shared={shared}/>;
+      if(activePage==="payout")    return <RaisePayoutModule user={user} shared={shared}/>;
+      if(activePage==="leads")     return <LeadsModule user={user} shared={shared}/>;
+      if(activePage==="appids")    return <AppIDsModule user={user} shared={shared}/>;
+      if(activePage==="override")  return <CounterUCMOverride user={user} shared={shared}/>;
+      if(activePage==="onboarding")return <OnboardingModuleOps user={user} shared={shared}/>;
+      if(activePage==="counter")   return <CounterModuleOps user={user} shared={shared}/>;
+      if(activePage==="sap")       return <SAPModuleOps user={user} shared={shared}/>;
+      if(activePage==="approvals") return <ApprovalsModule user={user} shared={shared}/>;
+      if(activePage==="transfer")  return <DataTransferModule user={user} shared={shared}/>;
+      if(activePage==="config")    return <ConfigModule user={user} shared={shared}/>;
+    }
+    }catch(err){console.error("Render error:",err);return <div style={{textAlign:"center",padding:60,color:T.danger}}><div style={{fontSize:40,marginBottom:12}}>⚠️</div><div style={{fontSize:14,fontWeight:700}}>Something went wrong</div><div style={{fontSize:12,color:T.mute,marginTop:4}}>{String(err.message||err)}</div><div style={{marginTop:12}}><Btn sm onClick={()=>setPage("dashboard")}>← Back to Dashboard</Btn></div></div>;}
+    return <div style={{textAlign:"center",padding:60,color:T.mute}}><div style={{fontSize:40,marginBottom:12}}>📭</div><div style={{fontSize:14,fontWeight:700}}>Page not found</div><div style={{marginTop:12}}><Btn sm onClick={()=>setPage("dashboard")}>← Dashboard</Btn></div></div>;
+  }
+
+  return <div style={{background:T.bg,minHeight:"100vh",display:"flex",flexDirection:"column"}}>
+    {toast&&<Toast key={toast.k} msg={toast.msg} type={toast.type} onDone={()=>setToast(null)}/>}
+    {guideOpen&&<RoleGuide user={user} onClose={()=>setGuideOpen(false)}/>}
+
+    {/* TOP HEADER — Cars24 Branded */}
+    <div style={{background:"linear-gradient(135deg,#0D1B2A 0%,#162D44 50%,#1B3A5C 100%)",padding:"0 20px",height:60,display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0,position:"sticky",top:0,zIndex:100,boxShadow:"0 4px 24px rgba(0,0,0,0.2),0 1px 4px rgba(0,0,0,0.1)",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
+      <div style={{display:"flex",alignItems:"center",gap:14}}>
+        <div style={{background:"linear-gradient(135deg,#FF6B35 0%,#FF8555 50%,#E85D2A 100%)",borderRadius:12,padding:"7px 14px",boxShadow:"0 4px 16px rgba(255,107,53,0.35),0 0 0 1px rgba(255,107,53,0.1)",display:"flex",alignItems:"center",gap:4}}><span style={{color:"#fff",fontWeight:900,fontSize:15,letterSpacing:1}}>CARS</span><span style={{color:"rgba(255,255,255,0.85)",fontWeight:700,fontSize:11,background:"rgba(255,255,255,0.15)",padding:"1px 5px",borderRadius:4}}>24</span></div>
+        <div style={{borderLeft:"1px solid rgba(255,255,255,0.1)",paddingLeft:14}}>
+          <div style={{color:"#fff",fontSize:14,fontWeight:800,letterSpacing:0.4}}>B2B Procurement</div>
+          <div style={{color:"rgba(255,255,255,0.4)",fontSize:10,fontWeight:600,letterSpacing:0.5,marginTop:1}}>{TITLES[activePage]||"Dashboard"}</div>
+        </div>
+      </div>
+      <div style={{display:"flex",alignItems:"center",gap:12}}>
+        <div style={{textAlign:"right"}}>
+          <div style={{color:"#fff",fontSize:12,fontWeight:700}}>{user.name}</div>
+          <div style={{fontSize:9,padding:"3px 10px",borderRadius:12,background:`${roleColor}18`,color:roleColor,fontWeight:800,marginTop:2,textAlign:"center",border:`1px solid ${roleColor}30`,letterSpacing:0.5}}>{user.role}</div>
+        </div>
+        <div style={{width:38,height:38,borderRadius:13,background:"linear-gradient(135deg,#FF6B35,#FF8555)",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:900,fontSize:14,boxShadow:"0 4px 12px rgba(255,107,53,0.3),0 0 0 2px rgba(255,107,53,0.1)",border:"2px solid rgba(255,255,255,0.1)"}}>{user.name.charAt(0)}</div>
+        <button onClick={()=>setGuideOpen(true)} title="Show guide" style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:11,padding:"7px 13px",color:"#FF8555",cursor:"pointer",fontSize:14,fontWeight:900,fontFamily:"inherit",transition:"all 0.25s",backdropFilter:"blur(8px)"}}>?</button>
+        <select value={userId} onChange={e=>setUserId(e.target.value)} style={{background:"rgba(255,255,255,0.06)",color:"#fff",border:"1px solid rgba(255,255,255,0.12)",borderRadius:11,padding:"7px 12px",fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"inherit",outline:"none",maxWidth:155,backdropFilter:"blur(8px)",transition:"all 0.25s"}}>
+          <optgroup label="── Field Team ──" style={{color:"#0D1B2A"}}>
+            {ALL_USERS.filter(u=>isFieldRole(u.role)).map(u=><option key={u.id} value={u.id} style={{color:"#0D1B2A"}}>{u.name} ({u.role})</option>)}
+          </optgroup>
+          <optgroup label="── Ops / Management ──" style={{color:"#0D1B2A"}}>
+            {ALL_USERS.filter(u=>isOpsRole(u.role)).map(u=><option key={u.id} value={u.id} style={{color:"#0D1B2A"}}>{u.name} ({u.role})</option>)}
+          </optgroup>
+        </select>
+      </div>
+    </div>
+
+    {/* SIMULATION BANNER */}
+    <div style={{background:"linear-gradient(90deg,#FF6B35 0%,#FF8555 50%,#E85D2A 100%)",padding:"5px 0",textAlign:"center",flexShrink:0,boxShadow:"0 2px 8px rgba(255,107,53,0.2)"}}><span style={{fontSize:9,fontWeight:800,color:"#fff",letterSpacing:1.5,textTransform:"uppercase"}}>✦ SIMULATION — NO REAL PAYOUTS · SHARED STATE — ALL ROLES SEE SAME DATA ✦</span></div>
+
+    {/* DESKTOP SIDEBAR + MAIN */}
+    <div className="desktop-only" style={{flex:1,display:"flex",minHeight:0}}>
+      {/* Sidebar — Dark themed with orange accents */}
+      <div style={{width:240,background:"linear-gradient(180deg,#0D1B2A 0%,#0F2132 40%,#132B42 100%)",display:"flex",flexDirection:"column",flexShrink:0,overflowY:"auto",borderRight:"1px solid rgba(255,255,255,0.04)"}}>
+        <nav style={{flex:1,padding:"16px 12px"}}>
+          {nav.map((n,i)=>{const active=activePage===n.id;const cnt=n.badge?badges[n.badge]:0;return <button key={n.id} onClick={()=>setPage(n.id)} className={`c24-nav-item ${active?"c24-nav-active":""}`} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"11px 14px",borderRadius:12,border:"none",cursor:"pointer",background:active?"linear-gradient(135deg,rgba(255,107,53,0.12),rgba(255,107,53,0.06))":"transparent",color:active?"#FF8555":"#6B7F96",marginBottom:4,textAlign:"left",fontFamily:"inherit",animationDelay:`${i*0.03}s`}}><div style={{display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:18,filter:active?"none":"grayscale(0.3)",transition:"filter 0.25s"}}>{n.icon}</span><span style={{fontSize:12,fontWeight:active?800:500,letterSpacing:active?0.3:0,transition:"all 0.25s"}}>{n.label}</span></div>{cnt>0&&<span style={{background:"linear-gradient(135deg,#DC3545,#C82333)",color:"#fff",fontSize:8,fontWeight:900,padding:"2px 7px",borderRadius:10,minWidth:18,textAlign:"center",boxShadow:"0 2px 6px rgba(220,53,69,0.3)",animation:"pulseGlow 2s infinite"}}>{cnt}</span>}</button>;})}
+        </nav>
+        <div style={{padding:"12px 14px 18px",borderTop:"1px solid rgba(255,255,255,0.04)"}}><div style={{background:"linear-gradient(135deg,rgba(255,107,53,0.06),rgba(255,107,53,0.02))",border:"1px solid rgba(255,107,53,0.1)",borderRadius:12,padding:"11px 14px"}}><div style={{fontSize:9,fontWeight:800,color:"#FF8555",letterSpacing:1}}>✦ SIMULATION MODE</div><div style={{fontSize:9,color:"#5A7088",marginTop:4,lineHeight:1.5}}>Data shared across all roles in real time</div></div></div>
+      </div>
+      {/* Content */}
+      <div style={{flex:1,overflowY:"auto",padding:28,background:"linear-gradient(180deg,#F0F2F5 0%,#E8ECF1 100%)"}}>{renderPage()}</div>
+    </div>
+
+    {/* MOBILE — CONTENT + BOTTOM NAV */}
+    <div className="mobile-only" style={{flex:1,flexDirection:"column",minHeight:0}}>
+      <div style={{flex:1,overflowY:"auto",padding:14,paddingBottom:85}}>{renderPage()}</div>
+      <div style={{position:"fixed",bottom:0,left:0,right:0,background:"rgba(255,255,255,0.92)",backdropFilter:"blur(16px)",WebkitBackdropFilter:"blur(16px)",borderTop:"1px solid rgba(0,0,0,0.06)",display:"flex",zIndex:100,overflowX:"auto",WebkitOverflowScrolling:"touch",boxShadow:"0 -4px 20px rgba(0,0,0,0.06)",padding:"2px 0 4px"}}>
+        {nav.map(n=>{const active=activePage===n.id;const cnt=n.badge?badges[n.badge]:0;return <button key={n.id} onClick={()=>setPage(n.id)} style={{flex:1,minWidth:52,padding:"8px 4px 6px",background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2,position:"relative",transition:"all 0.2s"}}><span style={{fontSize:19,transition:"transform 0.2s",transform:active?"scale(1.1)":"scale(1)"}}>{n.icon}</span><span style={{fontSize:8,fontWeight:active?800:600,color:active?T.accent:T.mute,whiteSpace:"nowrap",letterSpacing:active?0.3:0,transition:"all 0.2s"}}>{n.label}</span>{active&&<div style={{position:"absolute",bottom:0,left:"50%",transform:"translateX(-50%)",width:24,height:3,background:"linear-gradient(90deg,#FF6B35,#FF8555)",borderRadius:3,boxShadow:"0 0 8px rgba(255,107,53,0.4)"}}/>}{cnt>0&&<div style={{position:"absolute",top:3,right:4,background:"linear-gradient(135deg,#DC3545,#C82333)",color:"#fff",fontSize:7,fontWeight:900,borderRadius:8,minWidth:15,height:15,display:"flex",alignItems:"center",justifyContent:"center",padding:"0 3px",boxShadow:"0 2px 6px rgba(220,53,69,0.3)"}}>{cnt}</div>}</button>;})}
+      </div>
+    </div>
+  </div>;
+}
+
+ReactDOM.render(<App/>,document.getElementById("root"));
+</script>
+</body>
+</html>
