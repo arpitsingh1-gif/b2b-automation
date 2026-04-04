@@ -293,8 +293,17 @@ const ROLES=["RA","RM","TM","Central Ops","Business Head","Finance","Support Ops
 const ROLE_COLORS={RA:"#FF6B00",RM:"#7C3AED",TM:"#059669","Central Ops":"#D97706","Business Head":"#DC2626",Finance:"#0284C7","Support Ops":"#BE185D",Dealer:"#0891B2"};
 const REGIONS=["NDL","UPE","WGJ","MUM","CHN","BLR","HYD"];
 const STAGES=["Lead Created","Inspection Scheduled","Inspection Done","In Negotiation","Token Done","Delivery Payment Done","BBNP","SI Done"];
-const GRIEV_CATS=["RC Transfer","Challan Deduction","Party Peshi","Delivery Delay","Payment Issue","Documentation","Other"];
+const GRIEV_CATS=["RC Transfer","Challan Deduction","FASTag Deduction","Car in No Parking","Police Complaint on Car","Party Peshi","RC Photo Required","Scrap Letter","Any Other Request"];
 const GRIEV_PRIORITIES=["P0","P1","P2","P3"];
+const TICKET_SOURCES=["Channel Partner App","Manual - Call","Manual - WhatsApp","Manual - Email"];
+const MAIL_CATS=["RC Follow-up","Document Request","Challan Info","General Update","Legal Notice Follow-up","Payment Update","NOC Request"];
+const LEGAL_STATUSES=["None","Legal Ticket Raised","Legal Notice Sent"];
+const USER_EMAILS={"RA001":"ravinder.singh@cars24.com","RA002":"ashwani.kumar@cars24.com","RA003":"satish.patil@cars24.com","RM001":"deepak.verma@cars24.com","RM002":"sneha.kulkarni@cars24.com","TM001":"vikram.anand@cars24.com","OPS01":"priya.sharma@cars24.com","BH001":"rajesh.gupta@cars24.com","FIN01":"seema.mehta@cars24.com","SUP01":"arpit.singh1@cars24.com","DLR01":"rahul.sharma@gmail.com","DLR02":"anil.tiwari@gmail.com"};
+const EMAIL_TEMPLATES={"RC Follow-up":"Dear {dealer},\n\nThis is a follow-up on RC Transfer for {regNo} (App: {appId}).\nRC Transfer Status: {rcStatus}\n\nKindly share any pending documents and cooperate to expedite.\n\nRegards,\nCars24 Support Team","Document Request":"Dear {dealer},\n\nWe require specific documents for {regNo} (App: {appId}).\nKindly submit them at the earliest to avoid delays.\n\nRegards,\nCars24 Support Team","Challan Info":"Dear {dealer},\n\nChallan details for {regNo} (App: {appId}):\n{challanDetails}\n\nFor queries, contact your RA.\n\nRegards,\nCars24 Support Team","General Update":"Dear {dealer},\n\nUpdate on ticket {ticketId} for {regNo}:\nStatus: {status}\n\nWe are actively working on your request.\n\nRegards,\nCars24 Support Team","Legal Notice Follow-up":"Dear {dealer},\n\nFormal follow-up on legal proceedings for {regNo} (App: {appId}).\nPlease respond immediately to avoid further escalation.\n\nRegards,\nCars24 Legal Team","Payment Update":"Dear {dealer},\n\nPayment update for {regNo} (App: {appId}).\nStatus: {status}\n\nRegards,\nCars24 Finance Team","NOC Request":"Dear {dealer},\n\nWe request NOC for {regNo} (App: {appId}).\nKindly process at the earliest.\n\nRegards,\nCars24 Support Team"};
+const VAHAN_DATA={"DL3CAB1234":{rcStatus:"Active",ownership:"1st Owner",rcTransferStatus:"Pending",soDate:"2026-03-22",lastVahanApps:[{type:"RC Transfer",date:"2026-01-20",status:"Pending"},{type:"NOC Issue",date:"2025-12-15",status:"Completed"}],challans:[{no:"CHN2026001",date:"2026-01-10",type:"Speed Violation",fineAmt:1000}]},"DL7CQ5678":{rcStatus:"Active",ownership:"2nd Owner",rcTransferStatus:"Completed",soDate:"2026-03-24",lastVahanApps:[{type:"RC Transfer",date:"2026-03-10",status:"Completed"},{type:"RC Cancellation",date:"2026-03-08",status:"Completed"}],challans:[]},"UP32AX9012":{rcStatus:"Active",ownership:"1st Owner",rcTransferStatus:"Pending",soDate:null,lastVahanApps:[{type:"RC Transfer",date:"2026-02-18",status:"Pending"}],challans:[{no:"CHN2026002",date:"2026-02-01",type:"Red Light Violation",fineAmt:500},{no:"CHN2026003",date:"2026-01-10",type:"Parking Fine",fineAmt:500}]},"GJ01BX3456":{rcStatus:"Active",ownership:"1st Owner",rcTransferStatus:"Completed",soDate:"2026-03-21",lastVahanApps:[{type:"RC Transfer",date:"2026-03-20",status:"Completed"}],challans:[]},"DL4CX8822":{rcStatus:"Active",ownership:"3rd Owner",rcTransferStatus:"Completed",soDate:"2026-01-22",lastVahanApps:[{type:"RC Transfer",date:"2026-02-05",status:"Completed"},{type:"NOC Issue",date:"2026-01-25",status:"Completed"}],challans:[{no:"CHN2026004",date:"2025-11-15",type:"Over Speeding",fineAmt:2000}]},"GJ05MH7711":{rcStatus:"Active",ownership:"1st Owner",rcTransferStatus:"In Process",soDate:"2026-02-16",lastVahanApps:[{type:"RC Transfer",date:"2026-03-01",status:"In Process"}],challans:[]},"KA03HX4455":{rcStatus:"Active",ownership:"2nd Owner",rcTransferStatus:"Pending",soDate:"2026-03-02",lastVahanApps:[{type:"RC Transfer",date:"2026-03-15",status:"Pending"},{type:"NOC Issue",date:"2026-03-10",status:"In Process"}],challans:[{no:"CHN2026005",date:"2026-02-20",type:"No Helmet",fineAmt:1000}]},"UP14BT6633":{rcStatus:"Active",ownership:"1st Owner",rcTransferStatus:"Completed",soDate:"2026-02-05",lastVahanApps:[{type:"RC Transfer",date:"2026-02-25",status:"Completed"}],challans:[]},"KA01MN9988":{rcStatus:"Active",ownership:"1st Owner",rcTransferStatus:"Not Started",soDate:null,lastVahanApps:[],challans:[{no:"CHN2026006",date:"2026-03-10",type:"Lane Violation",fineAmt:1000}]},"MH02CK7744":{rcStatus:"Active",ownership:"2nd Owner",rcTransferStatus:"Not Started",soDate:null,lastVahanApps:[],challans:[]},"DL9AB3322":{rcStatus:"Inactive",ownership:"1st Owner",rcTransferStatus:"Completed",soDate:"2025-12-24",lastVahanApps:[{type:"RC Transfer",date:"2026-01-10",status:"Completed"}],challans:[]},"GJ03PQ5566":{rcStatus:"Active",ownership:"1st Owner",rcTransferStatus:"Not Started",soDate:null,lastVahanApps:[],challans:[]}};
+const PA_DATA={"APP001":{paName:"Vikram Sharma",paTlName:"Neha Gupta"},"APP002":{paName:"Pradeep Yadav",paTlName:"Neha Gupta"},"APP003":{paName:"Santosh Tiwari",paTlName:"Rohit Verma"},"APP004":{paName:"Aakash Mehta",paTlName:"Rohit Verma"},"APP005":{paName:"Vikram Sharma",paTlName:"Neha Gupta"},"APP006":{paName:"Aakash Mehta",paTlName:"Rohit Verma"},"APP007":{paName:"Ravi Kumar",paTlName:"Suresh Babu"},"APP008":{paName:"Santosh Tiwari",paTlName:"Rohit Verma"},"APP009":{paName:"Ravi Kumar",paTlName:"Suresh Babu"},"APP010":{paName:"Amit Joshi",paTlName:"Rohit Verma"},"APP011":{paName:"Vikram Sharma",paTlName:"Neha Gupta"},"APP012":{paName:"Aakash Mehta",paTlName:"Rohit Verma"}};
+const NCD_DEALERS={"D001":{code:"NCD-NDL-001",name:"Sharma Motors",phone:"9876543210",region:"NDL"},"D002":{code:"NCD-UPE-001",name:"Tiwari Auto",phone:"9765432109",region:"UPE"},"D003":{code:"NCD-WGJ-001",name:"Patil Cars",phone:"9654321098",region:"WGJ"},"D004":{code:"NCD-NDL-002",name:"Kumar Automobiles",phone:"9543210987",region:"NDL"},"D005":{code:"NCD-BLR-001",name:"Reddy Traders",phone:"9432109876",region:"BLR"},"D006":{code:"NCD-MUM-001",name:"Joshi Motors",phone:"9321098765",region:"MUM"}};
+const BUYING_DEALERS={"NDL":{code:"C24-NDL-HUB",name:"Cars24 Delhi Hub",phone:"9100000001",region:"NDL"},"UPE":{code:"C24-UPE-HUB",name:"Cars24 UP Hub",phone:"9100000002",region:"UPE"},"WGJ":{code:"C24-WGJ-HUB",name:"Cars24 Gujarat Hub",phone:"9100000003",region:"WGJ"},"BLR":{code:"C24-BLR-HUB",name:"Cars24 Bangalore Hub",phone:"9100000004",region:"BLR"},"MUM":{code:"C24-MUM-HUB",name:"Cars24 Mumbai Hub",phone:"9100000005",region:"MUM"},"CHN":{code:"C24-CHN-HUB",name:"Cars24 Chennai Hub",phone:"9100000006",region:"CHN"},"HYD":{code:"C24-HYD-HUB",name:"Cars24 Hyderabad Hub",phone:"9100000007",region:"HYD"}};
 const CONFIGS_DEFAULT={AUTO_APPROVE_THRESHOLD:50000,COUNTER_WALLET_LIMIT:500000,PAYOUT_TAX_RATE:10,WALLET_VALIDITY_DAYS:90,LEAD_DUP_CHECK_DAYS:15,MIN_PAYOUT:1000,MAX_PAYOUT_WITHOUT_FINANCE:200000};
 
 // ─── SEED DATA ─────────────────────────────────────────────────────────────────
@@ -396,11 +405,12 @@ const INIT_SAP_REQS=[
 ];
 
 const INIT_GRIEVANCES=[
-  {id:"GRV-00001",appId:"APP001",regNo:"DL3CAB1234",category:"RC Transfer",priority:"P1",status:"In Progress",raisedBy:"DLR01",raisedAt:"2026-03-20 10:00",source:"Channel Partner App",dealerRemark:"RC transfer pending for 45 days, customer calling daily",assignedTo:"SUP01",nextFollowUp:"2026-03-28",ect:"2026-04-05",comments:[{by:"SUP01",at:"2026-03-21 09:00",text:"Contacted buying dealer, RCT in process"}],legalStatus:"None",finalStatus:"In Progress"},
-  {id:"GRV-00002",appId:"APP003",regNo:"UP32AX9012",category:"Challan Deduction",priority:null,status:"Open",raisedBy:"DLR02",raisedAt:"2026-03-22 14:30",source:"Channel Partner App",dealerRemark:"Challan of Rs 2500 wrongly deducted",assignedTo:"SUP01",nextFollowUp:"",ect:"",comments:[],legalStatus:"None",finalStatus:"Open"},
-  {id:"GRV-00003",appId:"APP002",regNo:"DL7CQ5678",category:"Party Peshi",priority:"P0",status:"Escalated",raisedBy:"RA001",raisedAt:"2026-03-25 09:00",source:"Manual - Call",dealerRemark:"Customer refusing RC transfer, needs call from Cars24",assignedTo:"SUP01",nextFollowUp:"2026-03-27",ect:"2026-04-01",comments:[{by:"SUP01",at:"2026-03-25 10:00",text:"Escalated to legal team"}],legalStatus:"Legal Ticket Raised",legalRaiseDate:"2026-03-25",finalStatus:"Escalated"},
-  {id:"GRV-00004",appId:"APP007",regNo:"KA03HX4455",category:"Payment Issue",priority:null,status:"Open",raisedBy:"DLR01",raisedAt:"2026-03-29 11:00",source:"Channel Partner App",dealerRemark:"Split payout for XUV700 not received, UTR shared but bank says no credit",assignedTo:"SUP01",nextFollowUp:"",ect:"",comments:[],legalStatus:"None",finalStatus:"Open"},
-  {id:"GRV-00005",appId:"APP006",regNo:"GJ05MH7711",category:"Delivery Delay",priority:"P2",status:"Resolved",raisedBy:"RA003",raisedAt:"2026-02-20 09:30",source:"Manual - RA",dealerRemark:"Delivery delayed by 5 days, dealer upset",assignedTo:"SUP01",nextFollowUp:"2026-02-22",ect:"2026-02-25",comments:[{by:"SUP01",at:"2026-02-21 10:00",text:"Coordinated with logistics, resolved"},{by:"SUP01",at:"2026-02-24 14:00",text:"Delivery completed, closing ticket"}],legalStatus:"None",finalStatus:"Resolved"},
+  {id:"GRV-00001",appId:"APP001",regNo:"DL3CAB1234",category:"RC Transfer",priority:"P1",status:"In Progress",raisedBy:"DLR01",raisedAt:"2026-03-20 10:00",source:"Channel Partner App",dealerRemark:"RC transfer pending for 45 days, customer calling daily",assignedTo:"SUP01",nextFollowUp:"2026-04-06",ect:"2026-04-10",expectedTimeline:"RCT expected by 10-Apr",finalDisposition:"",frctCost:0,comments:[{by:"SUP01",at:"2026-03-21 09:00",text:"Contacted buying dealer, RCT in process"}],legalStatus:"None",legalRaiseDate:"",legalNoticeSentDate:"",legalRemark:"",finalStatus:"In Progress",resolutionTimeHrs:0},
+  {id:"GRV-00002",appId:"APP003",regNo:"UP32AX9012",category:"Challan Deduction",priority:"P2",status:"Open",raisedBy:"DLR02",raisedAt:"2026-03-22 14:30",source:"Channel Partner App",dealerRemark:"Challan of Rs 1000 wrongly deducted - no violation committed",assignedTo:"SUP01",nextFollowUp:"",ect:"",expectedTimeline:"",finalDisposition:"",frctCost:0,comments:[],legalStatus:"None",legalRaiseDate:"",legalNoticeSentDate:"",legalRemark:"",finalStatus:"Open",resolutionTimeHrs:0},
+  {id:"GRV-00003",appId:"APP002",regNo:"DL7CQ5678",category:"Party Peshi",priority:"P0",status:"Escalated",raisedBy:"RA001",raisedAt:"2026-03-25 09:00",source:"Manual - Call",dealerRemark:"Customer refusing RC transfer, needs call from Cars24 to convince",assignedTo:"SUP01",nextFollowUp:"2026-04-05",ect:"2026-04-08",expectedTimeline:"Customer call scheduled 5-Apr",finalDisposition:"",frctCost:0,comments:[{by:"SUP01",at:"2026-03-25 10:00",text:"Escalated to legal team - customer unresponsive"}],legalStatus:"Legal Ticket Raised",legalRaiseDate:"2026-03-25",legalNoticeSentDate:"",legalRemark:"Customer refusing cooperation on RC transfer",finalStatus:"Escalated",resolutionTimeHrs:0},
+  {id:"GRV-00004",appId:"APP007",regNo:"KA03HX4455",category:"Any Other Request",priority:"P1",status:"Open",raisedBy:"DLR01",raisedAt:"2026-03-29 11:00",source:"Channel Partner App",dealerRemark:"Split payout for XUV700 not received - UTR shared but bank says no credit",assignedTo:"SUP01",nextFollowUp:"",ect:"",expectedTimeline:"",finalDisposition:"",frctCost:0,comments:[],legalStatus:"None",legalRaiseDate:"",legalNoticeSentDate:"",legalRemark:"",finalStatus:"Open",resolutionTimeHrs:0},
+  {id:"GRV-00005",appId:"APP006",regNo:"GJ05MH7711",category:"RC Transfer",priority:"P2",status:"Resolved",raisedBy:"RA003",raisedAt:"2026-02-20 09:30",source:"Manual - Call",dealerRemark:"RC transfer not initiated for Kia Seltos, dealer following up",assignedTo:"SUP01",nextFollowUp:"2026-02-22",ect:"2026-02-25",expectedTimeline:"",finalDisposition:"RC Transfer initiated and completed",frctCost:0,comments:[{by:"SUP01",at:"2026-02-21 10:00",text:"Coordinated with RTO, transfer initiated"},{by:"SUP01",at:"2026-02-24 14:00",text:"RC Transfer completed, closing ticket"}],legalStatus:"None",legalRaiseDate:"",legalNoticeSentDate:"",legalRemark:"",finalStatus:"Resolved",resolutionTimeHrs:96},
+  {id:"GRV-00006",appId:"APP004",regNo:"GJ01BX3456",category:"Challan Deduction",priority:"P2",status:"Open",raisedBy:"DLR02",raisedAt:"2026-04-01 10:00",source:"Manual - WhatsApp",dealerRemark:"FASTag deducted Rs 500 after car was sold to Cars24",assignedTo:"SUP01",nextFollowUp:"",ect:"",expectedTimeline:"",finalDisposition:"",frctCost:0,comments:[],legalStatus:"None",legalRaiseDate:"",legalNoticeSentDate:"",legalRemark:"",finalStatus:"Open",resolutionTimeHrs:0},
 ];
 
 const INIT_CJS=[
@@ -1227,35 +1237,41 @@ function DashboardOps({user,leads,apps,dealers,grievances,payouts,onboarding,cou
 }
 
 function DashboardSupportOps({user,grievances,setPage}){
+  var today=todayStr();
+  var weekAgo=new Date();weekAgo.setDate(weekAgo.getDate()-7);var weekAgoStr=weekAgo.toISOString().slice(0,10);
+  var monthStr=today.slice(0,7);
   var total=grievances.length;
   var open=grievances.filter(function(g){return g.status==="Open"}).length;
   var inProg=grievances.filter(function(g){return g.status==="In Progress"}).length;
   var resolved=grievances.filter(function(g){return g.status==="Resolved"}).length;
   var closed=grievances.filter(function(g){return g.status==="Closed"}).length;
   var escalated=grievances.filter(function(g){return g.status==="Escalated"}).length;
-
   var p0=grievances.filter(function(g){return g.priority==="P0"}).length;
   var p1=grievances.filter(function(g){return g.priority==="P1"}).length;
   var p2=grievances.filter(function(g){return g.priority==="P2"}).length;
-
-  var cats={};
-  var sources={};
-  var dealers={};
+  var raisedToday=grievances.filter(function(g){return (g.raisedAt||"").slice(0,10)===today}).length;
+  var raisedWeek=grievances.filter(function(g){return (g.raisedAt||"").slice(0,10)>=weekAgoStr}).length;
+  var raisedMonth=grievances.filter(function(g){return (g.raisedAt||"").slice(0,7)===monthStr}).length;
+  var openTickets=grievances.filter(function(g){return g.status==="Open"||g.status==="In Progress"});
+  var aging7=openTickets.filter(function(g){return diffDays((g.raisedAt||"").slice(0,10),today)>7}).length;
+  var aging15=openTickets.filter(function(g){return diffDays((g.raisedAt||"").slice(0,10),today)>15}).length;
+  var aging30=openTickets.filter(function(g){return diffDays((g.raisedAt||"").slice(0,10),today)>30}).length;
+  var cats={};var sources={};var catsByDlr={};
   grievances.forEach(function(g){
     cats[g.category]=(cats[g.category]||0)+1;
     sources[g.source]=(sources[g.source]||0)+1;
-    dealers[g.dealerName]=(dealers[g.dealerName]||0)+1;
+    var dname=g.dealerName||(g.raisedBy||"Unknown");
+    catsByDlr[dname]=(catsByDlr[dname]||0)+1;
   });
-
   var avgResTime=resolved>0?Math.round(grievances.filter(function(g){return g.status==="Resolved"}).reduce(function(s,g){return s+(g.resolutionTimeHrs||0)},0)/resolved):0;
-  var slaCompliance=total>0?Math.round((resolved/(total-escalated||1)*100)):0;
+  var slaBase=total-escalated;
+  var slaCompliance=slaBase>0?Math.round((resolved/slaBase)*100):100;
   var criticalDue=grievances.filter(function(g){return g.priority==="P0"&&(g.status==="Open"||g.status==="In Progress")}).length;
 
   var supHint=null;
   if(criticalDue>0)supHint={type:"bad",icon:"🔥",text:criticalDue+" critical P0 ticket"+(criticalDue>1?"s":"")+" pending — immediate attention required"};
-  else if(slaCompliance<50)supHint={type:"warn",icon:"⚠️",text:"SLA compliance at "+slaCompliance+"% — below threshold"};
+  else if(aging15>0)supHint={type:"warn",icon:"⏳",text:aging15+" open ticket"+(aging15>1?"s":"")+" aging >15 days — at risk of SLA breach"};
   else supHint={type:"good",icon:"✅",text:"No critical tickets pending — SLA at "+slaCompliance+"%"};
-
   return React.createElement("div",null,
     React.createElement(SectionTitle,{title:"Support Ops Dashboard",sub:"Grievance & ticket performance"}),
     supHint&&React.createElement(SectionInsight,supHint),
@@ -1267,59 +1283,80 @@ function DashboardSupportOps({user,grievances,setPage}){
     ]}),
     React.createElement("div",{className:"grid g3",style:{marginBottom:16}},
       React.createElement(Card,{style:{background:criticalDue>0?"#fecaca":"#dcfce7"}},
-        React.createElement("div",{style:{fontSize:12,fontWeight:700,color:criticalDue>0?"#dc2626":"#16a34a",marginBottom:4}}),
-        React.createElement("div",{style:{fontSize:24,fontWeight:800,color:criticalDue>0?"#dc2626":"#16a34a"}},criticalDue),
-        React.createElement("div",{style:{fontSize:11,color:"#64748b",marginTop:4}},"Critical (P0) pending")
+        React.createElement("div",{style:{fontSize:12,fontWeight:700,color:criticalDue>0?"#dc2626":"#16a34a",marginBottom:4}},"P0 CRITICAL PENDING"),
+        React.createElement("div",{style:{fontSize:28,fontWeight:800,color:criticalDue>0?"#dc2626":"#16a34a"}},criticalDue),
+        React.createElement("div",{style:{fontSize:11,color:"#64748b",marginTop:4}},"Needs immediate action")
       ),
       React.createElement(Card,{style:{background:"#dbeafe"}},
-        React.createElement("div",{style:{fontSize:12,fontWeight:700,color:"#0284c7",marginBottom:4}},"AVG RESOLUTION"),
-        React.createElement("div",{style:{fontSize:24,fontWeight:800,color:"#0284c7"}},avgResTime+"h"),
+        React.createElement("div",{style:{fontSize:12,fontWeight:700,color:"#0284c7",marginBottom:4}},"AVG RESOLUTION TIME"),
+        React.createElement("div",{style:{fontSize:28,fontWeight:800,color:"#0284c7"}},avgResTime+"h"),
         React.createElement("div",{style:{fontSize:11,color:"#64748b",marginTop:4}},resolved+" resolved cases")
       ),
-      React.createElement(Card,{style:{background:"#e0e7ff"}},
-        React.createElement("div",{style:{fontSize:12,fontWeight:700,color:"#4535F1",marginBottom:4}},"SLA COMPLIANCE"),
-        React.createElement("div",{style:{fontSize:24,fontWeight:800,color:"#4535F1"}},slaCompliance+"%"),
-        React.createElement("div",{style:{fontSize:11,color:"#64748b",marginTop:4}},"vs escalated")
+      React.createElement(Card,{style:{background:slaCompliance<60?"#fee2e2":"#e0e7ff"}},
+        React.createElement("div",{style:{fontSize:12,fontWeight:700,color:slaCompliance<60?"#dc2626":"#4535F1",marginBottom:4}},"SLA COMPLIANCE"),
+        React.createElement("div",{style:{fontSize:28,fontWeight:800,color:slaCompliance<60?"#dc2626":"#4535F1"}},slaCompliance+"%"),
+        React.createElement("div",{style:{fontSize:11,color:"#64748b",marginTop:4}},"Resolved vs non-escalated")
       )
     ),
     React.createElement("div",{className:"grid g4",style:{marginBottom:16}},
-      React.createElement(StatCard,{label:"Total Tickets",value:total,color:"#4535F1"}),
-      React.createElement(StatCard,{label:"Open",value:open,color:open>5?"#dc2626":"#ea580c"}),
+      React.createElement(StatCard,{label:"Total",value:total,color:"#4535F1"}),
+      React.createElement(StatCard,{label:"Open",value:open,color:open>3?"#dc2626":"#ea580c"}),
       React.createElement(StatCard,{label:"In Progress",value:inProg,color:"#0284c7"}),
       React.createElement(StatCard,{label:"Resolved",value:resolved,color:"#16a34a"}),
       React.createElement(StatCard,{label:"Closed",value:closed,color:"#059669"}),
       React.createElement(StatCard,{label:"Escalated",value:escalated,color:escalated>0?"#dc2626":"#059669"}),
-      React.createElement(StatCard,{label:"P0 (Critical)",value:p0,color:"#dc2626"}),
-      React.createElement(StatCard,{label:"P1 (High)",value:p1,color:"#ea580c"})
+      React.createElement(StatCard,{label:"P0",value:p0,color:"#dc2626"}),
+      React.createElement(StatCard,{label:"P1",value:p1,color:"#ea580c"}),
+      React.createElement(StatCard,{label:"P2",value:p2,color:"#d97706"}),
+      React.createElement(StatCard,{label:"Today",value:raisedToday,color:"#7c3aed"}),
+      React.createElement(StatCard,{label:"This Week",value:raisedWeek,color:"#0891b2"}),
+      React.createElement(StatCard,{label:"This Month",value:raisedMonth,color:"#be185d"})
+    ),
+    React.createElement("div",{className:"grid g3",style:{marginBottom:16}},
+      React.createElement(Card,{style:{background:aging7>0?"#fff7ed":"#f0fdf4",border:"1px solid "+(aging7>0?"#fed7aa":"#bbf7d0")}},
+        React.createElement("div",{style:{fontSize:12,fontWeight:700,color:aging7>0?"#ea580c":"#16a34a",marginBottom:4}},"AGING > 7 DAYS"),
+        React.createElement("div",{style:{fontSize:28,fontWeight:800,color:aging7>0?"#ea580c":"#16a34a"}},aging7),
+        React.createElement("div",{style:{fontSize:11,color:"#64748b"}},"Open tickets")
+      ),
+      React.createElement(Card,{style:{background:aging15>0?"#fee2e2":"#f0fdf4",border:"1px solid "+(aging15>0?"#fecaca":"#bbf7d0")}},
+        React.createElement("div",{style:{fontSize:12,fontWeight:700,color:aging15>0?"#dc2626":"#16a34a",marginBottom:4}},"AGING > 15 DAYS"),
+        React.createElement("div",{style:{fontSize:28,fontWeight:800,color:aging15>0?"#dc2626":"#16a34a"}},aging15),
+        React.createElement("div",{style:{fontSize:11,color:"#64748b"}},"At risk of SLA breach")
+      ),
+      React.createElement(Card,{style:{background:aging30>0?"#fdf2f8":"#f0fdf4",border:"1px solid "+(aging30>0?"#f9a8d4":"#bbf7d0")}},
+        React.createElement("div",{style:{fontSize:12,fontWeight:700,color:aging30>0?"#be185d":"#16a34a",marginBottom:4}},"AGING > 30 DAYS"),
+        React.createElement("div",{style:{fontSize:28,fontWeight:800,color:aging30>0?"#be185d":"#16a34a"}},aging30),
+        React.createElement("div",{style:{fontSize:11,color:"#64748b"}},"Severe backlog risk")
+      )
     ),
     React.createElement("div",{className:"grid g2",style:{marginBottom:16}},
       React.createElement(Card,null,
-        React.createElement("div",{className:"card-hd"},"By Category"),
-        Object.keys(cats).map(function(c){
-          return React.createElement("div",{key:c,style:{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid var(--brd)"}},
-            React.createElement("span",{style:{fontSize:12}},c),React.createElement("strong",null,cats[c])
+        React.createElement("div",{className:"card-hd"},"By Disposition Category"),
+        Object.keys(cats).length===0&&React.createElement("div",{style:{color:"#64748b",padding:8,fontSize:12}},"No tickets"),
+        Object.keys(cats).sort(function(a,b){return cats[b]-cats[a]}).map(function(c){
+          return React.createElement("div",{key:c,style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:"1px solid var(--brd)"}},
+            React.createElement("span",{style:{fontSize:12}},c),React.createElement("strong",{style:{color:"#be185d"}},cats[c])
           );
-        }),
-        Object.keys(cats).length===0&&React.createElement("div",{style:{color:"#64748b",padding:8,fontSize:12}},"No tickets")
+        })
       ),
       React.createElement(Card,null,
         React.createElement("div",{className:"card-hd"},"By Source"),
-        Object.keys(sources).map(function(s){
-          return React.createElement("div",{key:s,style:{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid var(--brd)"}},
-            React.createElement("span",{style:{fontSize:12}},s),React.createElement("strong",null,sources[s])
+        Object.keys(sources).length===0&&React.createElement("div",{style:{color:"#64748b",padding:8,fontSize:12}},"No tickets"),
+        Object.keys(sources).sort(function(a,b){return sources[b]-sources[a]}).map(function(s){
+          return React.createElement("div",{key:s,style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:"1px solid var(--brd)"}},
+            React.createElement("span",{style:{fontSize:12}},s),React.createElement("strong",{style:{color:"#0284c7"}},sources[s])
           );
-        }),
-        Object.keys(sources).length===0&&React.createElement("div",{style:{color:"#64748b",padding:8,fontSize:12}},"No sources")
+        })
       )
     ),
     React.createElement(Card,null,
       React.createElement("div",{className:"card-hd"},"High-Volume Dealers"),
-      Object.keys(dealers).sort(function(a,b){return dealers[b]-dealers[a]}).slice(0,5).map(function(d){
-        return React.createElement("div",{key:d,style:{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid var(--brd)"}},
-          React.createElement("span",{style:{fontSize:12}},d),React.createElement("strong",{style:{color:"#ea580c"}},dealers[d])
+      Object.keys(catsByDlr).length===0&&React.createElement("div",{style:{color:"#64748b",padding:8,fontSize:12}},"No data"),
+      Object.keys(catsByDlr).sort(function(a,b){return catsByDlr[b]-catsByDlr[a]}).slice(0,5).map(function(d){
+        return React.createElement("div",{key:d,style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:"1px solid var(--brd)"}},
+          React.createElement("span",{style:{fontSize:12}},d),React.createElement("strong",{style:{color:"#ea580c"}},catsByDlr[d]+" ticket"+(catsByDlr[d]>1?"s":""))
         );
-      }),
-      Object.keys(dealers).length===0&&React.createElement("div",{style:{color:"#64748b",padding:8,fontSize:12}},"No dealers")
+      })
     )
   );
 }
@@ -1833,25 +1870,29 @@ function LeadDetailView({lead,user,apps,configs,cjs,onBack,onAdvance,addToast}){
 // ═════════════════════════════════════════════════════════════════════════════
 function GrievanceRaiseModule({user,grievances,setGrievances,leads,apps,dealers,addToast}){
   var [showForm,setShowForm]=useState(false);
-  var [f,setF]=useState({});
+  var [f,setF]=useState({source:"Manual - Call"});
   var set=function(k,v){setF(function(p){var n={};for(var x in p)n[x]=p[x];n[k]=v;return n})};
   var isDealer=user.role==="Dealer";
   var myGrv=isDealer?grievances.filter(function(g){return g.raisedBy===user.id}):grievances.filter(function(g){
     if(user.role==="RA")return g.raisedBy===user.id;
     return true;
   });
+  var previewApp=f.appId?apps.find(function(a){return a.id===f.appId}):null;
+  var previewVahan=previewApp?(VAHAN_DATA[previewApp.regNo]||null):null;
 
   function submitGrievance(){
     if(!f.appId||!f.category){addToast("Fill required fields","error");return}
     var app=apps.find(function(a){return a.id===f.appId});
+    var src=isDealer?"Channel Partner App":(f.source||"Manual - Call");
     var newG={
       id:uid("GRV-"),appId:f.appId,regNo:app?app.regNo:"",category:f.category,priority:null,
-      status:"Open",raisedBy:user.id,raisedAt:nowTs(),source:isDealer?"Channel Partner App":"Manual - "+user.role,
-      dealerRemark:f.remark||"",assignedTo:"SUP01",nextFollowUp:"",ect:"",comments:[],legalStatus:"None",finalStatus:"Open"
+      status:"Open",raisedBy:user.id,raisedAt:nowTs(),source:src,
+      dealerRemark:f.remark||"",assignedTo:"SUP01",nextFollowUp:"",ect:"",expectedTimeline:"",finalDisposition:"",frctCost:0,
+      comments:[],legalStatus:"None",legalRaiseDate:"",legalNoticeSentDate:"",legalRemark:"",finalStatus:"Open",resolutionTimeHrs:0
     };
     setGrievances(function(p){return p.concat([newG])});
     addToast("Grievance "+newG.id+" raised!");
-    setShowForm(false);setF({});
+    setShowForm(false);setF({source:"Manual - Call"});
   }
 
   return React.createElement("div",null,
@@ -1861,8 +1902,29 @@ function GrievanceRaiseModule({user,grievances,setGrievances,leads,apps,dealers,
     ),
     showForm&&React.createElement(Card,{style:{marginBottom:16,border:"2px solid #be185d"}},
       React.createElement("div",{className:"card-hd"},"Raise Grievance"),
-      React.createElement(Sel,{label:"App ID",value:f.appId,onChange:function(v){set("appId",v)},options:apps.map(function(a){return{value:a.id,label:a.id+" - "+a.make+" "+a.model+" ("+a.regNo+")"}}),required:true,placeholder:"Select App ID..."}),
-      React.createElement(Sel,{label:"Category",value:f.category,onChange:function(v){set("category",v)},options:GRIEV_CATS,required:true,placeholder:"Select category..."}),
+      React.createElement("div",{className:"grid g2"},
+        React.createElement(Sel,{label:"App ID *",value:f.appId,onChange:function(v){set("appId",v)},options:apps.map(function(a){return{value:a.id,label:a.id+" - "+a.make+" "+a.model+" ("+a.regNo+")"}}),placeholder:"Select App ID..."}),
+        isDealer
+          ?React.createElement(Inp,{label:"Ticket Source",value:"Channel Partner App",readOnly:true})
+          :React.createElement(Sel,{label:"Ticket Source",value:f.source,onChange:function(v){set("source",v)},options:TICKET_SOURCES.filter(function(s){return s!=="Channel Partner App"})})
+      ),
+      previewApp&&React.createElement("div",{style:{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"10px 12px",marginBottom:8,fontSize:12}},
+        React.createElement("div",{style:{fontWeight:700,fontSize:13,marginBottom:4,color:"#166534"}},"📋 Auto-fetched Details"),
+        React.createElement("div",{className:"grid g2"},
+          React.createElement("div",null,
+            React.createElement("div",null,React.createElement("strong",null,"Vehicle: "),previewApp.make+" "+previewApp.model+" "+previewApp.year+" ("+previewApp.color+")"),
+            React.createElement("div",null,React.createElement("strong",null,"Reg No: "),previewApp.regNo),
+            React.createElement("div",null,React.createElement("strong",null,"SI Date: "),previewApp.siDate||"Not done"),
+            previewApp.siDate&&React.createElement("div",null,React.createElement("strong",null,"SI Aging: "),diffDays(previewApp.siDate,todayStr())+" days")
+          ),
+          React.createElement("div",null,
+            previewVahan&&React.createElement("div",null,React.createElement("strong",null,"RC Transfer: "),previewVahan.rcTransferStatus),
+            previewVahan&&React.createElement("div",null,React.createElement("strong",null,"Ownership: "),previewVahan.ownership),
+            previewVahan&&previewVahan.challans&&previewVahan.challans.length>0&&React.createElement("div",{style:{color:"#dc2626"}},React.createElement("strong",null,"Challans: "),previewVahan.challans.length+" pending ("+fmt(previewVahan.challans.reduce(function(s,c){return s+c.fineAmt},0))+")")
+          )
+        )
+      ),
+      React.createElement(Sel,{label:"Category *",value:f.category,onChange:function(v){set("category",v)},options:GRIEV_CATS,placeholder:"Select category..."}),
       React.createElement(Alrt,{type:"info"},"Priority will be assessed and set by the Support Ops team after reviewing your ticket."),
       React.createElement(Fld,{label:"Remark / Description"},
         React.createElement("textarea",{value:f.remark||"",onChange:function(e){set("remark",e.target.value)},placeholder:"Describe the issue in detail..."})
@@ -1883,8 +1945,8 @@ function GrievanceRaiseModule({user,grievances,setGrievances,leads,apps,dealers,
               React.createElement("div",{style:{fontSize:11,color:"#64748b"}},"Top: "+d.topCat)
             ),
             React.createElement("div",{style:{display:"flex",gap:6,alignItems:"center"}},
-              d.byPriority.P0&&React.createElement("span",{style:{background:"#fecaca",color:"#dc2626",padding:"2px 6px",borderRadius:4,fontSize:10,fontWeight:700}},"P0: "+d.byPriority.P0),
-              d.byPriority.P1&&React.createElement("span",{style:{background:"#fed7aa",color:"#ea580c",padding:"2px 6px",borderRadius:4,fontSize:10,fontWeight:700}},"P1: "+d.byPriority.P1),
+              d.byPriority&&d.byPriority.P0&&React.createElement("span",{style:{background:"#fecaca",color:"#dc2626",padding:"2px 6px",borderRadius:4,fontSize:10,fontWeight:700}},"P0: "+d.byPriority.P0),
+              d.byPriority&&d.byPriority.P1&&React.createElement("span",{style:{background:"#fed7aa",color:"#ea580c",padding:"2px 6px",borderRadius:4,fontSize:10,fontWeight:700}},"P1: "+d.byPriority.P1),
               React.createElement("span",{style:{fontWeight:700,fontSize:13}},d.total),
               React.createElement("span",{style:{fontSize:11,color:d.open>0?"#dc2626":"#16a34a"}},d.open>0?d.open+" open":"all resolved")
             )
@@ -1893,8 +1955,9 @@ function GrievanceRaiseModule({user,grievances,setGrievances,leads,apps,dealers,
       })()
     ),
     myGrv.map(function(g){
-      var bgTint=g.priority==="P0"?"#fef2f2":g.priority==="P1"?"#fff7ed":"#fffbeb";
-      return React.createElement(Card,{key:g.id,style:{marginBottom:8,borderLeft:"4px solid "+(g.priority==="P0"?"#dc2626":g.priority==="P1"?"#ea580c":"#d97706"),background:bgTint}},
+      var borderColor=g.priority==="P0"?"#dc2626":g.priority==="P1"?"#ea580c":g.priority==="P2"?"#d97706":"#94a3b8";
+      var bgTint=g.priority==="P0"?"#fef2f2":g.priority==="P1"?"#fff7ed":"#fafafa";
+      return React.createElement(Card,{key:g.id,style:{marginBottom:8,borderLeft:"4px solid "+borderColor,background:bgTint}},
         React.createElement("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:4}},
           React.createElement("div",null,
             React.createElement("div",{style:{fontWeight:700,display:"flex",alignItems:"center",gap:6}},
@@ -1904,7 +1967,7 @@ function GrievanceRaiseModule({user,grievances,setGrievances,leads,apps,dealers,
             React.createElement("div",{style:{fontSize:12,color:"#64748b"}},g.category+" | "+g.appId+" | "+g.regNo)
           ),
           React.createElement("div",{style:{textAlign:"right"}},
-            React.createElement("span",{className:priorityBadge(g.priority)},g.priority),
+            React.createElement("span",{className:priorityBadge(g.priority)},g.priority||"Unset"),
             React.createElement("span",{className:statusBadge(g.status),style:{marginLeft:4}},g.status)
           )
         ),
@@ -1916,68 +1979,115 @@ function GrievanceRaiseModule({user,grievances,setGrievances,leads,apps,dealers,
   );
 }
 
-function SupportOpsTickets({user,grievances,setGrievances,apps,addToast}){
+function SupportOpsTickets({user,grievances,setGrievances,apps,dealers,leads,notifications,setNotifications,addToast}){
   var [selTicket,setSelTicket]=useState(null);
   var [filters,setFilters]=useState({});
   var [search,setSearch]=useState("");
   var [showRaiseModal,setShowRaiseModal]=useState(false);
-  var [raiseForm,setRaiseForm]=useState({dealerName:"",appId:"",regNo:"",category:GRIEV_CATS[0],priority:"P1",description:"",callerPhone:"",callId:""});
+  var emptyRaise={source:"Manual - Call",appId:"",regNo:"",category:GRIEV_CATS[0],priority:"P1",description:"",callerPhone:"",callId:""};
+  var [raiseForm,setRaiseForm]=useState(emptyRaise);
+  var setRF=function(k,v){setRaiseForm(function(p){var n={};for(var x in p)n[x]=p[x];n[k]=v;return n})};
+  var linkedApp=raiseForm.appId||raiseForm.regNo?apps.find(function(a){return a.id===raiseForm.appId||(raiseForm.regNo&&a.regNo===raiseForm.regNo)}):null;
+  var linkedVahan=linkedApp?(VAHAN_DATA[linkedApp.regNo]||null):null;
+  var linkedPA=linkedApp?(PA_DATA[linkedApp.id]||null):null;
+  var linkedNCD=linkedApp&&linkedApp.dealerId?(NCD_DEALERS[linkedApp.dealerId]||null):null;
   var filtered=grievances.filter(function(g){
     if(filters.status&&g.status!==filters.status)return false;
     if(filters.priority&&g.priority!==filters.priority)return false;
-    if(search){var q=search.toLowerCase();return(g.id||"").toLowerCase().indexOf(q)!==-1||(g.regNo||"").toLowerCase().indexOf(q)!==-1||(g.category||"").toLowerCase().indexOf(q)!==-1}
+    if(filters.category&&g.category!==filters.category)return false;
+    if(search){var q=search.toLowerCase();return(g.id||"").toLowerCase().indexOf(q)!==-1||(g.regNo||"").toLowerCase().indexOf(q)!==-1||(g.category||"").toLowerCase().indexOf(q)!==-1||(g.appId||"").toLowerCase().indexOf(q)!==-1}
     return true;
   });
 
   function updateTicket(id,updates){
     setGrievances(function(prev){return prev.map(function(g){
       if(g.id!==id)return g;
-      var upd={};for(var k in g)upd[k]=g[k];
-      for(var u in updates)upd[u]=updates[u];
-      return upd;
+      var upd={};for(var k in g)upd[k]=g[k];for(var u in updates)upd[u]=updates[u];return upd;
     })});
     addToast("Ticket "+id+" updated!");
   }
 
   function raiseManualTicket(){
-    if(!raiseForm.dealerName||!raiseForm.category){addToast("Dealer name and category required","error");return;}
-    var newId="GRV-"+String(grievances.length+1).padStart(5,"0");
-    var linked=apps.find(function(a){return a.id===raiseForm.appId||a.regNo===raiseForm.regNo});
-    var newGrv={id:newId,raisedBy:user.id,dealerName:raiseForm.dealerName,appId:linked?linked.id:raiseForm.appId,regNo:linked?linked.regNo:raiseForm.regNo,category:raiseForm.category,priority:raiseForm.priority,status:"Open",description:raiseForm.description,source:"Manual - Call",raisedAt:nowTs(),callerPhone:raiseForm.callerPhone,callId:raiseForm.callId,comments:[{by:user.id,at:nowTs(),text:"Raised manually on dealer's behalf. "+raiseForm.description}],resolutionTimeHrs:null,nextFollowUp:"",ect:"",legalStatus:"",dealerRemark:"",finalStatus:""};
+    if(!raiseForm.category||!raiseForm.description){addToast("Category and description required","error");return;}
+    var newId="GRV-"+String(Date.now()).slice(-5);
+    var app=linkedApp;
+    var newGrv={
+      id:newId,raisedBy:user.id,
+      appId:app?app.id:(raiseForm.appId||""),
+      regNo:app?app.regNo:(raiseForm.regNo||""),
+      category:raiseForm.category,priority:raiseForm.priority,
+      status:"Open",source:raiseForm.source,raisedAt:nowTs(),
+      callerPhone:raiseForm.callerPhone,callId:raiseForm.callId,
+      dealerRemark:raiseForm.description,
+      comments:[{by:user.id,at:nowTs(),text:"Manually raised. "+raiseForm.description}],
+      nextFollowUp:"",ect:"",expectedTimeline:"",finalDisposition:"",frctCost:0,
+      legalStatus:"None",legalRaiseDate:"",legalNoticeSentDate:"",legalRemark:"",
+      finalStatus:"Open",resolutionTimeHrs:0
+    };
     setGrievances(function(prev){return[newGrv].concat(prev)});
-    setShowRaiseModal(false);
-    setRaiseForm({dealerName:"",appId:"",regNo:"",category:GRIEV_CATS[0],priority:"P1",description:"",callerPhone:"",callId:""});
-    addToast(newId+" created on dealer's behalf","success");
+    // Notify dealer if linked app found
+    if(app&&app.dealerId){
+      var dealerUser=ALL_USERS.find(function(u){return u.role==="Dealer"&&u.dealerId===app.dealerId});
+      if(dealerUser){
+        var notif={id:uid("N"),to:dealerUser.id,from:user.id,subject:"Ticket "+newId+" Raised",body:"A support ticket has been raised for "+app.make+" "+app.model+" ("+app.regNo+"). Category: "+raiseForm.category,at:nowTs(),read:false};
+        setNotifications(function(prev){return prev.concat([notif])});
+      }
+    }
+    setShowRaiseModal(false);setRaiseForm(emptyRaise);
+    addToast(newId+" created — dealer notified","success");
   }
 
   if(selTicket){
     var ticket=grievances.find(function(g){return g.id===selTicket});
     if(!ticket)return React.createElement("div",null,"Not found");
-    return React.createElement(TicketDetail,{ticket:ticket,onBack:function(){setSelTicket(null)},onUpdate:updateTicket,apps:apps,addToast:addToast});
+    return React.createElement(TicketDetail,{ticket:ticket,onBack:function(){setSelTicket(null)},onUpdate:updateTicket,apps:apps,dealers:dealers,leads:leads,notifications:notifications,setNotifications:setNotifications,addToast:addToast});
   }
 
   return React.createElement("div",null,
     showRaiseModal&&React.createElement("div",{className:"modal-overlay",onClick:function(e){if(e.target===e.currentTarget)setShowRaiseModal(false)}},
       React.createElement("div",{className:"modal"},
         React.createElement("div",{className:"modal-hd"},
-          React.createElement("div",{style:{fontWeight:700,fontSize:16}},"Raise Ticket on Dealer's Behalf"),
+          React.createElement("div",{style:{fontWeight:700,fontSize:16}},"Raise Manual Ticket"),
           React.createElement("button",{onClick:function(){setShowRaiseModal(false)},style:{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"#64748b"}},"×")
         ),
-        React.createElement("div",{className:"alert alert-info"},"📞 Use this to log a manual ticket when a dealer calls in. This creates a ticket sourced as 'Manual - Call'."),
         React.createElement("div",{className:"grid g2"},
-          React.createElement("div",{className:"fld"},React.createElement("label",null,"Dealer Name *"),React.createElement("input",{value:raiseForm.dealerName,onChange:function(e){setRaiseForm(function(p){var n={};for(var k in p)n[k]=p[k];n.dealerName=e.target.value;return n})},placeholder:"e.g. Sharma Motors"})),
-          React.createElement("div",{className:"fld"},React.createElement("label",null,"Caller Phone"),React.createElement("input",{value:raiseForm.callerPhone,onChange:function(e){setRaiseForm(function(p){var n={};for(var k in p)n[k]=p[k];n.callerPhone=e.target.value;return n})},placeholder:"9876543210"}))
+          React.createElement("div",{className:"fld"},
+            React.createElement("label",null,"Ticket Source *"),
+            React.createElement("select",{value:raiseForm.source,onChange:function(e){setRF("source",e.target.value)}},
+              TICKET_SOURCES.map(function(s){return React.createElement("option",{key:s,value:s},s)})
+            )
+          ),
+          React.createElement("div",{className:"fld"},React.createElement("label",null,"Caller Phone"),React.createElement("input",{value:raiseForm.callerPhone,onChange:function(e){setRF("callerPhone",e.target.value)},placeholder:"9876543210"}))
         ),
         React.createElement("div",{className:"grid g2"},
-          React.createElement("div",{className:"fld"},React.createElement("label",null,"App ID (if known)"),React.createElement("input",{value:raiseForm.appId,onChange:function(e){setRaiseForm(function(p){var n={};for(var k in p)n[k]=p[k];n.appId=e.target.value;return n})},placeholder:"APP001"})),
-          React.createElement("div",{className:"fld"},React.createElement("label",null,"Reg No (if known)"),React.createElement("input",{value:raiseForm.regNo,onChange:function(e){setRaiseForm(function(p){var n={};for(var k in p)n[k]=p[k];n.regNo=e.target.value;return n})},placeholder:"DL3CAB1234"}))
+          React.createElement("div",{className:"fld"},React.createElement("label",null,"App ID"),React.createElement("input",{value:raiseForm.appId,onChange:function(e){setRF("appId",e.target.value)},placeholder:"APP001 — auto-fetches details"})),
+          React.createElement("div",{className:"fld"},React.createElement("label",null,"Reg No"),React.createElement("input",{value:raiseForm.regNo,onChange:function(e){setRF("regNo",e.target.value)},placeholder:"DL3CAB1234"}))
+        ),
+        linkedApp&&React.createElement("div",{style:{background:"#f0fdf4",border:"1px solid #bbf7d0",borderRadius:8,padding:"10px 12px",marginBottom:8,fontSize:12}},
+          React.createElement("div",{style:{fontWeight:700,color:"#166534",marginBottom:6}},"✅ Auto-fetched Details"),
+          React.createElement("div",{className:"grid g2"},
+            React.createElement("div",null,
+              React.createElement("div",null,React.createElement("strong",null,"Vehicle: "),linkedApp.make+" "+linkedApp.model+" "+linkedApp.year+" ("+linkedApp.color+")"),
+              React.createElement("div",null,React.createElement("strong",null,"Reg No: "),linkedApp.regNo),
+              React.createElement("div",null,React.createElement("strong",null,"Dealer: "),linkedApp.dealerName),
+              React.createElement("div",null,React.createElement("strong",null,"SI Date: "),linkedApp.siDate||"Not done"),
+              linkedApp.siDate&&React.createElement("div",null,React.createElement("strong",null,"SI Aging: "),diffDays(linkedApp.siDate,todayStr())+" days")
+            ),
+            React.createElement("div",null,
+              linkedVahan&&React.createElement("div",null,React.createElement("strong",null,"RC Transfer: "),linkedVahan.rcTransferStatus),
+              linkedVahan&&React.createElement("div",null,React.createElement("strong",null,"Ownership: "),linkedVahan.ownership),
+              linkedNCD&&React.createElement("div",null,React.createElement("strong",null,"NCD Code: "),linkedNCD.code),
+              linkedPA&&React.createElement("div",null,React.createElement("strong",null,"PA: "),linkedPA.paName),
+              linkedVahan&&linkedVahan.challans&&linkedVahan.challans.length>0&&React.createElement("div",{style:{color:"#dc2626"}},React.createElement("strong",null,"Challans: "),linkedVahan.challans.length+" ("+fmt(linkedVahan.challans.reduce(function(s,c){return s+c.fineAmt},0))+")")
+            )
+          )
         ),
         React.createElement("div",{className:"grid g2"},
-          React.createElement("div",{className:"fld"},React.createElement("label",null,"Category *"),React.createElement("select",{value:raiseForm.category,onChange:function(e){setRaiseForm(function(p){var n={};for(var k in p)n[k]=p[k];n.category=e.target.value;return n})},},GRIEV_CATS.map(function(c){return React.createElement("option",{key:c,value:c},c)}))),
-          React.createElement("div",{className:"fld"},React.createElement("label",null,"Priority"),React.createElement("select",{value:raiseForm.priority,onChange:function(e){setRaiseForm(function(p){var n={};for(var k in p)n[k]=p[k];n.priority=e.target.value;return n})},},GRIEV_PRIORITIES.map(function(p){return React.createElement("option",{key:p,value:p},p)})))
+          React.createElement("div",{className:"fld"},React.createElement("label",null,"Category *"),React.createElement("select",{value:raiseForm.category,onChange:function(e){setRF("category",e.target.value)}},GRIEV_CATS.map(function(c){return React.createElement("option",{key:c,value:c},c)}))),
+          React.createElement("div",{className:"fld"},React.createElement("label",null,"Priority"),React.createElement("select",{value:raiseForm.priority,onChange:function(e){setRF("priority",e.target.value)}},GRIEV_PRIORITIES.map(function(p){return React.createElement("option",{key:p,value:p},p)})))
         ),
-        React.createElement("div",{className:"fld"},React.createElement("label",null,"Call ID / Reference"),React.createElement("input",{value:raiseForm.callId,onChange:function(e){setRaiseForm(function(p){var n={};for(var k in p)n[k]=p[k];n.callId=e.target.value;return n})},placeholder:"CRM-CALL-12345"})),
-        React.createElement("div",{className:"fld"},React.createElement("label",null,"Description / Issue Summary *"),React.createElement("textarea",{value:raiseForm.description,onChange:function(e){setRaiseForm(function(p){var n={};for(var k in p)n[k]=p[k];n.description=e.target.value;return n})},placeholder:"Describe the issue the dealer is facing...",style:{minHeight:80}})),
+        React.createElement("div",{className:"fld"},React.createElement("label",null,"Call ID / Reference"),React.createElement("input",{value:raiseForm.callId,onChange:function(e){setRF("callId",e.target.value)},placeholder:"CRM-CALL-12345"})),
+        React.createElement("div",{className:"fld"},React.createElement("label",null,"Description / Issue *"),React.createElement("textarea",{value:raiseForm.description,onChange:function(e){setRF("description",e.target.value)},placeholder:"Describe the issue...",style:{minHeight:80}})),
         React.createElement("div",{style:{display:"flex",gap:10,justifyContent:"flex-end",marginTop:8}},
           React.createElement(Btn,{cls:"btn-ghost",onClick:function(){setShowRaiseModal(false)}},"Cancel"),
           React.createElement(Btn,{cls:"btn-p",onClick:raiseManualTicket},"📞 Raise Ticket")
@@ -1985,31 +2095,37 @@ function SupportOpsTickets({user,grievances,setGrievances,apps,addToast}){
       )
     ),
     React.createElement("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}},
-      React.createElement(SectionTitle,{title:"Grievance Tickets",sub:filtered.length+" tickets"}),
-      React.createElement(Btn,{cls:"btn-p",onClick:function(){setShowRaiseModal(true)}},"📞 Raise on Dealer's Behalf")
+      React.createElement(SectionTitle,{title:"Grievance Tickets",sub:filtered.length+"/"+grievances.length+" shown"}),
+      React.createElement(Btn,{cls:"btn-p",onClick:function(){setShowRaiseModal(true)}},"📞 Raise Manual Ticket")
     ),
     React.createElement("div",{className:"filter-bar"},
-      React.createElement("input",{type:"text",placeholder:"Search ID, Reg No...",value:search,onChange:function(e){setSearch(e.target.value)},style:{minWidth:160}}),
-      React.createElement("select",{value:filters.status||"",onChange:function(e){setFilters(function(p){return{status:e.target.value,priority:p.priority}})}},
+      React.createElement("input",{type:"text",placeholder:"Search ID, App ID, Reg No...",value:search,onChange:function(e){setSearch(e.target.value)},style:{minWidth:160}}),
+      React.createElement("select",{value:filters.status||"",onChange:function(e){setFilters(function(p){return{status:e.target.value,priority:p.priority,category:p.category}})}},
         React.createElement("option",{value:""},"All Status"),["Open","In Progress","Resolved","Closed","Escalated"].map(function(s){return React.createElement("option",{key:s,value:s},s)})
       ),
-      React.createElement("select",{value:filters.priority||"",onChange:function(e){setFilters(function(p){return{status:p.status,priority:e.target.value}})}},
+      React.createElement("select",{value:filters.priority||"",onChange:function(e){setFilters(function(p){return{status:p.status,priority:e.target.value,category:p.category}})}},
         React.createElement("option",{value:""},"All Priority"),GRIEV_PRIORITIES.map(function(p){return React.createElement("option",{key:p,value:p},p)})
+      ),
+      React.createElement("select",{value:filters.category||"",onChange:function(e){setFilters(function(p){return{status:p.status,priority:p.priority,category:e.target.value}})}},
+        React.createElement("option",{value:""},"All Category"),GRIEV_CATS.map(function(c){return React.createElement("option",{key:c,value:c},c)})
       )
     ),
     React.createElement("table",null,
       React.createElement("thead",null,React.createElement("tr",null,
-        React.createElement("th",null,"ID"),React.createElement("th",null,"Category"),React.createElement("th",null,"Priority"),React.createElement("th",null,"Status"),React.createElement("th",null,"App ID"),React.createElement("th",null,"Raised"),React.createElement("th",null,"Source")
+        React.createElement("th",null,"ID"),React.createElement("th",null,"Category"),React.createElement("th",null,"Priority"),React.createElement("th",null,"Status"),React.createElement("th",null,"App ID"),React.createElement("th",null,"Reg No"),React.createElement("th",null,"Aging"),React.createElement("th",null,"Source")
       )),
       React.createElement("tbody",null,filtered.map(function(g){
+        var ageD=diffDays((g.raisedAt||"").slice(0,10),todayStr());
+        var ageColor=ageD>15?"#dc2626":ageD>7?"#ea580c":"#64748b";
         return React.createElement("tr",{key:g.id,style:{cursor:"pointer"},onClick:function(){setSelTicket(g.id)}},
           React.createElement("td",{style:{fontWeight:600,color:"#4535F1"}},g.id),
           React.createElement("td",null,g.category),
-          React.createElement("td",null,React.createElement("span",{className:priorityBadge(g.priority)},g.priority)),
+          React.createElement("td",null,React.createElement("span",{className:priorityBadge(g.priority)},g.priority||"—")),
           React.createElement("td",null,React.createElement("span",{className:statusBadge(g.status)},g.status)),
-          React.createElement("td",null,g.appId),
-          React.createElement("td",{style:{fontSize:12}},g.raisedAt),
-          React.createElement("td",{style:{fontSize:12}},g.source)
+          React.createElement("td",null,g.appId||"—"),
+          React.createElement("td",{style:{fontSize:11}},g.regNo||"—"),
+          React.createElement("td",{style:{fontSize:12,fontWeight:ageD>7?700:400,color:ageColor}},ageD+"d"),
+          React.createElement("td",{style:{fontSize:11}},g.source)
         );
       }))
     ),
@@ -2017,182 +2133,474 @@ function SupportOpsTickets({user,grievances,setGrievances,apps,addToast}){
   );
 }
 
-function TicketDetail({ticket,onBack,onUpdate,apps,addToast}){
+function TicketDetail({ticket,onBack,onUpdate,apps,dealers,leads,notifications,setNotifications,addToast}){
   var [comment,setComment]=useState("");
   var [status,setStatus]=useState(ticket.status);
   var [priority,setPriority]=useState(ticket.priority||"P2");
   var [followUp,setFollowUp]=useState(ticket.nextFollowUp||"");
   var [ect,setEct]=useState(ticket.ect||"");
+  var [expectedTimeline,setExpectedTimeline]=useState(ticket.expectedTimeline||"");
+  var [finalDisposition,setFinalDisposition]=useState(ticket.finalDisposition||"");
+  var [frctCost,setFrctCost]=useState(ticket.frctCost||0);
+  var [legalStatus,setLegalStatus]=useState(ticket.legalStatus||"None");
+  var [legalRaiseDate,setLegalRaiseDate]=useState(ticket.legalRaiseDate||"");
+  var [legalNoticeSentDate,setLegalNoticeSentDate]=useState(ticket.legalNoticeSentDate||"");
+  var [legalRemark,setLegalRemark]=useState(ticket.legalRemark||"");
+  var [showEmailForm,setShowEmailForm]=useState(false);
+  var [emailRecipNCD,setEmailRecipNCD]=useState(false);
+  var [emailRecipBuying,setEmailRecipBuying]=useState(false);
+  var [emailTeammates,setEmailTeammates]=useState([]);
+  var [emailTmSearch,setEmailTmSearch]=useState("");
+  var [emailCat,setEmailCat]=useState(MAIL_CATS[0]);
+  var [emailContent,setEmailContent]=useState("");
+  var [emailAttach,setEmailAttach]=useState({carDetails:false,ticketDetails:false,ticketStatus:false,priceBreakup:false,challanData:false,rcStatus:false});
+  var [emailSending,setEmailSending]=useState(false);
   var app=apps.find(function(a){return a.id===ticket.appId});
 
   // Dealer insight from MONTHLY_STATS
-  var dealerApp=app?apps.find(function(a){return a.id===ticket.appId}):null;
-  var dealerId=dealerApp?dealerApp.dealerId:(app?app.dealerId:"");
-  var cm=currentMonth();
-  var months3=lastNMonths(3);
-  var months6=lastNMonths(6);
+  var dealerId=app?app.dealerId:"";
+  var vahan=app?(VAHAN_DATA[app.regNo]||{}):{};
+  var pa=PA_DATA[ticket.appId]||{};
+  var ncd=dealerId?(NCD_DEALERS[dealerId]||{}):{};
+  var buyingDlr=app&&app.region?(BUYING_DEALERS[app.region]||BUYING_DEALERS["NDL"]):(BUYING_DEALERS["NDL"]||{});
+  var challans=vahan.challans||[];
+  var challanTotal=challans.reduce(function(s,c){return s+c.fineAmt},0);
+  var svcCharge=app?Math.round(app.price*0.015):0;
+  var finalPayable=app?(app.price-svcCharge-challanTotal-(app.otherCharges||0)):0;
+  var siAging=app&&app.siDate?diffDays(app.siDate,todayStr()):null;
+  var soAging=vahan&&vahan.soDate?diffDays(vahan.soDate,todayStr()):null;
+  var cm=currentMonth();var months3=lastNMonths(3);var months6=lastNMonths(6);
   var statsMTD=getDealerMonthlyStats(dealerId,cm);
-  var stats3M=aggregateDealerStats([dealerId],months3);
-  var stats6M=aggregateDealerStats([dealerId],months6);
+  var si3M=aggregateDealerStats([dealerId],months3).sis;
+  var si6M=aggregateDealerStats([dealerId],months6).sis;
   var siMTD=statsMTD?statsMTD.sis:0;
-  var si3M=stats3M?stats3M.sis:0;
-  var si6M=stats6M?stats6M.sis:0;
   var avgPerMonth=months6.length>0?Math.round(si6M/months6.length*10)/10:0;
   var suggestPriority=siMTD>=5?"P0":siMTD>=3?"P1":siMTD>=1?"P2":"P3";
   var suggestColor=suggestPriority==="P0"?"#dc2626":suggestPriority==="P1"?"#ea580c":suggestPriority==="P2"?"#d97706":"#64748b";
+  var teammateOpts=ALL_USERS.filter(function(u){return u.role!=="Dealer"&&u.role!=="Finance"});
 
   function saveChanges(){
-    var updates={status:status,priority:priority,nextFollowUp:followUp,ect:ect,finalStatus:status};
-    if(comment){
-      var newComments=(ticket.comments||[]).concat([{by:"SUP01",at:nowTs(),text:comment}]);
-      updates.comments=newComments;
-    }
+    var updates={status:status,priority:priority,nextFollowUp:followUp,ect:ect,finalStatus:status,expectedTimeline:expectedTimeline,finalDisposition:finalDisposition,frctCost:Number(frctCost),legalStatus:legalStatus,legalRaiseDate:legalRaiseDate,legalNoticeSentDate:legalNoticeSentDate,legalRemark:legalRemark};
+    var newComments=ticket.comments||[];
+    if(comment){newComments=newComments.concat([{by:"SUP01",at:nowTs(),text:comment}]);}
+    updates.comments=newComments;
     onUpdate(ticket.id,updates);
     setComment("");
+    addToast("Ticket saved");
   }
+
+  function fillTemplate(cat){
+    var t=EMAIL_TEMPLATES[cat]||"";
+    var rcS=vahan.rcTransferStatus||"N/A";
+    var chalDet=challans.map(function(c){return c.no+": "+c.type+" - "+fmt(c.fineAmt)+" ("+c.date+")"}).join("\n")||"No challans";
+    t=t.replace(/{dealer}/g,app?app.dealerName:"Dealer").replace(/{regNo}/g,ticket.regNo||"").replace(/{appId}/g,ticket.appId||"").replace(/{rcStatus}/g,rcS).replace(/{challanDetails}/g,chalDet).replace(/{ticketId}/g,ticket.id).replace(/{status}/g,status);
+    setEmailContent(t);
+    setEmailCat(cat);
+  }
+
+  function toggleTeammate(uid2){
+    setEmailTeammates(function(prev){
+      if(prev.indexOf(uid2)!==-1)return prev.filter(function(x){return x!==uid2});
+      return prev.concat([uid2]);
+    });
+  }
+
+  function sendEmail(){
+    var recipients=[];
+    if(emailRecipNCD&&ncd.name)recipients.push({name:ncd.name,email:(ncd.name.toLowerCase().replace(/\s+/g,".")+("@gmail.com")),type:"NCD Dealer"});
+    if(emailRecipBuying&&buyingDlr.name)recipients.push({name:buyingDlr.name,email:(buyingDlr.code.toLowerCase()+"@cars24.com"),type:"Buying Dealer"});
+    emailTeammates.forEach(function(uid2){
+      var u=ALL_USERS.find(function(x){return x.id===uid2});
+      if(u){var e=USER_EMAILS[uid2]||u.id.toLowerCase()+"@cars24.com";recipients.push({name:u.name,email:e,type:"Teammate"});}
+    });
+    if(recipients.length===0){addToast("Select at least one recipient","error");return;}
+    if(!emailContent.trim()){addToast("Email content is empty","error");return;}
+    setEmailSending(true);
+    setTimeout(function(){
+      var attachSummary=[];
+      if(emailAttach.carDetails)attachSummary.push("Car Details");
+      if(emailAttach.ticketDetails)attachSummary.push("Ticket Details");
+      if(emailAttach.ticketStatus)attachSummary.push("Ticket Status");
+      if(emailAttach.priceBreakup)attachSummary.push("Price Breakup");
+      if(emailAttach.challanData)attachSummary.push("Challan Data");
+      if(emailAttach.rcStatus)attachSummary.push("RC Status");
+      var recipNames=recipients.map(function(r){return r.name+" <"+r.email+">"}).join(", ");
+      var logText="📧 Email sent | Category: "+emailCat+" | To: "+recipNames+(attachSummary.length>0?" | Attachments: "+attachSummary.join(", "):"");
+      var newComments=(ticket.comments||[]).concat([{by:"SUP01",at:nowTs(),text:logText}]);
+      onUpdate(ticket.id,{comments:newComments});
+      setEmailSending(false);
+      setShowEmailForm(false);
+      setEmailRecipNCD(false);setEmailRecipBuying(false);setEmailTeammates([]);setEmailContent("");setEmailTmSearch("");
+      setEmailAttach({carDetails:false,ticketDetails:false,ticketStatus:false,priceBreakup:false,challanData:false,rcStatus:false});
+      addToast("Email sent to "+recipients.length+" recipient(s) — logged in ticket","success");
+    },1200);
+  }
+
+  var filtTm=emailTmSearch?teammateOpts.filter(function(u){return u.name.toLowerCase().indexOf(emailTmSearch.toLowerCase())!==-1}):teammateOpts;
 
   return React.createElement("div",null,
     React.createElement("div",{style:{display:"flex",alignItems:"center",gap:12,marginBottom:16}},
       React.createElement(Btn,{cls:"btn-ghost",sm:true,onClick:onBack},"< Back"),
-      React.createElement(SectionTitle,{title:ticket.id,sub:ticket.category})
+      React.createElement(SectionTitle,{title:ticket.id,sub:ticket.category+" | "+ticket.status})
     ),
-    React.createElement("div",{className:"grid g2",style:{marginBottom:16}},
+
+    // ── AUTO-FETCHED INFO ──
+    React.createElement("div",{className:"grid g2",style:{marginBottom:12}},
       React.createElement(Card,null,
-        React.createElement("div",{className:"card-hd"},"Ticket Info"),
+        React.createElement("div",{className:"card-hd"},"📋 Ticket Info"),
+        React.createElement(InfoRow,{label:"Ticket ID",value:ticket.id}),
+        React.createElement(InfoRow,{label:"Raised Date",value:ticket.raisedAt}),
+        React.createElement(InfoRow,{label:"Source",value:ticket.source}),
         React.createElement(InfoRow,{label:"Category",value:ticket.category}),
-        React.createElement(InfoRow,{label:"Priority",value:ticket.priority}),
+        React.createElement(InfoRow,{label:"Priority",value:ticket.priority||"Not set"}),
         React.createElement(InfoRow,{label:"Status",value:ticket.status}),
         React.createElement(InfoRow,{label:"Raised By",value:userName(ticket.raisedBy)}),
-        React.createElement(InfoRow,{label:"Raised At",value:ticket.raisedAt}),
-        React.createElement(InfoRow,{label:"Source",value:ticket.source}),
-        React.createElement(InfoRow,{label:"Legal Status",value:ticket.legalStatus})
+        ticket.callerPhone&&React.createElement(InfoRow,{label:"Caller Phone",value:ticket.callerPhone}),
+        ticket.callId&&React.createElement(InfoRow,{label:"Call ID",value:ticket.callId})
       ),
       React.createElement(Card,null,
-        React.createElement("div",{className:"card-hd"},"Vehicle / App Details"),
+        React.createElement("div",{className:"card-hd"},"🚗 Vehicle Details"),
         React.createElement(InfoRow,{label:"App ID",value:ticket.appId}),
         React.createElement(InfoRow,{label:"Reg No",value:ticket.regNo}),
-        app&&React.createElement(InfoRow,{label:"Vehicle",value:app.make+" "+app.model+" "+app.year}),
-        app&&React.createElement(InfoRow,{label:"Price",value:fmt(app.price)}),
-        React.createElement(InfoRow,{label:"Dealer Remark",value:ticket.dealerRemark})
+        app&&React.createElement(InfoRow,{label:"Make / Model",value:app.make+" "+app.model+" "+app.variant+" "+app.year}),
+        app&&React.createElement(InfoRow,{label:"Colour",value:app.color}),
+        vahan.ownership&&React.createElement(InfoRow,{label:"Ownership",value:vahan.ownership}),
+        app&&React.createElement(InfoRow,{label:"SI Date",value:app.siDate||"Not done"}),
+        siAging!==null&&React.createElement(InfoRow,{label:"Aging from SI",value:siAging+" days"}),
+        vahan.soDate&&React.createElement(InfoRow,{label:"SO Date",value:vahan.soDate}),
+        soAging!==null&&React.createElement(InfoRow,{label:"Aging from SO",value:soAging+" days"}),
+        vahan.rcTransferStatus&&React.createElement(InfoRow,{label:"RC Transfer",value:vahan.rcTransferStatus}),
+        vahan.rcStatus&&React.createElement(InfoRow,{label:"RC Status",value:vahan.rcStatus})
       )
     ),
-    dealerId&&React.createElement(Card,{style:{marginBottom:16,background:"linear-gradient(135deg,#eff6ff,#f0fdf4)",border:"1.5px solid #bfdbfe"}},
-      React.createElement("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:10}},
-        React.createElement("span",{style:{fontSize:18}},"🏪"),
-        React.createElement("div",null,
-          React.createElement("div",{style:{fontWeight:700,fontSize:14}},"Dealer Insight"),
-          React.createElement("div",{style:{fontSize:11,color:"#64748b"}},"How big is this dealer? — use to set priority")
-        )
+    React.createElement("div",{className:"grid g2",style:{marginBottom:12}},
+      React.createElement(Card,null,
+        React.createElement("div",{className:"card-hd"},"🏪 NCD (Sourcing) Dealer"),
+        React.createElement(InfoRow,{label:"Code",value:ncd.code||"—"}),
+        React.createElement(InfoRow,{label:"Name",value:ncd.name||"—"}),
+        React.createElement(InfoRow,{label:"Phone",value:ncd.phone||"—"}),
+        React.createElement(InfoRow,{label:"Region",value:ncd.region||"—"})
       ),
-      React.createElement("div",{className:"grid g4",style:{marginBottom:10}},
-        React.createElement("div",{style:{textAlign:"center",padding:"8px 0",background:"#fff",borderRadius:8,border:"1px solid var(--brd)"}},
-          React.createElement("div",{style:{fontSize:20,fontWeight:800,color:"#4535F1"}},siMTD),
-          React.createElement("div",{style:{fontSize:10,color:"#64748b"}},cm.replace(/\d{4}-/,"")+" SIs")
-        ),
-        React.createElement("div",{style:{textAlign:"center",padding:"8px 0",background:"#fff",borderRadius:8,border:"1px solid var(--brd)"}},
-          React.createElement("div",{style:{fontSize:20,fontWeight:800,color:"#059669"}},avgPerMonth),
-          React.createElement("div",{style:{fontSize:10,color:"#64748b"}},"Avg/Month")
-        ),
-        React.createElement("div",{style:{textAlign:"center",padding:"8px 0",background:"#fff",borderRadius:8,border:"1px solid var(--brd)"}},
-          React.createElement("div",{style:{fontSize:20,fontWeight:800,color:"#7c3aed"}},si3M),
-          React.createElement("div",{style:{fontSize:10,color:"#64748b"}},"3M SIs")
-        ),
-        React.createElement("div",{style:{textAlign:"center",padding:"8px 0",background:"#fff",borderRadius:8,border:"1px solid var(--brd)"}},
-          React.createElement("div",{style:{fontSize:20,fontWeight:800,color:"#0284c7"}},si6M),
-          React.createElement("div",{style:{fontSize:10,color:"#64748b"}},"6M SIs")
-        )
+      React.createElement(Card,null,
+        React.createElement("div",{className:"card-hd"},"🏢 Buying Dealer (Cars24 Hub)"),
+        React.createElement(InfoRow,{label:"Code",value:buyingDlr.code||"—"}),
+        React.createElement(InfoRow,{label:"Name",value:buyingDlr.name||"—"}),
+        React.createElement(InfoRow,{label:"Phone",value:buyingDlr.phone||"—"}),
+        React.createElement(InfoRow,{label:"Region",value:buyingDlr.region||"—"})
+      )
+    ),
+    app&&React.createElement(Card,{style:{marginBottom:12}},
+      React.createElement("div",{className:"card-hd"},"💰 Price Breakup"),
+      React.createElement("div",{className:"grid g3"},
+        React.createElement("div",{style:{textAlign:"center",padding:"8px",background:"#eff6ff",borderRadius:8}},React.createElement("div",{style:{fontSize:18,fontWeight:800,color:"#0284c7"}},fmt(app.price)),React.createElement("div",{style:{fontSize:10,color:"#64748b"}},"C24 Quote")),
+        React.createElement("div",{style:{textAlign:"center",padding:"8px",background:"#fff7ed",borderRadius:8}},React.createElement("div",{style:{fontSize:18,fontWeight:800,color:"#ea580c"}},fmt(svcCharge)),React.createElement("div",{style:{fontSize:10,color:"#64748b"}},"Service Charge (1.5%)")),
+        React.createElement("div",{style:{textAlign:"center",padding:"8px",background:"#fef2f2",borderRadius:8}},React.createElement("div",{style:{fontSize:18,fontWeight:800,color:"#dc2626"}},fmt(challanTotal)),React.createElement("div",{style:{fontSize:10,color:"#64748b"}},"Challan")),
+        React.createElement("div",{style:{textAlign:"center",padding:"8px",background:"#fff7ed",borderRadius:8}},React.createElement("div",{style:{fontSize:18,fontWeight:800,color:"#d97706"}},fmt(app.otherCharges||0)),React.createElement("div",{style:{fontSize:10,color:"#64748b"}},"Other Charges")),
+        React.createElement("div",{style:{textAlign:"center",padding:"8px",background:"#f0fdf4",borderRadius:8,gridColumn:"span 2"}},React.createElement("div",{style:{fontSize:20,fontWeight:800,color:"#16a34a"}},fmt(finalPayable)),React.createElement("div",{style:{fontSize:10,color:"#64748b"}},"Final Payable"))
+      )
+    ),
+    React.createElement("div",{className:"grid g2",style:{marginBottom:12}},
+      React.createElement(Card,null,
+        React.createElement("div",{className:"card-hd"},"👤 PA / Team Details"),
+        React.createElement(InfoRow,{label:"RA Name",value:app?userName(app.raId):"—"}),
+        React.createElement(InfoRow,{label:"PA Name",value:pa.paName||"—"}),
+        React.createElement(InfoRow,{label:"PA TL",value:pa.paTlName||"—"})
+      ),
+      vahan.lastVahanApps&&vahan.lastVahanApps.length>0&&React.createElement(Card,null,
+        React.createElement("div",{className:"card-hd"},"🔍 Last Vahan Applications"),
+        vahan.lastVahanApps.map(function(v,i){
+          return React.createElement("div",{key:i,style:{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid var(--brd)",fontSize:12}},
+            React.createElement("span",null,v.type+" — "+v.date),
+            React.createElement("span",{className:statusBadge(v.status)},v.status)
+          );
+        })
+      )
+    ),
+    challans.length>0&&React.createElement(Card,{style:{marginBottom:12,border:"1px solid #fecaca"}},
+      React.createElement("div",{className:"card-hd"},"⚠️ Challan Data ("+challans.length+" challans — "+fmt(challanTotal)+")"),
+      React.createElement("table",null,
+        React.createElement("thead",null,React.createElement("tr",null,React.createElement("th",null,"Challan No"),React.createElement("th",null,"Date"),React.createElement("th",null,"Type"),React.createElement("th",null,"Fine"))),
+        React.createElement("tbody",null,challans.map(function(c,i){
+          return React.createElement("tr",{key:i},React.createElement("td",null,c.no),React.createElement("td",null,c.date),React.createElement("td",null,c.type),React.createElement("td",{style:{color:"#dc2626",fontWeight:700}},fmt(c.fineAmt)));
+        }))
+      )
+    ),
+    React.createElement(Card,{style:{marginBottom:12,background:"#fffbeb",border:"1px solid #fde68a"}},
+      React.createElement("div",{className:"card-hd"},"💬 Dealer Remark"),
+      React.createElement("div",{style:{fontSize:13,lineHeight:1.5}},ticket.dealerRemark||"No remark provided")
+    ),
+
+    // ── DEALER INSIGHT ──
+    dealerId&&React.createElement(Card,{style:{marginBottom:12,background:"linear-gradient(135deg,#eff6ff,#f0fdf4)",border:"1.5px solid #bfdbfe"}},
+      React.createElement("div",{style:{fontWeight:700,fontSize:13,marginBottom:8}},"🏪 Dealer SI Insight — set priority accordingly"),
+      React.createElement("div",{className:"grid g4",style:{marginBottom:8}},
+        React.createElement("div",{style:{textAlign:"center",padding:"8px",background:"#fff",borderRadius:8,border:"1px solid var(--brd)"}},React.createElement("div",{style:{fontSize:20,fontWeight:800,color:"#4535F1"}},siMTD),React.createElement("div",{style:{fontSize:10,color:"#64748b"}},"This Month SIs")),
+        React.createElement("div",{style:{textAlign:"center",padding:"8px",background:"#fff",borderRadius:8,border:"1px solid var(--brd)"}},React.createElement("div",{style:{fontSize:20,fontWeight:800,color:"#059669"}},avgPerMonth),React.createElement("div",{style:{fontSize:10,color:"#64748b"}},"Avg/Month")),
+        React.createElement("div",{style:{textAlign:"center",padding:"8px",background:"#fff",borderRadius:8,border:"1px solid var(--brd)"}},React.createElement("div",{style:{fontSize:20,fontWeight:800,color:"#7c3aed"}},si3M),React.createElement("div",{style:{fontSize:10,color:"#64748b"}},"3M SIs")),
+        React.createElement("div",{style:{textAlign:"center",padding:"8px",background:"#fff",borderRadius:8,border:"1px solid var(--brd)"}},React.createElement("div",{style:{fontSize:20,fontWeight:800,color:"#0284c7"}},si6M),React.createElement("div",{style:{fontSize:10,color:"#64748b"}},"6M SIs"))
       ),
       React.createElement("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 12px",background:"#fff",borderRadius:8,border:"1px solid var(--brd)"}},
-        React.createElement("span",{style:{fontSize:12,color:"#64748b"}},"Suggested Priority based on SI volume:"),
-        React.createElement("span",{style:{background:suggestColor,color:"#fff",padding:"3px 10px",borderRadius:6,fontSize:12,fontWeight:700}},suggestPriority+" — "+(suggestPriority==="P0"?"Critical (High Volume)":suggestPriority==="P1"?"High":suggestPriority==="P2"?"Medium":"Low"))
+        React.createElement("span",{style:{fontSize:12,color:"#64748b"}},"Suggested Priority:"),
+        React.createElement("span",{style:{background:suggestColor,color:"#fff",padding:"3px 10px",borderRadius:6,fontSize:12,fontWeight:700}},suggestPriority+" — "+(suggestPriority==="P0"?"Critical":suggestPriority==="P1"?"High":suggestPriority==="P2"?"Medium":"Low Volume"))
       )
     ),
-    React.createElement(Card,{style:{marginBottom:16}},
-      React.createElement("div",{className:"card-hd"},"Update Ticket"),
+
+    // ── SUPPORT OPS WORKING FIELDS ──
+    React.createElement(Card,{style:{marginBottom:12}},
+      React.createElement("div",{className:"card-hd"},"🔧 Support Ops Working"),
       React.createElement("div",{className:"grid g2"},
         React.createElement(Sel,{label:"Status",value:status,onChange:setStatus,options:["Open","In Progress","Resolved","Closed","Escalated"]}),
-        React.createElement(Sel,{label:"Priority (set by Support Ops)",value:priority,onChange:setPriority,options:GRIEV_PRIORITIES})
+        React.createElement(Sel,{label:"Priority",value:priority,onChange:setPriority,options:GRIEV_PRIORITIES})
       ),
       React.createElement("div",{className:"grid g2"},
-        React.createElement(Inp,{label:"Next Follow-up",value:followUp,onChange:setFollowUp,type:"date"}),
-        React.createElement(Inp,{label:"ECT (Expected Closure)",value:ect,onChange:setEct,type:"date"})
+        React.createElement(Inp,{label:"Next Follow-up Date",value:followUp,onChange:setFollowUp,type:"date"}),
+        React.createElement(Inp,{label:"ECT (Expected Closure Date)",value:ect,onChange:setEct,type:"date"})
       ),
-      React.createElement(Fld,{label:"Add Comment"},React.createElement("textarea",{value:comment,onChange:function(e){setComment(e.target.value)},placeholder:"Internal note..."})),
-      React.createElement("div",{style:{display:"flex",justifyContent:"flex-end",marginTop:8}},React.createElement(Btn,{onClick:saveChanges},"Save Changes"))
+      React.createElement("div",{className:"grid g2"},
+        React.createElement(Inp,{label:"Expected Timeline for RCT/NOC",value:expectedTimeline,onChange:setExpectedTimeline,placeholder:"e.g. RCT expected by 10-Apr"}),
+        React.createElement(Inp,{label:"FRCT Cost (₹)",value:String(frctCost),onChange:function(v){setFrctCost(v)},type:"number",placeholder:"0"})
+      ),
+      React.createElement(Inp,{label:"Final Disposition",value:finalDisposition,onChange:setFinalDisposition,placeholder:"e.g. RC Transfer Completed"}),
+      React.createElement(Fld,{label:"Comment / Internal Note"},React.createElement("textarea",{value:comment,onChange:function(e){setComment(e.target.value)},placeholder:"Add internal note..."})),
+      React.createElement("div",{style:{display:"flex",justifyContent:"flex-end",marginTop:8}},React.createElement(Btn,{onClick:saveChanges},"💾 Save Changes"))
     ),
+
+    // ── LEGAL ACTION ──
+    React.createElement(Card,{style:{marginBottom:12,border:(legalStatus!=="None")?"1.5px solid #dc2626":"1px solid var(--brd)"}},
+      React.createElement("div",{className:"card-hd"},"⚖️ Legal Action"),
+      React.createElement(Sel,{label:"Legal Action Status",value:legalStatus,onChange:setLegalStatus,options:LEGAL_STATUSES}),
+      (legalStatus==="Legal Ticket Raised"||legalStatus==="Legal Notice Sent")&&React.createElement(Inp,{label:"Legal Ticket Raise Date",value:legalRaiseDate,onChange:setLegalRaiseDate,type:"date"}),
+      legalStatus==="Legal Notice Sent"&&React.createElement(Inp,{label:"Legal Notice Sent Date",value:legalNoticeSentDate,onChange:setLegalNoticeSentDate,type:"date"}),
+      legalStatus!=="None"&&React.createElement(Fld,{label:"Legal Action Remark"},React.createElement("textarea",{value:legalRemark,onChange:function(e){setLegalRemark(e.target.value)},placeholder:"Details about legal action taken..."})),
+      React.createElement("div",{style:{display:"flex",justifyContent:"flex-end",marginTop:8}},React.createElement(Btn,{onClick:saveChanges},"Save Legal Status"))
+    ),
+
+    // ── EMAIL TRIGGER ──
+    React.createElement(Card,{style:{marginBottom:12}},
+      React.createElement("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
+        React.createElement("div",{className:"card-hd",style:{marginBottom:0}},"📧 Email Trigger"),
+        React.createElement(Btn,{cls:"btn-ghost",sm:true,onClick:function(){setShowEmailForm(!showEmailForm)}},showEmailForm?"Collapse ▲":"Compose Email ▼")
+      ),
+      showEmailForm&&React.createElement("div",{style:{marginTop:12}},
+        React.createElement("div",{style:{marginBottom:10}},
+          React.createElement("div",{style:{fontWeight:600,fontSize:12,marginBottom:6,color:"#374151"}},"Recipients"),
+          React.createElement("label",{style:{display:"flex",alignItems:"center",gap:8,fontSize:12,padding:"6px 0",cursor:"pointer"}},
+            React.createElement("input",{type:"checkbox",checked:emailRecipNCD,onChange:function(e){setEmailRecipNCD(e.target.checked)}}),
+            React.createElement("span",null,"NCD Dealer: "+(ncd.name||"—")+" — "+(ncd.name?(ncd.name.toLowerCase().replace(/\s+/g,".")+("@gmail.com")):"no email"))
+          ),
+          React.createElement("label",{style:{display:"flex",alignItems:"center",gap:8,fontSize:12,padding:"6px 0",cursor:"pointer"}},
+            React.createElement("input",{type:"checkbox",checked:emailRecipBuying,onChange:function(e){setEmailRecipBuying(e.target.checked)}}),
+            React.createElement("span",null,"Buying Dealer: "+(buyingDlr.name||"—")+" — "+(buyingDlr.code?(buyingDlr.code.toLowerCase()+"@cars24.com"):"no email"))
+          ),
+          React.createElement("div",{style:{marginTop:6}},
+            React.createElement("div",{style:{fontSize:11,color:"#64748b",marginBottom:4}},"Search Teammates:"),
+            React.createElement("input",{type:"text",value:emailTmSearch,onChange:function(e){setEmailTmSearch(e.target.value)},placeholder:"Filter teammates...",style:{width:"100%",padding:"6px 8px",border:"1px solid var(--brd)",borderRadius:6,fontSize:12,marginBottom:4}}),
+            filtTm.map(function(u){
+              var checked=emailTeammates.indexOf(u.id)!==-1;
+              var email=USER_EMAILS[u.id]||u.id.toLowerCase()+"@cars24.com";
+              return React.createElement("label",{key:u.id,style:{display:"flex",alignItems:"center",gap:8,fontSize:12,padding:"4px 0",cursor:"pointer"}},
+                React.createElement("input",{type:"checkbox",checked:checked,onChange:function(){toggleTeammate(u.id)}}),
+                React.createElement("span",null,u.name+" ("+u.role+") — "+email)
+              );
+            })
+          )
+        ),
+        React.createElement("div",{className:"grid g2",style:{marginBottom:8}},
+          React.createElement("div",null,
+            React.createElement("div",{style:{fontSize:12,fontWeight:600,marginBottom:4}},"Mail Category"),
+            React.createElement("select",{value:emailCat,onChange:function(e){fillTemplate(e.target.value)},style:{width:"100%",padding:"6px 8px",border:"1px solid var(--brd)",borderRadius:6,fontSize:12}},
+              MAIL_CATS.map(function(c){return React.createElement("option",{key:c,value:c},c)})
+            )
+          ),
+          React.createElement("div",{style:{fontSize:11,color:"#64748b",paddingTop:20}},"Template auto-fills on category change. Edit freely below.")
+        ),
+        React.createElement(Fld,{label:"Email Content"},
+          React.createElement("textarea",{value:emailContent,onChange:function(e){setEmailContent(e.target.value)},placeholder:"Email body...",style:{minHeight:120,fontSize:12,fontFamily:"monospace"}})
+        ),
+        React.createElement("div",{style:{marginBottom:10}},
+          React.createElement("div",{style:{fontSize:12,fontWeight:600,marginBottom:6}},"Attach (include in email body):"),
+          React.createElement("div",{style:{display:"flex",flexWrap:"wrap",gap:8}},
+            [["carDetails","Car Details"],["ticketDetails","Ticket Details"],["ticketStatus","Ticket Status"],["priceBreakup","Price Breakup"],["challanData","Challan Data"],["rcStatus","RC Status"]].map(function(item){
+              return React.createElement("label",{key:item[0],style:{display:"flex",alignItems:"center",gap:4,fontSize:12,cursor:"pointer",padding:"4px 8px",background:"#f8fafc",borderRadius:6,border:"1px solid var(--brd)"}},
+                React.createElement("input",{type:"checkbox",checked:emailAttach[item[0]],onChange:function(e){setEmailAttach(function(p){var n={};for(var k in p)n[k]=p[k];n[item[0]]=e.target.checked;return n})}}),
+                item[1]
+              );
+            })
+          )
+        ),
+        React.createElement(Alrt,{type:"info"},"📧 Simulation: Email will be logged in ticket comments. Test recipient: arpit.singh1@cars24.com (mapped to SUP01 / Support Ops)."),
+        React.createElement("div",{style:{display:"flex",justifyContent:"flex-end",marginTop:8}},
+          React.createElement(Btn,{onClick:sendEmail,cls:"btn-p"},emailSending?"Sending...":"📤 Send Email")
+        )
+      )
+    ),
+
+    // ── COMMENTS ──
     React.createElement(Card,null,
-      React.createElement("div",{className:"card-hd"},"Comments / History"),
-      (ticket.comments||[]).map(function(c,i){
-        return React.createElement("div",{key:i,style:{padding:"8px 0",borderBottom:"1px solid var(--brd)"}},
+      React.createElement("div",{className:"card-hd"},"💬 Comments / History"),
+      (ticket.comments||[]).length===0&&React.createElement("div",{style:{color:"#64748b",padding:8}},"No comments yet"),
+      (ticket.comments||[]).slice().reverse().map(function(c,i){
+        var isEmail=c.text&&c.text.indexOf("📧 Email sent")===0;
+        return React.createElement("div",{key:i,style:{padding:"10px 0",borderBottom:"1px solid var(--brd)",background:isEmail?"#f0fdf4":"transparent"}},
           React.createElement("div",{style:{display:"flex",justifyContent:"space-between"}},
-            React.createElement("strong",{style:{fontSize:13}},userName(c.by)),
+            React.createElement("strong",{style:{fontSize:12}},userName(c.by)),
             React.createElement("span",{style:{fontSize:11,color:"#64748b"}},c.at)
           ),
-          React.createElement("div",{style:{fontSize:13,marginTop:4}},c.text)
+          React.createElement("div",{style:{fontSize:12,marginTop:4,whiteSpace:"pre-wrap",color:isEmail?"#166534":"inherit"}},c.text)
         );
-      }),
-      (ticket.comments||[]).length===0&&React.createElement("div",{style:{color:"#64748b",padding:8}},"No comments yet")
+      })
     )
   );
 }
 
-function SupportOpsSearch({apps,leads,grievances,payouts}){
+function SupportOpsSearch({apps,leads,grievances,payouts,dealers}){
   var [q,setQ]=useState("");
   var results=q.length>=3?apps.filter(function(a){return a.id.toLowerCase().indexOf(q.toLowerCase())!==-1||a.regNo.toLowerCase().indexOf(q.toLowerCase())!==-1}):[];
 
   return React.createElement("div",null,
-    React.createElement(SectionTitle,{title:"Search App ID",sub:"Look up any vehicle record"}),
-    React.createElement(SearchBox,{value:q,onChange:setQ,placeholder:"Enter App ID or Reg No..."}),
+    React.createElement(SectionTitle,{title:"Search",sub:"Look up any App ID or Reg No — get full record"}),
+    React.createElement(SearchBox,{value:q,onChange:setQ,placeholder:"Enter App ID (APP001) or Reg No (DL3CAB1234)..."}),
     results.map(function(a){
-      var aLeads=leads.filter(function(l){return l.appId===a.id});
-      var aGrv=grievances.filter(function(g){return g.appId===a.id});
+      var aLeads=leads.filter(function(l){return l.appId===a.id||l.regNo===a.regNo});
+      var aGrv=grievances.filter(function(g){return g.appId===a.id||g.regNo===a.regNo});
       var aPay=payouts.filter(function(p){return p.appId===a.id});
-      return React.createElement(Card,{key:a.id,style:{marginTop:12}},
-        React.createElement("div",{className:"card-hd"},a.id+" - "+a.make+" "+a.model),
-        React.createElement(InfoRow,{label:"Reg No",value:a.regNo}),
-        React.createElement(InfoRow,{label:"Dealer",value:a.dealerName}),
-        React.createElement(InfoRow,{label:"Price",value:fmt(a.price)}),
-        React.createElement(InfoRow,{label:"SI Done",value:a.siDone?"Yes":"No"}),
-        React.createElement(InfoRow,{label:"Wallet",value:fmt(a.walletBal)}),
-        React.createElement("div",{className:"divider"}),
-        React.createElement("div",{style:{fontSize:12,color:"#64748b"}},"Leads: "+aLeads.length+" | Grievances: "+aGrv.length+" | Payouts: "+aPay.length)
+      var vahan=VAHAN_DATA[a.regNo]||{};
+      var ncd=a.dealerId?(NCD_DEALERS[a.dealerId]||{}):{};
+      var buyingDlr=a.region?(BUYING_DEALERS[a.region]||BUYING_DEALERS["NDL"]):{};
+      var pa=PA_DATA[a.id]||{};
+      var challans=vahan.challans||[];
+      var challanTotal=challans.reduce(function(s,c){return s+c.fineAmt},0);
+      var svcCharge=Math.round(a.price*0.015);
+      var finalPayable=a.price-svcCharge-challanTotal-(a.otherCharges||0);
+      var siAging=a.siDate?diffDays(a.siDate,todayStr()):null;
+      var soAging=vahan.soDate?diffDays(vahan.soDate,todayStr()):null;
+      return React.createElement("div",{key:a.id,style:{marginTop:16}},
+        React.createElement(Card,{style:{border:"2px solid #4535F1",marginBottom:8}},
+          React.createElement("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}},
+            React.createElement("div",{style:{fontWeight:800,fontSize:15,color:"#4535F1"}},a.id+" — "+a.make+" "+a.model+" "+a.year),
+            React.createElement("span",{className:statusBadge(a.appStatus)},a.appStatus)
+          ),
+          React.createElement("div",{className:"grid g3"},
+            React.createElement("div",null,
+              React.createElement(InfoRow,{label:"Reg No",value:a.regNo}),
+              React.createElement(InfoRow,{label:"Colour",value:a.color}),
+              vahan.ownership&&React.createElement(InfoRow,{label:"Ownership",value:vahan.ownership}),
+              React.createElement(InfoRow,{label:"SI Date",value:a.siDate||"Not done"}),
+              siAging!==null&&React.createElement(InfoRow,{label:"SI Aging",value:siAging+" days"}),
+              vahan.soDate&&React.createElement(InfoRow,{label:"SO Date",value:vahan.soDate}),
+              soAging!==null&&React.createElement(InfoRow,{label:"SO Aging",value:soAging+" days"})
+            ),
+            React.createElement("div",null,
+              React.createElement(InfoRow,{label:"RC Transfer",value:vahan.rcTransferStatus||"N/A"}),
+              React.createElement(InfoRow,{label:"RC Status",value:vahan.rcStatus||"N/A"}),
+              React.createElement(InfoRow,{label:"NCD Dealer",value:(ncd.name||"—")+" ("+( ncd.code||"—")+")"}),
+              React.createElement(InfoRow,{label:"NCD Phone",value:ncd.phone||"—"}),
+              React.createElement(InfoRow,{label:"Buying Dealer",value:buyingDlr.name||"—"}),
+              React.createElement(InfoRow,{label:"RA",value:userName(a.raId)}),
+              React.createElement(InfoRow,{label:"PA / TL",value:(pa.paName||"—")+" / "+(pa.paTlName||"—")})
+            ),
+            React.createElement("div",null,
+              React.createElement("div",{style:{background:"#f8fafc",borderRadius:8,padding:8}},
+                React.createElement("div",{style:{fontSize:11,fontWeight:700,marginBottom:4}},"Price Breakup"),
+                React.createElement(InfoRow,{label:"C24 Quote",value:fmt(a.price)}),
+                React.createElement(InfoRow,{label:"Svc Charge",value:fmt(svcCharge)}),
+                React.createElement(InfoRow,{label:"Challan",value:fmt(challanTotal)}),
+                React.createElement(InfoRow,{label:"Other",value:fmt(a.otherCharges||0)}),
+                React.createElement("div",{style:{borderTop:"1px solid var(--brd)",marginTop:4,paddingTop:4}},
+                  React.createElement(InfoRow,{label:"Final Payable",value:fmt(finalPayable)})
+                )
+              )
+            )
+          )
+        ),
+        challans.length>0&&React.createElement(Card,{style:{marginBottom:8,border:"1px solid #fecaca"}},
+          React.createElement("div",{className:"card-hd"},"⚠️ Challans ("+challans.length+" — "+fmt(challanTotal)+")"),
+          React.createElement("table",null,
+            React.createElement("thead",null,React.createElement("tr",null,React.createElement("th",null,"No"),React.createElement("th",null,"Date"),React.createElement("th",null,"Type"),React.createElement("th",null,"Fine"))),
+            React.createElement("tbody",null,challans.map(function(c,i){return React.createElement("tr",{key:i},React.createElement("td",null,c.no),React.createElement("td",null,c.date),React.createElement("td",null,c.type),React.createElement("td",{style:{color:"#dc2626",fontWeight:700}},fmt(c.fineAmt)));}))
+          )
+        ),
+        vahan.lastVahanApps&&vahan.lastVahanApps.length>0&&React.createElement(Card,{style:{marginBottom:8}},
+          React.createElement("div",{className:"card-hd"},"Vahan Applications"),
+          vahan.lastVahanApps.map(function(v,i){return React.createElement("div",{key:i,style:{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid var(--brd)",fontSize:12}},React.createElement("span",null,v.type+" — "+v.date),React.createElement("span",{className:statusBadge(v.status)},v.status));})
+        ),
+        aLeads.length>0&&React.createElement(Card,{style:{marginBottom:8}},
+          React.createElement("div",{className:"card-hd"},"Lead Journey ("+aLeads.length+")"),
+          aLeads.map(function(l){return React.createElement("div",{key:l.id,style:{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid var(--brd)",fontSize:12}},React.createElement("span",null,l.id+" — "+l.ownerName),React.createElement("span",{className:statusBadge(l.stage)},l.stage));})
+        ),
+        aGrv.length>0&&React.createElement(Card,{style:{marginBottom:8}},
+          React.createElement("div",{className:"card-hd"},"Grievance Tickets ("+aGrv.length+")"),
+          aGrv.map(function(g){return React.createElement("div",{key:g.id,style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:"1px solid var(--brd)",fontSize:12}},
+            React.createElement("span",{style:{color:"#4535F1",fontWeight:600}},g.id),
+            React.createElement("span",null,g.category),
+            React.createElement("span",{className:priorityBadge(g.priority)},g.priority||"—"),
+            React.createElement("span",{className:statusBadge(g.status)},g.status)
+          );})
+        ),
+        aPay.length>0&&React.createElement(Card,{style:{marginBottom:8}},
+          React.createElement("div",{className:"card-hd"},"Payout History ("+aPay.length+")"),
+          aPay.map(function(p){return React.createElement("div",{key:p.id,style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:"1px solid var(--brd)",fontSize:12}},
+            React.createElement("span",{style:{fontWeight:600}},p.id),
+            React.createElement("span",null,p.type),
+            React.createElement("span",{style:{fontWeight:700,color:"#16a34a"}},fmt(p.amount)),
+            React.createElement("span",{className:statusBadge(p.status)},p.status)
+          );})
+        )
       );
     }),
-    q.length>=3&&results.length===0&&React.createElement(EmptyState,{icon:"🔍",msg:"No results found"})
+    q.length>=3&&results.length===0&&React.createElement(EmptyState,{icon:"🔍",msg:"No results for '"+q+"'"})
   );
 }
 
 function SupportOpsOutreach({notifications,setNotifications,dealers,addToast}){
-  var [f,setF]=useState({});
+  var [f,setF]=useState({type:"Document Request"});
   var set=function(k,v){setF(function(p){var n={};for(var x in p)n[x]=p[x];n[k]=v;return n})};
   var dealerUsers=ALL_USERS.filter(function(u){return u.role==="Dealer"});
+  var outreachTypes=["Document Request","RC Follow-up","Challan Info","Payment Update","General Update","NOC Request"];
+  var sent=notifications.filter(function(n){return n.from==="SUP01"&&n.type==="outreach"});
 
   function sendOutreach(){
-    if(!f.to||!f.subject||!f.body){addToast("Fill all fields","error");return}
-    var notif={id:uid("N"),to:f.to,from:"SUP01",subject:f.subject,body:f.body,at:nowTs(),read:false};
+    if(!f.to||!f.subject||!f.body){addToast("Fill all fields","error");return;}
+    var notif={id:uid("N"),to:f.to,from:"SUP01",subject:f.subject,body:f.body,at:nowTs(),read:false,type:"outreach"};
     setNotifications(function(p){return p.concat([notif])});
-    addToast("Outreach sent to "+userName(f.to));
-    setF({});
+    addToast("📢 Outreach sent to "+userName(f.to)+" — pop-up notification triggered in their app","success");
+    setF({type:"Document Request"});
   }
 
   return React.createElement("div",null,
-    React.createElement(SectionTitle,{title:"Outreach",sub:"Proactive dealer communication"}),
-    React.createElement(Card,null,
+    React.createElement(SectionTitle,{title:"Outreach",sub:"Proactive dealer communication — no grievance ticket required"}),
+    React.createElement(Alrt,{type:"info"},"📢 Outreach sends a pop-up notification directly to the dealer's app. This is for proactive document requests, RC follow-ups, or any info push — without creating a grievance ticket."),
+    React.createElement(Card,{style:{marginBottom:16}},
       React.createElement("div",{className:"card-hd"},"Send Outreach"),
-      React.createElement(Sel,{label:"To (Dealer)",value:f.to,onChange:function(v){set("to",v)},options:dealerUsers.map(function(u){return{value:u.id,label:u.name}}),required:true,placeholder:"Select dealer user..."}),
-      React.createElement(Inp,{label:"Subject",value:f.subject,onChange:function(v){set("subject",v)},required:true,placeholder:"e.g. Document Request"}),
-      React.createElement(Fld,{label:"Message"},React.createElement("textarea",{value:f.body||"",onChange:function(e){set("body",e.target.value)},placeholder:"Type message..."})),
-      React.createElement("div",{style:{display:"flex",justifyContent:"flex-end",marginTop:8}},React.createElement(Btn,{onClick:sendOutreach},"Send"))
+      React.createElement("div",{className:"grid g2"},
+        React.createElement(Sel,{label:"To (Dealer) *",value:f.to,onChange:function(v){set("to",v)},options:dealerUsers.map(function(u){return{value:u.id,label:u.name+" ("+u.id+")"}}),placeholder:"Select dealer..."}),
+        React.createElement("div",{className:"fld"},
+          React.createElement("label",null,"Outreach Type"),
+          React.createElement("select",{value:f.type||"Document Request",onChange:function(e){set("type",e.target.value)}},
+            outreachTypes.map(function(t){return React.createElement("option",{key:t,value:t},t)})
+          )
+        )
+      ),
+      React.createElement(Inp,{label:"Subject *",value:f.subject,onChange:function(v){set("subject",v)},placeholder:"e.g. RC Transfer Documents Required"}),
+      React.createElement(Fld,{label:"Message *"},React.createElement("textarea",{value:f.body||"",onChange:function(e){set("body",e.target.value)},placeholder:"Type your message to the dealer...",style:{minHeight:80}})),
+      f.to&&React.createElement(Alrt,{type:"info"},"This will trigger a pop-up notification for "+userName(f.to)+" in their app immediately."),
+      React.createElement("div",{style:{display:"flex",justifyContent:"flex-end",marginTop:8}},
+        React.createElement(Btn,{cls:"btn-p",onClick:sendOutreach},"📢 Send Outreach")
+      )
     ),
-    React.createElement(Card,{style:{marginTop:16}},
-      React.createElement("div",{className:"card-hd"},"Sent Messages"),
-      notifications.filter(function(n){return n.from==="SUP01"}).reverse().map(function(n){
-        return React.createElement("div",{key:n.id,style:{padding:"8px 0",borderBottom:"1px solid var(--brd)"}},
-          React.createElement("div",{style:{display:"flex",justifyContent:"space-between"}},
-            React.createElement("strong",{style:{fontSize:13}},n.subject),
-            React.createElement("span",{style:{fontSize:11,color:"#64748b"}},n.at)
+    React.createElement(Card,null,
+      React.createElement("div",{className:"card-hd"},"Sent Outreach ("+sent.length+")"),
+      sent.length===0&&React.createElement(EmptyState,{icon:"📢",msg:"No outreach sent yet"}),
+      sent.slice().reverse().map(function(n){
+        return React.createElement("div",{key:n.id,style:{padding:"10px 0",borderBottom:"1px solid var(--brd)"}},
+          React.createElement("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}},
+            React.createElement("div",null,
+              React.createElement("div",{style:{fontWeight:600,fontSize:13}},n.subject),
+              React.createElement("div",{style:{fontSize:12,color:"#64748b",marginTop:2}},"To: "+userName(n.to)+" | "+n.at)
+            ),
+            React.createElement("span",{className:"badge badge-blue"},"Delivered")
           ),
-          React.createElement("div",{style:{fontSize:12,color:"#64748b"}},"To: "+userName(n.to))
+          React.createElement("div",{style:{fontSize:12,color:"#64748b",marginTop:4}},n.body)
         );
       })
     )
@@ -2233,17 +2641,38 @@ function ApprovalsModule({user,payouts,setPayouts,apps,setApps,addToast}){
     return false;
   });
   function approve(id){
+    var payout=payouts.find(function(p){return p.id===id});
+    if(!payout)return;
+    var newStatus="Approved";
+    if(user.role==="Central Ops")newStatus=payout.amount>200000?"BH Review":"Approved";
+    if(user.role==="Business Head")newStatus=payout.amount>200000?"Finance Review":"Approved";
+
     setPayouts(function(prev){return prev.map(function(p){
       if(p.id!==id)return p;
-      var newStatus="Approved";
-      if(user.role==="Central Ops")newStatus=p.amount>200000?"BH Review":"Approved";
-      if(user.role==="Business Head")newStatus=p.amount>200000?"Finance Review":"Approved";
       var upd={};for(var k in p)upd[k]=p[k];
       upd.status=newStatus;upd.approvedBy=user.id;upd.processedAt=nowTs();
       if(newStatus==="Approved")upd.utr="UTR"+Date.now().toString().slice(-10);
       return upd;
     })});
-    addToast("Payout approved!");
+
+    // Deduct wallet on final approval
+    if(newStatus==="Approved"){
+      setApps(function(prev){return prev.map(function(a){
+        // Cross-ID Transfer: deduct from each source app
+        if(payout.type==="Cross-ID Transfer"&&payout.sources&&payout.sources.length>0){
+          var src=payout.sources.find(function(s){return s.appId===a.id});
+          if(src){var u={};for(var k in a)u[k]=a[k];u.walletBal=Math.max(0,(a.walletBal||0)-src.amount);return u;}
+          return a;
+        }
+        // Split / Incentive / Wallet Topup: deduct from source app
+        if(a.id===payout.appId&&(payout.type==="Split"||payout.type==="Incentive"||payout.type==="Wallet Topup")){
+          var u={};for(var k in a)u[k]=a[k];
+          u.walletBal=Math.max(0,(a.walletBal||0)-payout.amount);return u;
+        }
+        return a;
+      })});
+    }
+    addToast(newStatus==="Approved"?"Payout approved — wallet deducted!":"Moved to "+newStatus);
   }
   function reject(id){
     setPayouts(function(prev){return prev.map(function(p){
@@ -2680,6 +3109,15 @@ function CounterModule({user,counters,counterReqs,setCounterReqs,dealers,addToas
 
 function PayeesModule({user,payees,setPayees,addToast}){
   var canToggle=["Central Ops","Business Head","Finance"].indexOf(user.role)!==-1;
+  var canReview=user.role==="Finance";
+  var canRequest=["RA","RM","TM"].indexOf(user.role)!==-1;
+  var [changeModal,setChangeModal]=useState(null); // payeeId being edited
+  var [changeForm,setChangeForm]=useState({});
+  var setCF=function(k,v){setChangeForm(function(p){var n={};for(var x in p)n[x]=p[x];n[k]=v;return n})};
+
+  // All pending change requests across all payees
+  var pendingChanges=[];
+  payees.forEach(function(p){(p.changeRequests||[]).forEach(function(cr){if(cr.status==="Finance Review")pendingChanges.push(Object.assign({},cr,{payeeName:p.name,payeeId:p.id}));});});
 
   function togglePayee(id){
     setPayees(function(prev){return prev.map(function(p){
@@ -2691,28 +3129,122 @@ function PayeesModule({user,payees,setPayees,addToast}){
     addToast("Payee "+(p?p.name:id)+" set to "+(p&&p.status==="Active"?"Inactive":"Active")+".");
   }
 
+  function submitChangeRequest(){
+    if(!changeForm.bank||!changeForm.accountNo||!changeForm.ifsc){addToast("Fill bank, account number and IFSC","error");return}
+    var cr={id:uid("ACR"),requestedBy:user.id,requestedAt:nowTs(),status:"Finance Review",
+      newBank:changeForm.bank,newAccountNo:changeForm.accountNo,newIfsc:changeForm.ifsc,
+      newAccountName:changeForm.accountName||"",reason:changeForm.reason||""};
+    setPayees(function(prev){return prev.map(function(p){
+      if(p.id!==changeModal)return p;
+      var u={};for(var k in p)u[k]=p[k];
+      u.changeRequests=(p.changeRequests||[]).concat([cr]);return u;
+    })});
+    addToast("Account change request submitted for Finance review.");
+    setChangeModal(null);setChangeForm({});
+  }
+
+  function approveChange(payeeId,crId){
+    setPayees(function(prev){return prev.map(function(p){
+      if(p.id!==payeeId)return p;
+      var cr=(p.changeRequests||[]).find(function(r){return r.id===crId});
+      if(!cr)return p;
+      var u={};for(var k in p)u[k]=p[k];
+      u.bank=cr.newBank;u.accountNo=cr.newAccountNo;u.ifsc=cr.newIfsc;
+      if(cr.newAccountName)u.accountName=cr.newAccountName;
+      u.verifiedAt=nowTs().slice(0,10);
+      u.changeRequests=(p.changeRequests||[]).map(function(r){
+        if(r.id!==crId)return r;
+        var ru={};for(var k in r)ru[k]=r[k];ru.status="Approved";ru.processedAt=nowTs();ru.approvedBy=user.id;return ru;
+      });
+      return u;
+    })});
+    addToast("Account change approved — payee updated.");
+  }
+
+  function rejectChange(payeeId,crId){
+    setPayees(function(prev){return prev.map(function(p){
+      if(p.id!==payeeId)return p;
+      var u={};for(var k in p)u[k]=p[k];
+      u.changeRequests=(p.changeRequests||[]).map(function(r){
+        if(r.id!==crId)return r;
+        var ru={};for(var k in r)ru[k]=r[k];ru.status="Rejected";ru.processedAt=nowTs();return ru;
+      });
+      return u;
+    })});
+    addToast("Account change request rejected.");
+  }
+
   return React.createElement("div",null,
     React.createElement(SectionTitle,{title:"Payees / SAP",sub:payees.length+" payees · Fetched from B2B platform"}),
+
+    // Finance review queue for pending account changes
+    canReview&&pendingChanges.length>0&&React.createElement(Card,{style:{marginBottom:16,border:"2px solid #d97706"}},
+      React.createElement("div",{className:"card-hd",style:{color:"#d97706"}},"⚠️ Account Change Requests — "+pendingChanges.length+" pending Finance review"),
+      pendingChanges.map(function(cr){
+        return React.createElement("div",{key:cr.id,style:{padding:"10px 0",borderBottom:"1px solid var(--brd)"}},
+          React.createElement("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}},
+            React.createElement("div",null,
+              React.createElement("div",{style:{fontWeight:600,fontSize:13}},cr.payeeName+" — "+cr.id),
+              React.createElement("div",{style:{fontSize:12,color:"#64748b",marginTop:2}},
+                "New: "+cr.newBank+" | A/C: ***"+String(cr.newAccountNo).slice(-4)+" | IFSC: "+cr.newIfsc
+              ),
+              cr.reason&&React.createElement("div",{style:{fontSize:11,color:"#92400e",marginTop:2}},"Reason: "+cr.reason),
+              React.createElement("div",{style:{fontSize:11,color:"#94a3b8"}},"Requested: "+cr.requestedAt)
+            ),
+            React.createElement("div",{style:{display:"flex",gap:6,marginTop:4}},
+              React.createElement("button",{style:{fontSize:11,padding:"4px 10px",borderRadius:6,border:"1px solid #dc2626",background:"#fef2f2",color:"#dc2626",cursor:"pointer",fontWeight:600},onClick:function(){rejectChange(cr.payeeId,cr.id)}},"Reject"),
+              React.createElement("button",{style:{fontSize:11,padding:"4px 10px",borderRadius:6,border:"1px solid #16a34a",background:"#f0fdf4",color:"#16a34a",cursor:"pointer",fontWeight:600},onClick:function(){approveChange(cr.payeeId,cr.id)}},"Approve")
+            )
+          )
+        );
+      })
+    ),
+
     payees.length===0&&React.createElement(EmptyState,{msg:"No payees"}),
     payees.map(function(p){
       var isActive=p.status==="Active";
+      var pendingCR=(p.changeRequests||[]).filter(function(r){return r.status==="Finance Review"}).length;
       return React.createElement(Card,{key:p.id,style:{marginBottom:8,borderLeft:"4px solid "+(isActive?"#16a34a":"#94a3b8")}},
         React.createElement("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}},
           React.createElement("div",null,
             React.createElement("div",{style:{fontWeight:700,fontSize:14}},p.name),
             React.createElement("div",{style:{fontSize:12,color:"#64748b",marginTop:2}},p.bank+" | A/C: ***"+p.accountNo.slice(-4)+" | PAN: "+p.pan),
-            p.ifsc&&React.createElement("div",{style:{fontSize:11,color:"#94a3b8"}},"IFSC: "+p.ifsc)
+            p.ifsc&&React.createElement("div",{style:{fontSize:11,color:"#94a3b8"}},"IFSC: "+p.ifsc),
+            pendingCR>0&&React.createElement("div",{style:{fontSize:11,color:"#d97706",marginTop:3,fontWeight:600}},"⏳ Account change pending Finance review")
           ),
           React.createElement("div",{style:{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}},
             React.createElement("span",{className:statusBadge(p.status)},p.status),
             canToggle&&React.createElement("button",{
               style:{fontSize:11,padding:"3px 10px",borderRadius:6,border:"1px solid "+(isActive?"#dc2626":"#16a34a"),background:isActive?"#fef2f2":"#f0fdf4",color:isActive?"#dc2626":"#16a34a",cursor:"pointer",fontWeight:600},
               onClick:function(){togglePayee(p.id)}
-            },isActive?"Deactivate":"Activate")
+            },isActive?"Deactivate":"Activate"),
+            canRequest&&isActive&&pendingCR===0&&React.createElement("button",{
+              style:{fontSize:11,padding:"3px 10px",borderRadius:6,border:"1px solid #6366f1",background:"#eef2ff",color:"#4f46e5",cursor:"pointer",fontWeight:600},
+              onClick:function(){setChangeModal(p.id);setChangeForm({bank:p.bank,accountNo:"",ifsc:p.ifsc,accountName:p.accountName||"",reason:""})}
+            },"✏️ Change A/C")
           )
         )
       );
-    })
+    }),
+
+    // Account change modal
+    changeModal&&React.createElement(ModalWrap,{onClose:function(){setChangeModal(null);setChangeForm({})},title:"✏️ Request Account Change"},
+      React.createElement("div",{style:{padding:"16px 20px"}},
+        (function(){var py=payees.find(function(x){return x.id===changeModal});return py?React.createElement(Alrt,{type:"info"},"Current: "+py.bank+" | A/C: ***"+py.accountNo.slice(-4)+" | IFSC: "+py.ifsc):null})(),
+        React.createElement("div",{style:{marginTop:12,display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px 16px"}},
+          React.createElement(Inp,{label:"New Bank Name",value:changeForm.bank||"",onChange:function(v){setCF("bank",v)},required:true}),
+          React.createElement(Inp,{label:"New Account Number",value:changeForm.accountNo||"",onChange:function(v){setCF("accountNo",v)},required:true}),
+          React.createElement(Inp,{label:"New IFSC Code",value:changeForm.ifsc||"",onChange:function(v){setCF("ifsc",v)},required:true}),
+          React.createElement(Inp,{label:"Account Holder Name",value:changeForm.accountName||"",onChange:function(v){setCF("accountName",v)}})
+        ),
+        React.createElement(Fld,{label:"Reason for change"},React.createElement("textarea",{value:changeForm.reason||"",onChange:function(e){setCF("reason",e.target.value)},style:{width:"100%",minHeight:52,fontSize:13},placeholder:"e.g. Bank migration, account closure..."})),
+        React.createElement(Alrt,{type:"warn",style:{marginTop:8}},"This request will be sent to Finance for approval before the account is updated."),
+        React.createElement("div",{style:{display:"flex",justifyContent:"flex-end",gap:8,marginTop:12}},
+          React.createElement(Btn,{cls:"btn-ghost",onClick:function(){setChangeModal(null);setChangeForm({})}},"Cancel"),
+          React.createElement(Btn,{onClick:submitChangeRequest},"Submit for Finance Review")
+        )
+      )
+    )
   );
 }
 
@@ -2913,7 +3445,7 @@ function ConfigModule({configs,setConfigs,addToast}){
   );
 }
 
-function DataTransferModule({user,leads,setLeads,apps,setApps,dealers,addToast}){
+function DataTransferModule({user,leads,setLeads,apps,setApps,dealers,setDealers,payees,setPayees,addToast}){
   var [f,setF]=useState({});
   var [preview,setPreview]=useState(null);
   var [history,setHistory]=useState([]);
@@ -2954,11 +3486,26 @@ function DataTransferModule({user,leads,setLeads,apps,setApps,dealers,addToast})
       })});
     }
 
+    var dealerIds=preview.dealers.map(function(d){return d.id});
+    if(dealerIds.length>0){
+      setDealers(function(prev){return prev.map(function(d){
+        if(dealerIds.indexOf(d.id)===-1)return d;
+        var u={};for(var k in d)u[k]=d[k];
+        u.raId=preview.targetRA;return u;
+      })});
+      // Also reassign payees linked to those dealers
+      setPayees(function(prev){return prev.map(function(p){
+        if(dealerIds.indexOf(p.dealerId)===-1)return p;
+        var u={};for(var k in p)u[k]=p[k];
+        u.raId=preview.targetRA;return u;
+      })});
+    }
+
     setHistory(function(prev){return prev.concat([{
-      id:uid("DT"),from:srcName,to:tgtName,leads:leadIds.length,apps:appIds.length,dealers:preview.dealers.length,at:nowTs(),by:user.name
+      id:uid("DT"),from:srcName,to:tgtName,leads:leadIds.length,apps:appIds.length,dealers:dealerIds.length,payees:dealerIds.length>0?payees.filter(function(p){return dealerIds.indexOf(p.dealerId)!==-1}).length:0,at:nowTs(),by:user.name
     }])});
 
-    addToast("Transfer complete: "+leadIds.length+" leads, "+appIds.length+" apps moved from "+srcName+" to "+tgtName);
+    addToast("Transfer complete: "+leadIds.length+" leads, "+appIds.length+" apps, "+dealerIds.length+" dealers moved to "+tgtName);
     setPreview(null);setF({});
   }
 
@@ -3447,20 +3994,24 @@ function AIAgentChat({user,leads,apps,dealers,grievances,payouts}){
     setTimeout(scrollBottom,50);
 
     var ctx=buildAgentContext(user,leads,apps,dealers,grievances,payouts);
-    var apiMessages=[
-      {role:"user",content:ctx+"\n\nUser question: "+userMsg}
-    ];
+    var reqBody={model:"claude-3-5-haiku-20241022",max_tokens:500,system:"You are an AI assistant for the Cars24 B2B One-Bridge procurement panel. Keep responses concise (2-4 sentences). Use Indian currency format.",messages:[{role:"user",content:ctx+"\n\nUser question: "+userMsg}]};
+    console.log("[AI Chat] Sending request body:", JSON.stringify(reqBody).slice(0,500));
 
     fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
       headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:300,messages:apiMessages})
-    }).then(function(r){return r.json()}).then(function(data){
+      body:JSON.stringify(reqBody)
+    }).then(function(r){
+      var status=r.status;
+      return r.json().then(function(data){return{status:status,data:data}});
+    }).then(function(res){
+      var data=res.data;
       var reply="Sorry, I couldn't process that.";
+      console.log("[AI Chat] Response status:",res.status,"body:",JSON.stringify(data).slice(0,300));
       if(data&&data.content&&data.content[0]&&data.content[0].text){
         reply=data.content[0].text;
       }else if(data&&data.error&&data.error.message){
-        reply="Error: "+data.error.message;
+        reply="Error ("+res.status+"): "+data.error.message;
       }
       setMessages(function(p){return p.concat([{role:"bot",text:reply}])});
       setLoading(false);
@@ -3578,8 +4129,8 @@ function App(){
 
     // Grievances
     if(activePage==="grievances")return React.createElement(GrievanceRaiseModule,{user:user,grievances:grievances,setGrievances:setGrievances,leads:leads,apps:apps,dealers:dealers,addToast:addToast});
-    if(activePage==="tickets")return React.createElement(SupportOpsTickets,{user:user,grievances:grievances,setGrievances:setGrievances,apps:apps,addToast:addToast});
-    if(activePage==="search")return React.createElement(SupportOpsSearch,{apps:apps,leads:leads,grievances:grievances,payouts:payouts});
+    if(activePage==="tickets")return React.createElement(SupportOpsTickets,{user:user,grievances:grievances,setGrievances:setGrievances,apps:apps,dealers:dealers,leads:leads,notifications:notifications,setNotifications:setNotifications,addToast:addToast});
+    if(activePage==="search")return React.createElement(SupportOpsSearch,{apps:apps,leads:leads,grievances:grievances,payouts:payouts,dealers:dealers});
     if(activePage==="outreach")return React.createElement(SupportOpsOutreach,{notifications:notifications,setNotifications:setNotifications,dealers:dealers,addToast:addToast});
     if(activePage==="notifications")return React.createElement(DealerNotifications,{user:user,notifications:notifications,setNotifications:setNotifications});
 
@@ -3603,7 +4154,7 @@ function App(){
     if(activePage==="config")return React.createElement(ConfigModule,{configs:configs,setConfigs:setConfigs,addToast:addToast});
 
     // Data Transfer
-    if(activePage==="data_transfer")return React.createElement(DataTransferModule,{user:user,leads:leads,setLeads:setLeads,apps:apps,setApps:setApps,dealers:dealers,addToast:addToast});
+    if(activePage==="data_transfer")return React.createElement(DataTransferModule,{user:user,leads:leads,setLeads:setLeads,apps:apps,setApps:setApps,dealers:dealers,setDealers:setDealers,payees:payees,setPayees:setPayees,addToast:addToast});
 
     // Counter Override
     if(activePage==="counter_override")return React.createElement(CounterOverrideModule,{user:user,apps:apps,setApps:setApps,dealers:dealers,counters:counters,addToast:addToast});
@@ -3647,12 +4198,12 @@ function App(){
       React.createElement("div",{className:"logo-wrap"},
         React.createElement("div",{style:{display:"flex",flexDirection:"column",gap:6}},
           React.createElement("div",{style:{background:"#fff",borderRadius:8,padding:"5px 10px",display:"inline-flex",alignItems:"center",gap:7}},
-            React.createElement("svg",{viewBox:"0 0 54 54",width:26,height:26,xmlns:"http://www.w3.org/2000/svg"},
-              React.createElement("rect",{width:54,height:54,rx:11,fill:"#3535D4"}),
-              React.createElement("path",{d:"M 27 12 A 15 15 0 1 0 12 27",stroke:"white",strokeWidth:5.5,strokeLinecap:"round",fill:"none"}),
-              React.createElement("polygon",{points:"6,21 18,21 12,32",fill:"white"})
+            React.createElement("svg",{viewBox:"0 0 40 40",width:28,height:28,xmlns:"http://www.w3.org/2000/svg"},
+              React.createElement("rect",{width:40,height:40,rx:9,fill:"#3D35D4"}),
+              React.createElement("path",{d:"M 20 8 A 12 12 0 1 0 32 20",stroke:"white",strokeWidth:4,strokeLinecap:"round",fill:"none"}),
+              React.createElement("polygon",{points:"28,13 36,13 32,21",fill:"white"})
             ),
-            React.createElement("span",{style:{fontWeight:700,fontSize:18,color:"#3535D4",fontFamily:"DM Sans,sans-serif",letterSpacing:-0.3}},"Cars24")
+            React.createElement("span",{style:{fontWeight:700,fontSize:17,color:"#1a1a2e",fontFamily:"DM Sans,sans-serif",letterSpacing:-0.2}},"Cars24")
           ),
           React.createElement("div",{className:"logo-sub"},"B2B Panel")
         )
